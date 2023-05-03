@@ -17,8 +17,7 @@ func TestJob(modName string, rng string, prio int) *Job {
 
 func TestPlanReadyJobs(jobs ...*Job) *Plan {
 	return &Plan{
-		readyJobs:               jobs,
-		modulesRunningUpToBlock: map[string]uint64{},
+		readyJobs: jobs,
 	}
 }
 
@@ -26,8 +25,8 @@ func TestJobDeps(modName string, rng string, prio int, deps string) *Job {
 	return NewJob(modName, block.ParseRange(rng), strings.Split(deps, ","), prio)
 }
 
-func TestStoreState(modName string, rng string) storage.ModuleStorageState {
-	return &state2.StoreStorageState{ModuleName: modName, PartialsMissing: block.ParseRanges(rng)}
+func TestStoreState(modName string, rangeMissing string) storage.ModuleStorageState {
+	return &state2.StoreStorageState{ModuleName: modName, PartialsMissing: block.ParseRanges(rangeMissing)}
 }
 
 func TestMapState(modName string, rng string) storage.ModuleStorageState {

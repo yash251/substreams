@@ -7,26 +7,15 @@ import (
 )
 
 type ExecOutputStorageState struct {
-	ModuleName         string
-	ModuleInitialBlock uint64
+	ModuleName string
 
 	SegmentsPresent block.Ranges
 	SegmentsMissing block.Ranges
 }
 
-func (m ExecOutputStorageState) Name() string { return m.ModuleName }
-func (m ExecOutputStorageState) InitialProgressRanges() block.Ranges {
-	return m.SegmentsPresent.Merged()
-}
-func (m ExecOutputStorageState) ReadyUpToBlock() uint64 {
-	if len(m.SegmentsMissing) != 0 {
-		return m.SegmentsMissing[0].StartBlock
-	}
-	if l := len(m.SegmentsPresent); l != 0 {
-		return m.SegmentsPresent[l-1].ExclusiveEndBlock
-	}
-	return m.ModuleInitialBlock
-}
+func (m ExecOutputStorageState) Name() string                        { return m.ModuleName }
+func (m ExecOutputStorageState) InitialProgressRanges() block.Ranges { return nil }
+func (m ExecOutputStorageState) ReadyUpToBlock() uint64              { return 0 }
 
 func (m ExecOutputStorageState) BatchRequests(subRequestSplitSize uint64) block.Ranges {
 	return m.SegmentsMissing.MergedBuckets(subRequestSplitSize)
@@ -35,8 +24,7 @@ func (m ExecOutputStorageState) BatchRequests(subRequestSplitSize uint64) block.
 func NewExecOutputStorageState(config *execout.Config, saveInterval, requestStartBlock, linearHandoffBlock uint64, snapshots block.Ranges) (out *ExecOutputStorageState, err error) {
 	modInitBlock := config.ModuleInitialBlock()
 	out = &ExecOutputStorageState{
-		ModuleName:         config.Name(),
-		ModuleInitialBlock: modInitBlock,
+		ModuleName: config.Name(),
 	}
 
 	if linearHandoffBlock <= modInitBlock {
