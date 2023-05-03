@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
+
 	"github.com/streamingfast/derr"
 	"github.com/streamingfast/dstore"
-	"io"
 )
 
 func saveStore(ctx context.Context, store dstore.Store, filename string, content []byte) error {
