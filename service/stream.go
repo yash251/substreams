@@ -7,7 +7,7 @@ import (
 	"github.com/streamingfast/bstream/hub"
 	"github.com/streamingfast/bstream/stream"
 	"github.com/streamingfast/dstore"
-	"github.com/streamingfast/substreams/tracking"
+	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -26,11 +26,12 @@ func (sf *StreamFactory) New(
 	cursor string,
 	finalBlocksOnly bool,
 	cursorIsTarget bool,
+	logger *zap.Logger,
 ) (Streamable, error) {
 	options := []stream.Option{
 		stream.WithStopBlock(stopBlockNum),
 		stream.WithCustomStepTypeFilter(bstream.StepsAll), // substreams always wants new, undo, new+irreversible, irreversible, stalled
-		stream.WithLogger(zlog),
+		stream.WithLogger(logger),
 	}
 	if finalBlocksOnly {
 		options = append(options, stream.WithFinalBlocksOnly())
@@ -48,16 +49,22 @@ func (sf *StreamFactory) New(
 		}
 	}
 
-	if bytesMeter := tracking.GetBytesMeter(ctx); bytesMeter != nil {
-		sf.mergedBlocksStore.SetMeter(bytesMeter)
-		if sf.forkedBlocksStore != nil {
-			sf.forkedBlocksStore.SetMeter(bytesMeter)
-		}
+	// FIXME: disabled for now
+	//if bytesMeter := tracking.GetBytesMeter(ctx); bytesMeter != nil {
+	//	sf.mergedBlocksStore.SetMeter(bytesMeter)
+	//	if sf.forkedBlocksStore != nil {
+	//		sf.forkedBlocksStore.SetMeter(bytesMeter)
+	//	}
+	//}
+
+	mergedBlocksStore, err := sf.mergedBlocksStore.Clone(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	return stream.New(
 		sf.forkedBlocksStore,
-		sf.mergedBlocksStore,
+		mergedBlocksStore,
 		sf.hub,
 		startBlockNum,
 		h,
