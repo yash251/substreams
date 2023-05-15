@@ -1,6 +1,8 @@
 package block
 
-import "strings"
+import (
+	"strings"
+)
 
 func ParseRanges(in string) (out Ranges) {
 	for _, e := range strings.Split(in, ",") {

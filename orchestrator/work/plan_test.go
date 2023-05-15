@@ -39,7 +39,7 @@ func TestWorkPlanning(t *testing.T) {
 			upToBlock:   85,
 			subreqSplit: 20,
 			state: TestModStateMap(
-				TestStoreState("B", "0-10"),
+				TestStoreStatePartialsMissing("B", "0-10"),
 			),
 			productionMode: false,
 			outMod:         "B",
@@ -52,8 +52,8 @@ func TestWorkPlanning(t *testing.T) {
 			upToBlock:   85,
 			subreqSplit: 20,
 			state: TestModStateMap(
-				TestStoreState("As", "0-10,10-20,30-40,40-50,50-60"),
-				TestStoreState("B", "0-10"),
+				TestStoreStatePartialsMissing("As", "0-10,10-20,30-40,40-50,50-60"),
+				TestStoreStatePartialsMissing("B", "0-10"),
 			),
 			productionMode: false,
 			outMod:         "As",
@@ -61,6 +61,23 @@ func TestWorkPlanning(t *testing.T) {
 				TestJob("As", "0-20", 5),
 				TestJob("As", "30-50", 4),
 				TestJob("As", "50-60", 3),
+			},
+		},
+		{
+			name:        "missing kv on disk",
+			upToBlock:   300,
+			subreqSplit: 100,
+			state: TestModStateMap(
+				TestStoreStateInitialCompleteRanges("B", &block.Range{
+					StartBlock:        200,
+					ExclusiveEndBlock: 300,
+				}),
+			),
+			productionMode: true,
+			outMod:         "B",
+			expectWaitingJobs: []*Job{
+				TestJob("B", "0-100", 5),
+				TestJob("B", "100-200", 5),
 			},
 		},
 	}
@@ -362,7 +379,7 @@ func TestPlan_initModulesReadyUpToBlock(t *testing.T) {
 			fields: fields{
 				ModulesStateMap: storage.ModuleStorageStateMap{
 					"A": &state.StoreStorageState{
-						InitialCompleteRange: &state.FullStoreFile{StartBlock: 1, ExclusiveEndBlock: 20},
+						LastCompletedRange: &state.FullStoreFile{StartBlock: 1, ExclusiveEndBlock: 20},
 					},
 				},
 			},
@@ -375,7 +392,7 @@ func TestPlan_initModulesReadyUpToBlock(t *testing.T) {
 			fields: fields{
 				ModulesStateMap: storage.ModuleStorageStateMap{
 					"A": &state.StoreStorageState{
-						InitialCompleteRange: &state.FullStoreFile{StartBlock: 1, ExclusiveEndBlock: 20},
+						LastCompletedRange: &state.FullStoreFile{StartBlock: 1, ExclusiveEndBlock: 20},
 					},
 					"B": &state.StoreStorageState{
 						ModuleInitialBlock: 1,
@@ -593,16 +610,16 @@ func TestPlan_initialProgressMessages(t *testing.T) {
 	}{
 		{
 			modState: &state.StoreStorageState{
-				ModuleName:           "A",
-				InitialCompleteRange: block.ParseRange("1-10"),
-				PartialsPresent:      block.ParseRanges("20-30,40-50,50-60"),
+				ModuleName:         "A",
+				LastCompletedRange: block.ParseRange("1-10"),
+				PartialsPresent:    block.ParseRanges("20-30,40-50,50-60"),
 			},
 			expectedProgress: "A:r1-10,20-30,40-60",
 		},
 		{
 			modState: &state.StoreStorageState{
-				ModuleName:           "A",
-				InitialCompleteRange: block.ParseRange("1-10"),
+				ModuleName:         "A",
+				LastCompletedRange: block.ParseRange("1-10"),
 			},
 			expectedProgress: "A:r1-10",
 		},

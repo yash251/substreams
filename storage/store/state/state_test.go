@@ -17,13 +17,13 @@ func TestWorkUnits_init(t *testing.T) {
 		snapshots    *storeSnapshots // store's Last block saved from the store's Info file
 		reqStart     uint64          // the request's absolute start block
 
-		expectInitLoad    *block.Range // Used for LoadFrom()
-		expectMissing     block.Ranges // sent to the user as already processed, and passed to the Squasher, the first Covered is expected to match the expectStoreInit
-		expectPresent     block.Ranges // sent to the user as already processed, and passed to the Squasher, the first Covered is expected to match the expectStoreInit
-		storeSaveInterval uint64
+		expectInitialCompletedRanges *block.Range // Used for LoadFrom()
+		expectMissingPartialRanges   block.Ranges // sent to the user as already processed, and passed to the Squasher, the first Covered is expected to match the expectStoreInit
+		expectPresentPartialRanges   block.Ranges // sent to the user as already processed, and passed to the Squasher, the first Covered is expected to match the expectStoreInit
+		storeSaveInterval            uint64
 	}
 
-	splitTest := func(name string, storeSaveInterval uint64, modInitBlock uint64, snapshotsSpec string, reqStart uint64, expectInitLoad, expectMissing, expectPresent string,
+	splitTest := func(name string, storeSaveInterval uint64, modInitBlock uint64, snapshotsSpec string, reqStart uint64, expectInitialCompletedRanges, expectMissingPartialRanges, expectPresentPartialRanges string,
 	) splitTestCase {
 		c := splitTestCase{
 			name:              name,
@@ -32,9 +32,9 @@ func TestWorkUnits_init(t *testing.T) {
 			modInitBlock:      modInitBlock,
 			reqStart:          reqStart,
 		}
-		c.expectInitLoad = block.ParseRange(expectInitLoad)
-		c.expectMissing = block.ParseRanges(expectMissing)
-		c.expectPresent = block.ParseRanges(expectPresent)
+		c.expectInitialCompletedRanges = block.ParseRange(expectInitialCompletedRanges)
+		c.expectMissingPartialRanges = block.ParseRanges(expectMissingPartialRanges)
+		c.expectPresentPartialRanges = block.ParseRanges(expectPresentPartialRanges)
 		return c
 	}
 
@@ -105,15 +105,132 @@ func TestWorkUnits_init(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			wu, err := NewStoreStorageState("mod", tt.storeSaveInterval, tt.modInitBlock, tt.reqStart, tt.snapshots)
 			require.NoError(t, err)
-			assert.Equal(t, tt.expectInitLoad, wu.InitialCompleteRange)
+			assert.Equal(t, tt.expectInitialCompletedRanges, wu.LastCompletedRange)
 			assert.Equal(t,
-				tt.expectMissing.String(),
+				tt.expectMissingPartialRanges.String(),
 				wu.PartialsMissing.String(),
 			)
 			assert.Equal(t,
-				tt.expectPresent.String(),
+				tt.expectPresentPartialRanges.String(),
 				wu.PartialsPresent.String(),
 			)
+		})
+	}
+}
+
+func Test_MissingParallelKvs(t *testing.T) {
+	tests := []struct {
+		name              string
+		modName           string
+		saveStoreInterval uint64
+		modInitBlock      uint64
+		workUpToBlock     uint64
+		snapshots         *storeSnapshots
+
+		expectedLastCompletedRange     *FullStoreFile
+		expectedMissingCompletedRanges MissingFullStoreFiles
+		expectedPartialsMissing        PartialStoreFiles
+		expectedPartialsPresent        PartialStoreFiles
+	}{
+		{
+			name:              "simple job, nothing missing",
+			modName:           "module.a",
+			saveStoreInterval: 10,
+			modInitBlock:      0,
+			workUpToBlock:     10,
+			snapshots: &storeSnapshots{
+				Completes: block.ParseRanges("0-10"),
+				Partials:  nil,
+			},
+			expectedLastCompletedRange: &FullStoreFile{
+				StartBlock:        0,
+				ExclusiveEndBlock: 10,
+			},
+			expectedMissingCompletedRanges: nil,
+			expectedPartialsMissing:        nil,
+			expectedPartialsPresent:        nil,
+		},
+		{
+			name:              "simple job, some partials missing",
+			modName:           "module.a",
+			saveStoreInterval: 10,
+			modInitBlock:      0,
+			workUpToBlock:     40,
+			snapshots: &storeSnapshots{
+				Completes: block.ParseRanges("0-10"),
+				Partials:  block.ParseRanges("10-20,20-30"),
+			},
+			expectedLastCompletedRange: &FullStoreFile{
+				StartBlock:        0,
+				ExclusiveEndBlock: 10,
+			},
+			expectedMissingCompletedRanges: nil,
+			expectedPartialsMissing:        block.ParseRanges("30-40"),
+			expectedPartialsPresent:        block.ParseRanges("10-20,20-30"),
+		},
+		{
+			name:              "simple job with more completed ranges, no holes and no partials",
+			modName:           "module.a",
+			saveStoreInterval: 10,
+			modInitBlock:      0,
+			workUpToBlock:     100,
+			snapshots: &storeSnapshots{
+				Completes: block.ParseRanges("0-10,10-20,20-30,30-40"),
+				Partials:  nil,
+			},
+			expectedLastCompletedRange: &FullStoreFile{
+				StartBlock:        0,
+				ExclusiveEndBlock: 40,
+			},
+			expectedMissingCompletedRanges: nil,
+			expectedPartialsMissing:        block.ParseRanges("30-40"),
+			expectedPartialsPresent:        block.ParseRanges("10-20,20-30"),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			storeStorageState, err := NewStoreStorageState(test.modName, test.saveStoreInterval, test.modInitBlock, test.workUpToBlock, test.snapshots)
+			require.NoError(t, err)
+
+			assert.Equal(t, test.expectedLastCompletedRange, storeStorageState.LastCompletedRange)
+			assert.Equal(t, test.expectedMissingCompletedRanges, storeStorageState.MissingCompletedRanges)
+			assert.Equal(t, test.expectedPartialsMissing, storeStorageState.PartialsMissing)
+			assert.Equal(t, test.expectedPartialsPresent, storeStorageState.PartialsPresent)
+		})
+	}
+}
+
+func Test_computeMissingRanges(t *testing.T) {
+	tests := []struct {
+		name              string
+		storeSaveInterval uint64
+		modInitBlock      uint64
+		completeSnapshot  *block.Range
+		snapshots         *storeSnapshots
+
+		expectedMissingFullStoreFiles block.Ranges
+	}{
+		{
+			name:              "missing 1 full store",
+			storeSaveInterval: 100,
+			modInitBlock:      0,
+			completeSnapshot: &block.Range{
+				StartBlock:        0,
+				ExclusiveEndBlock: 500,
+			},
+			snapshots: &storeSnapshots{
+				Completes: block.ParseRanges("0-100,0-200,0-300,0-500"),
+				Partials:  nil,
+			},
+			expectedMissingFullStoreFiles: block.ParseRanges("0-400"),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			missingRanges := computeMissingRanges(test.storeSaveInterval, test.modInitBlock, test.completeSnapshot, test.snapshots)
+			assert.Equal(t, test.expectedMissingFullStoreFiles, missingRanges)
 		})
 	}
 }

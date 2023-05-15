@@ -57,7 +57,6 @@ func BuildNewPlan(ctx context.Context, modulesStateMap storage.ModuleStorageStat
 }
 
 func (p *Plan) splitWorkIntoJobs(subrequestSplitSize uint64, outputModuleName string, ancestorsFrom func(string) []string) error {
-
 	stepSize := calculateHighestDependencyDepth(p.schedulableModules, p.ModulesStateMap, ancestorsFrom)
 	highestJobOrdinal := int(p.upToBlock/subrequestSplitSize) * stepSize
 
@@ -91,7 +90,7 @@ func (p *Plan) splitWorkIntoJobs(subrequestSplitSize uint64, outputModuleName st
 	}
 
 	// Loop through `mappers` and schedule them, separately from the stores
-	// ModulesStateMap would be concerned ONLY with Stores
+	// ModulesStateMap would be concerned ONLY with Stores,
 	// and we add a MapperStateMap, concerned only with Mappers
 	// with the appropriate ranges in there, and not the
 	// store-specific `PartialsMissing`, `PartialsPresent`, etc..

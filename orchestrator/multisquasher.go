@@ -84,23 +84,23 @@ func buildStoreSquasher(ctx context.Context, storeSnapshotsSaveInterval uint64, 
 	//  can we derive it from a prior store? Did we REALLY need to initialize the store from which this
 	//  one is derived?
 	var storeSquasher *StoreSquasher
-	if storeStorageState.InitialCompleteRange == nil {
+	if storeStorageState.LastCompletedRange == nil {
 		logger.Debug("setting up initial store",
 			zap.String("store", storeModuleName),
-			zap.Object("initial_store_file", storeStorageState.InitialCompleteRange),
+			zap.Object("last_completed_range_file", storeStorageState.LastCompletedRange),
 		)
 		storeSquasher = NewStoreSquasher(startingStore, upToBlock, startingStore.InitialBlock(), storeSnapshotsSaveInterval, onStoreCompletedUntilBlock)
 	} else {
 		logger.Debug("loading initial store",
 			zap.String("store", storeModuleName),
-			zap.Object("initial_store_file", storeStorageState.InitialCompleteRange),
+			zap.Object("last_completed_range_file", storeStorageState.LastCompletedRange),
 		)
-		if err := startingStore.Load(ctx, storeStorageState.InitialCompleteRange.ExclusiveEndBlock); err != nil {
-			return nil, fmt.Errorf("load store %q: range %s: %w", storeModuleName, storeStorageState.InitialCompleteRange, err)
+		if err := startingStore.Load(ctx, storeStorageState.LastCompletedRange.ExclusiveEndBlock); err != nil {
+			return nil, fmt.Errorf("load store %q: range %s: %w", storeModuleName, storeStorageState.LastCompletedRange, err)
 		}
-		storeSquasher = NewStoreSquasher(startingStore, upToBlock, storeStorageState.InitialCompleteRange.ExclusiveEndBlock, storeSnapshotsSaveInterval, onStoreCompletedUntilBlock)
+		storeSquasher = NewStoreSquasher(startingStore, upToBlock, storeStorageState.LastCompletedRange.ExclusiveEndBlock, storeSnapshotsSaveInterval, onStoreCompletedUntilBlock)
 
-		onStoreCompletedUntilBlock(storeModuleName, storeStorageState.InitialCompleteRange.ExclusiveEndBlock)
+		onStoreCompletedUntilBlock(storeModuleName, storeStorageState.LastCompletedRange.ExclusiveEndBlock)
 	}
 
 	if len(storeStorageState.PartialsMissing) == 0 {

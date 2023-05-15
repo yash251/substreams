@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"sort"
 
+	"go.uber.org/zap/zapcore"
+
 	"github.com/streamingfast/substreams/block"
 	"github.com/streamingfast/substreams/storage/store"
 )
@@ -25,6 +27,12 @@ func (s *storeSnapshots) Sort() {
 
 func (s *storeSnapshots) String() string {
 	return fmt.Sprintf("completes=%s, partials=%s", s.Completes, s.Partials)
+}
+
+func (s *storeSnapshots) MarshalLogObject(enc zapcore.ObjectEncoder) error {
+	enc.AddString("completes", s.Completes.String())
+	enc.AddString("partials", s.Partials.String())
+	return nil
 }
 
 func (s *storeSnapshots) LastCompletedBlock() uint64 {

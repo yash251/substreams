@@ -30,14 +30,15 @@ func BuildModuleStorageStateMap(ctx context.Context, storeConfigMap store.Config
 func buildStoresStorageState(ctx context.Context, storeConfigMap store.ConfigMap, storeSnapshotsSaveInterval, storeLinearHandoff uint64, out ModuleStorageStateMap) error {
 	logger := reqctx.Logger(ctx)
 
-	state, err := storeState.FetchState(ctx, storeConfigMap, storeLinearHandoff)
+	storeSnapshotsMap, err := storeState.FetchState(ctx, storeConfigMap, storeLinearHandoff)
 	if err != nil {
 		return fmt.Errorf("fetching stores states: %w", err)
 	}
 
 	for _, config := range storeConfigMap {
 		name := config.Name()
-		snapshot, ok := state.Snapshots[name]
+		snapshot, ok := storeSnapshotsMap.Snapshots[name]
+		logger.Debug("store snapshots map", zap.String("module_name", name), zap.String("snapshot", snapshot.String()))
 		if !ok {
 			return fmt.Errorf("fatal: storage state not reported for module name %q", name)
 		}
@@ -46,6 +47,7 @@ func buildStoresStorageState(ctx context.Context, storeConfigMap store.ConfigMap
 		if err != nil {
 			return fmt.Errorf("new file units %q: %w", name, err)
 		}
+		logger.Debug("build stores storage state", zap.Object("store_storage_state", moduleStorageState))
 
 		out[name] = moduleStorageState
 
