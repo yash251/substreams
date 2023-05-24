@@ -36,26 +36,8 @@ func NewStoreStorageState(modName string, storeSaveInterval, modInitBlock, workU
 		return nil, fmt.Errorf("cannot have saved last store before module's init block")
 	}
 
-	// todo: battle test this
 	if completeSnapshot != nil {
-		totalNumberOfCompletedRanges := completeSnapshot.ExclusiveEndBlock / storeSaveInterval
-		if totalNumberOfCompletedRanges != uint64(snapshots.Completes.Len()) {
-			var missingFullStoreFiles block.Ranges
-			missingRangesCounter := completeSnapshot.ExclusiveEndBlock / storeSaveInterval
-			for i := snapshots.Completes.Len() - 1; i >= 0; i-- {
-				completedEndBlock := snapshots.Completes[i].ExclusiveEndBlock / storeSaveInterval
-				if completedEndBlock == totalNumberOfCompletedRanges {
-					totalNumberOfCompletedRanges--
-					missingRangesCounter--
-				} else {
-					for j := missingRangesCounter; missingRangesCounter <= completedEndBlock; j-- {
-						missingFullStoreFiles = append(missingFullStoreFiles, block.NewRange(modInitBlock, totalNumberOfCompletedRanges*storeSaveInterval))
-						totalNumberOfCompletedRanges--
-						missingRangesCounter--
-					}
-				}
-			}
-		}
+		out.MissingCompletedRanges = computeMissingRanges(storeSaveInterval, modInitBlock, completeSnapshot, snapshots)
 	}
 
 	parallelProcessStartBlock := modInitBlock
