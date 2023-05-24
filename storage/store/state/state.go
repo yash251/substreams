@@ -48,7 +48,7 @@ func NewStoreStorageState(modName string, storeSaveInterval, modInitBlock, workU
 					totalNumberOfCompletedRanges--
 					missingRangesCounter--
 				} else {
-					for j := missingRangesCounter; j != completedEndBlock; j-- {
+					for j := missingRangesCounter; missingRangesCounter <= completedEndBlock; j-- {
 						missingFullStoreFiles = append(missingFullStoreFiles, block.NewRange(modInitBlock, totalNumberOfCompletedRanges*storeSaveInterval))
 						totalNumberOfCompletedRanges--
 						missingRangesCounter--
@@ -116,16 +116,16 @@ func computeMissingRanges(storeSaveInterval uint64, modInitBlock uint64, complet
 	totalNumberOfCompletedRanges := completeSnapshot.ExclusiveEndBlock / storeSaveInterval
 	if totalNumberOfCompletedRanges != uint64(snapshots.Completes.Len()) {
 		missingRangesCounter := completeSnapshot.ExclusiveEndBlock / storeSaveInterval
-		lastCompletedRange := totalNumberOfCompletedRanges
 		for i := snapshots.Completes.Len() - 1; i >= 0; i-- {
 			completedEndBlock := snapshots.Completes[i].ExclusiveEndBlock / storeSaveInterval
 			if completedEndBlock == totalNumberOfCompletedRanges {
 				totalNumberOfCompletedRanges--
 				missingRangesCounter--
-				lastCompletedRange--
 			} else {
-				for j := missingRangesCounter; j != completedEndBlock; j-- {
-					missingFullStoreFiles = append(missingFullStoreFiles, block.NewRange(modInitBlock, totalNumberOfCompletedRanges*storeSaveInterval))
+				for j := missingRangesCounter; j >= completedEndBlock; j-- {
+					if missingRangesCounter != completedEndBlock {
+						missingFullStoreFiles = append(missingFullStoreFiles, block.NewRange(modInitBlock, totalNumberOfCompletedRanges*storeSaveInterval))
+					}
 					totalNumberOfCompletedRanges--
 					missingRangesCounter--
 				}

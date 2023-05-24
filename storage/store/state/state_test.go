@@ -225,6 +225,48 @@ func Test_computeMissingRanges(t *testing.T) {
 			},
 			expectedMissingFullStoreFiles: block.ParseRanges("0-400"),
 		},
+		{
+			name:              "missing 2 full stores",
+			storeSaveInterval: 100,
+			modInitBlock:      0,
+			completeSnapshot: &block.Range{
+				StartBlock:        0,
+				ExclusiveEndBlock: 500,
+			},
+			snapshots: &storeSnapshots{
+				Completes: block.ParseRanges("0-100,0-200,0-500"),
+				Partials:  nil,
+			},
+			expectedMissingFullStoreFiles: block.ParseRanges("0-400,0-300"),
+		},
+		{
+			name:              "missing 2 full stores at different intervals",
+			storeSaveInterval: 100,
+			modInitBlock:      0,
+			completeSnapshot: &block.Range{
+				StartBlock:        0,
+				ExclusiveEndBlock: 500,
+			},
+			snapshots: &storeSnapshots{
+				Completes: block.ParseRanges("0-100,0-300,0-500"),
+				Partials:  nil,
+			},
+			expectedMissingFullStoreFiles: block.ParseRanges("0-400,0-200"),
+		},
+		{
+			name:              "missing multiple full stores at different intervals",
+			storeSaveInterval: 100,
+			modInitBlock:      0,
+			completeSnapshot: &block.Range{
+				StartBlock:        0,
+				ExclusiveEndBlock: 1000,
+			},
+			snapshots: &storeSnapshots{
+				Completes: block.ParseRanges("0-100,0-300,0-500,0-700,0-900"),
+				Partials:  nil,
+			},
+			expectedMissingFullStoreFiles: block.ParseRanges("0-1000,0-800,0-600,0-400,0-200"),
+		},
 	}
 
 	for _, test := range tests {
