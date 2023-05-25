@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 
 	"github.com/streamingfast/cli"
-	"github.com/streamingfast/substreams/tools"
 
 	"github.com/jhump/protoreflect/desc"
 	"github.com/spf13/cobra"
@@ -36,19 +35,18 @@ func init() {
 }
 
 func runCodeGen(cmd *cobra.Command, args []string) error {
-	manifestPathRaw := ""
+	manifestPath := ""
 	if len(args) == 1 {
-		manifestPathRaw = args[0]
-	}
-	manifestPath, err := tools.ResolveManifestFile(manifestPathRaw)
-	if err != nil {
-		return fmt.Errorf("resolving manifest: %w", err)
+		manifestPath = args[0]
 	}
 
 	var protoDefinitions []*desc.FileDescriptor
-	manifestReader := manifest.NewReader(manifestPath, manifest.SkipSourceCodeReader(), manifest.WithCollectProtoDefinitions(func(pd []*desc.FileDescriptor) {
+	manifestReader, err := manifest.NewReader(manifestPath, manifest.SkipSourceCodeReader(), manifest.WithCollectProtoDefinitions(func(pd []*desc.FileDescriptor) {
 		protoDefinitions = pd
 	}))
+	if err != nil {
+		return fmt.Errorf("manifest reader: %w", err)
+	}
 
 	manifestAbsPath, err := filepath.Abs(manifestPath)
 	if err != nil {

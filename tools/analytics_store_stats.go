@@ -44,7 +44,11 @@ func StoreStatsE(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("creating base store: %w", err)
 	}
 
-	manifestReader := manifest.NewReader(manifestPath)
+	manifestReader, err := manifest.NewReader(manifestPath)
+	if err != nil {
+		return fmt.Errorf("manifest reader: %w", err)
+	}
+
 	pkg, err := manifestReader.Read()
 	if err != nil {
 		return fmt.Errorf("read manifest %q: %w", manifestPath, err)
@@ -110,11 +114,13 @@ func StoreStatsE(cmd *cobra.Command, args []string) error {
 				module.GetKind().(*pbsubstreams.Module_KindStore_).KindStore.UpdatePolicy,
 				module.GetKind().(*pbsubstreams.Module_KindStore_).KindStore.ValueType,
 				baseDStore,
+				"",
 			)
 			if err != nil {
 				zlog.Error("creating store config", zap.Error(err))
 				return
 			}
+
 			storeStats := initializeStoreStats(conf)
 
 			stateStore, fileInfos, err := getStore(ctx, conf, math.MaxUint64)
@@ -145,7 +151,7 @@ func StoreStatsE(cmd *cobra.Command, args []string) error {
 			}
 
 			storeStats.FileInfo = &FileInfo{
-				FileBlockRange: block.NewRange(latestFile.StartBlock, latestFile.EndBlock),
+				FileBlockRange: latestFile.Range,
 				FileName:       latestFile.Filename,
 				FileSize:       fileSize,
 				FileSizeGrowth: growth,
@@ -264,7 +270,7 @@ func getStore(ctx context.Context, conf *store.Config, below uint64) (store.Stor
 
 	start = time.Now()
 	sort.Slice(kvFiles, func(i, j int) bool { //reverse sort
-		return kvFiles[i].EndBlock >= kvFiles[j].EndBlock
+		return kvFiles[i].Range.ExclusiveEndBlock >= kvFiles[j].Range.ExclusiveEndBlock
 	})
 	zlog.Debug("sorting snapshot files", zap.Duration("duration", time.Now().Sub(start)))
 
@@ -279,7 +285,7 @@ func getStore(ctx context.Context, conf *store.Config, below uint64) (store.Stor
 
 	start = time.Now()
 	s := conf.NewFullKV(zlog)
-	err = s.Load(ctx, latestFile.EndBlock)
+	err = s.Load(ctx, latestFile)
 	if err != nil {
 		return nil, nil, fmt.Errorf("loading store: %w", err)
 	}

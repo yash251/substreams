@@ -95,6 +95,7 @@ func (s *Stream) Update(msg tea.Msg) tea.Cmd {
 		*pbsubstreamsrpc.ModulesProgress,
 		*pbsubstreamsrpc.InitialSnapshotData,
 		*pbsubstreamsrpc.InitialSnapshotComplete,
+		*pbsubstreamsrpc.SessionInit,
 		ResponseUnknownMsg:
 		return s.readNextMessage
 	case Msg:
@@ -158,6 +159,8 @@ func (s *Stream) routeNextMessage(resp *pbsubstreamsrpc.Response) tea.Msg {
 		return m.DebugSnapshotData
 	case *pbsubstreamsrpc.Response_DebugSnapshotComplete:
 		return m.DebugSnapshotComplete
+	case *pbsubstreamsrpc.Response_Session:
+		return m.Session
 	}
 	return ResponseUnknownMsg(fmt.Sprintf("%T", resp.Message))
 }

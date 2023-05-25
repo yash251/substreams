@@ -6,26 +6,27 @@ import (
 	"io"
 	"sync/atomic"
 
+	"github.com/streamingfast/substreams"
+	"github.com/streamingfast/substreams/client"
+	pbssinternal "github.com/streamingfast/substreams/pb/sf/substreams/intern/v2"
+	pbsubstreamsrpc "github.com/streamingfast/substreams/pb/sf/substreams/rpc/v2"
+	"github.com/streamingfast/substreams/reqctx"
+	"github.com/streamingfast/substreams/storage/store"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	ttrace "go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
+	grpcCodes "google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
-
-	"github.com/streamingfast/substreams"
-	"github.com/streamingfast/substreams/block"
-	"github.com/streamingfast/substreams/client"
-	pbssinternal "github.com/streamingfast/substreams/pb/sf/substreams/intern/v2"
-	pbsubstreamsrpc "github.com/streamingfast/substreams/pb/sf/substreams/rpc/v2"
-	"github.com/streamingfast/substreams/reqctx"
+	"google.golang.org/grpc/status"
 )
 
 var lastWorkerID uint64
 
 type Result struct {
-	PartialsWritten []*block.Range
-	Error           error
+	PartialFilesWritten store.FileInfos
+	Error               error
 }
 
 type Worker interface {
@@ -78,11 +79,15 @@ func (w *RemoteWorker) ID() string {
 
 func (w *RemoteWorker) Work(ctx context.Context, request *pbssinternal.ProcessRangeRequest, respFunc substreams.ResponseFunc) *Result {
 	var err error
-	ctx, span := reqctx.WithSpan(ctx, "running_job")
+
+	ctx, span := reqctx.WithSpan(ctx, fmt.Sprintf("substreams/tier1/schedule/%s/%d-%d", request.OutputModule, request.StartBlockNum, request.StopBlockNum))
 	defer span.EndWithErr(&err)
-	span.SetAttributes(attribute.String("output_module", request.OutputModule))
-	span.SetAttributes(attribute.Int64("start_block", int64(request.StartBlockNum)))
-	span.SetAttributes(attribute.Int64("stop_block", int64(request.StopBlockNum)))
+	span.SetAttributes(
+		attribute.String("substreams.output_module", request.OutputModule),
+		attribute.Int64("substreams.start_block", int64(request.StartBlockNum)),
+		attribute.Int64("substreams.stop_block", int64(request.StopBlockNum)),
+		attribute.Int64("substreams.worker_id", int64(w.id)),
+	)
 	logger := w.logger
 
 	grpcClient, closeFunc, grpcCallOpts, err := w.clientFactory()
@@ -136,7 +141,7 @@ func (w *RemoteWorker) Work(ctx context.Context, request *pbssinternal.ProcessRa
 		logger = logger.With(zap.String("remote_hostname", remoteHostname))
 	}
 
-	span.SetAttributes(attribute.String("remote_hostname", remoteHostname))
+	span.SetAttributes(attribute.String("substreams.remote_hostname", remoteHostname))
 
 	for {
 		select {
@@ -154,6 +159,11 @@ func (w *RemoteWorker) Work(ctx context.Context, request *pbssinternal.ProcessRa
 				forwardResponse := toRPCRangeProgressResponse(resp.ModuleName, r.ProcessedRange.StartBlock, r.ProcessedRange.EndBlock)
 				err := respFunc(forwardResponse)
 				if err != nil {
+					if ctx.Err() != nil {
+						return &Result{
+							Error: ctx.Err(),
+						}
+					}
 					span.SetStatus(codes.Error, err.Error())
 					return &Result{
 						Error: NewRetryableErr(fmt.Errorf("sending progress: %w", err)),
@@ -182,7 +192,7 @@ func (w *RemoteWorker) Work(ctx context.Context, request *pbssinternal.ProcessRa
 			case *pbssinternal.ProcessRangeResponse_Completed:
 				logger.Info("worker done")
 				return &Result{
-					PartialsWritten: toRPCBlockRanges(r.Completed.AllProcessedRanges),
+					PartialFilesWritten: toRPCPartialFiles(r.Completed),
 				}
 			}
 		}
@@ -190,6 +200,18 @@ func (w *RemoteWorker) Work(ctx context.Context, request *pbssinternal.ProcessRa
 		if err != nil {
 			if err == io.EOF {
 				return &Result{}
+			}
+			if ctx.Err() != nil {
+				return &Result{
+					Error: ctx.Err(),
+				}
+			}
+			if s, ok := status.FromError(err); ok {
+				if s.Code() == grpcCodes.InvalidArgument {
+					return &Result{
+						Error: err,
+					}
+				}
 			}
 			return &Result{
 				Error: NewRetryableErr(fmt.Errorf("receiving stream resp: %w", err)),
@@ -272,12 +294,10 @@ func toRPCRangeProgressResponse(moduleName string, start, end uint64) *pbsubstre
 	}
 }
 
-func toRPCBlockRanges(in []*pbssinternal.BlockRange) (out []*block.Range) {
-	for _, b := range in {
-		out = append(out, &block.Range{
-			StartBlock:        b.StartBlock,
-			ExclusiveEndBlock: b.EndBlock,
-		})
+func toRPCPartialFiles(completed *pbssinternal.Completed) (out store.FileInfos) {
+	out = make(store.FileInfos, len(completed.AllProcessedRanges))
+	for i, b := range completed.AllProcessedRanges {
+		out[i] = store.NewPartialFileInfo(b.StartBlock, b.EndBlock, completed.TraceId)
 	}
 	return
 }

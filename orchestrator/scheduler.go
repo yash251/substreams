@@ -2,6 +2,7 @@ package orchestrator
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 	"time"
@@ -10,24 +11,22 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/streamingfast/substreams"
-	"github.com/streamingfast/substreams/block"
-	"github.com/streamingfast/substreams/manifest"
 	"github.com/streamingfast/substreams/orchestrator/work"
 	pbsubstreams "github.com/streamingfast/substreams/pb/sf/substreams/v1"
 	"github.com/streamingfast/substreams/reqctx"
+	"github.com/streamingfast/substreams/storage/store"
 )
 
 type Scheduler struct {
 	workPlan               *work.Plan
 	submittedJobs          []*work.Job
 	respFunc               substreams.ResponseFunc
-	graph                  *manifest.ModuleGraph
 	upstreamRequestModules *pbsubstreams.Modules
 
 	currentJobsLock sync.Mutex
 	currentJobs     map[string]*work.Job
 
-	OnStoreJobTerminated func(ctx context.Context, moduleName string, partialsWritten block.Ranges) error
+	OnStoreJobTerminated func(ctx context.Context, moduleName string, partialFilesWritten store.FileInfos) error
 }
 
 func NewScheduler(workPlan *work.Plan, respFunc substreams.ResponseFunc, upstreamRequestModules *pbsubstreams.Modules) *Scheduler {
@@ -41,14 +40,14 @@ func NewScheduler(workPlan *work.Plan, respFunc substreams.ResponseFunc, upstrea
 
 type jobResult struct {
 	job             *work.Job
-	partialsWritten block.Ranges
+	partialsWritten store.FileInfos
 	err             error
 }
 
 func fromWorkResult(job *work.Job, wr *work.Result) jobResult {
 	return jobResult{
 		job:             job,
-		partialsWritten: wr.PartialsWritten,
+		partialsWritten: wr.PartialFilesWritten,
 		err:             wr.Error,
 	}
 }
@@ -58,14 +57,14 @@ func (s *Scheduler) Schedule(ctx context.Context, pool work.WorkerPool) (err err
 	result := make(chan jobResult)
 
 	wg := &sync.WaitGroup{}
-	logger.Debug("launching scheduler")
+	logger.Info("launching scheduler")
 
 	go func() {
 		allJobsStarted := false
 		for !allJobsStarted {
 			allJobsStarted = s.run(ctx, wg, result, pool)
 		}
-		logger.Info("scheduler finished starting jobs. waiting for them to complete")
+		logger.Info("scheduler finished starting jobs, waiting for them to complete")
 
 		wg.Wait()
 		logger.Info("all jobs completed")
@@ -146,8 +145,13 @@ func (s *Scheduler) gatherResults(ctx context.Context, result chan jobResult) (e
 			if !ok {
 				return nil
 			}
+
 			if err := s.processJobResult(ctx, jobResult); err != nil {
-				return fmt.Errorf("process job result for target %q: %w", jobResult.job.ModuleName, err)
+				moduleName := "unknown"
+				if jobResult.job != nil {
+					moduleName = jobResult.job.ModuleName
+				}
+				return fmt.Errorf("process job result for module %q: %w", moduleName, err)
 			}
 		}
 	}
@@ -155,7 +159,7 @@ func (s *Scheduler) gatherResults(ctx context.Context, result chan jobResult) (e
 
 func (s *Scheduler) processJobResult(ctx context.Context, result jobResult) error {
 	if result.err != nil {
-		return fmt.Errorf("worker ended in error: %w", result.err)
+		return fmt.Errorf("job ended in error: %w", result.err)
 	}
 
 	if result.partialsWritten != nil {
@@ -181,36 +185,35 @@ func (s *Scheduler) runSingleJob(ctx context.Context, worker work.Worker, job *w
 	request := job.CreateRequest(requestModules)
 
 	var workResult *work.Result
-	var nonRetryableError error
 
-	_ = derr.RetryContext(ctx, 3, func(ctx context.Context) error {
-		if nonRetryableError != nil {
-			return nonRetryableError
-		}
+	err := derr.RetryContext(ctx, 3, func(ctx context.Context) error {
 
 		workResult = worker.Work(ctx, request, s.respFunc)
 		err := workResult.Error
 
 		switch err.(type) {
 		case *work.RetryableErr:
-			logger.Info("worker failed with retryable error", zap.Error(err))
+			logger.Debug("worker failed with retryable error", zap.Error(err))
 			return err
 		default:
 			if err != nil {
-				logger.Info("worker failed with a non-retryable error", zap.Error(err))
+				return derr.NewFatalError(err)
 			}
-			nonRetryableError = err
 			return nil
 		}
 	})
-	if nonRetryableError != nil {
-		logger.Info("job failed", zap.Object("job", job), zap.Error(nonRetryableError))
-		return jobResult{err: nonRetryableError}
+	if err != nil {
+		if errors.Is(err, context.Canceled) {
+			logger.Debug("job canceled", zap.Object("job", job), zap.Error(err))
+			return jobResult{job: job, err: err}
+		}
+		logger.Info("job failed", zap.Object("job", job), zap.Error(err))
+		return jobResult{job: job, err: err}
 	}
 
 	if err := ctx.Err(); err != nil {
 		logger.Info("job not completed", zap.Object("job", job), zap.Error(err))
-		return jobResult{err: err}
+		return jobResult{job: job, err: err}
 	}
 
 	jr := fromWorkResult(job, workResult)

@@ -20,6 +20,9 @@ func WithWASMExtension(ext wasm.WASMExtensioner) Option {
 	}
 }
 
+// WithPipelineOptions is used to configure pipeline options for
+// consumer outside of the substreams library itself, for example
+// in chain specific Firehose implementations.
 func WithPipelineOptions(f pipeline.PipelineOptioner) Option {
 	return func(a anyTierService) {
 		switch s := a.(type) {
@@ -61,6 +64,17 @@ func WithMaxWasmFuelPerBlockModule(maxFuel uint64) Option {
 			s.runtimeConfig.MaxWasmFuel = maxFuel
 		case *Tier2Service:
 			s.runtimeConfig.MaxWasmFuel = maxFuel
+		}
+	}
+}
+
+func WithModuleExecutionTracing() Option {
+	return func(a anyTierService) {
+		switch s := a.(type) {
+		case *Tier1Service:
+			s.runtimeConfig.ModuleExecutionTracing = true
+		case *Tier2Service:
+			s.runtimeConfig.ModuleExecutionTracing = true
 		}
 	}
 }

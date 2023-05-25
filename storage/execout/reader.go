@@ -3,6 +3,7 @@ package execout
 import (
 	"context"
 	"fmt"
+	"github.com/streamingfast/dstore"
 	"strings"
 	"time"
 
@@ -55,7 +56,9 @@ func (r *LinearReader) Launch(ctx context.Context) {
 	logger.Info("launching downloader", zap.Uint64("start_block", r.requestStartBlock), zap.Uint64("exclusive_end_block", r.exclusiveEndBlock))
 
 	go func() {
+		ctx, span := reqctx.WithSpan(ctx, "substreams/tier1/pipeline/linear_reader")
 		err := r.run(ctx)
+		span.EndWithErr(&err)
 		r.Shutdown(err)
 	}()
 }
@@ -132,17 +135,19 @@ func (r *LinearReader) download(ctx context.Context, file *File) error {
 	}
 }
 
-func (r *LinearReader) downloadFile(ctx context.Context, file *File) (out []*pboutput.Item, err error) {
+func (r *LinearReader) downloadFile(ctx context.Context, file *File) ([]*pboutput.Item, error) {
 	logger := reqctx.Logger(ctx)
 	for {
 		logger.Debug("loading next cache", zap.Object("file", file))
-		loaded, err := file.Load(ctx)
-		if err != nil {
+
+		err := file.Load(ctx)
+		if err != nil && err != dstore.ErrNotFound {
 			return nil, fmt.Errorf("loading %s cache %q: %w", file.ModuleName, file.Filename(), err)
 		}
-		if loaded {
-			out = file.SortedItems()
-			return out, nil
+
+		// err can be equal to dstore.ErrNotFound, we want to skip this and retur
+		if err == nil {
+			return file.SortedItems(), nil
 		}
 
 		// TODO(abourget): if file.IsPartial(), we should delete it, it would mean it'd be left

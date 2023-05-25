@@ -10,11 +10,11 @@ import (
 	"github.com/streamingfast/bstream/hub"
 	"github.com/streamingfast/bstream/stream"
 	"github.com/streamingfast/dauth/authenticator"
+	"github.com/streamingfast/dgrpc"
 	dgrpcserver "github.com/streamingfast/dgrpc/server"
 	"github.com/streamingfast/dstore"
 	"github.com/streamingfast/logging"
 	tracing "github.com/streamingfast/sf-tracing"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	ttrace "go.opentelemetry.io/otel/trace"
 	"go.uber.org/atomic"
@@ -31,6 +31,7 @@ import (
 	pbsubstreamsrpc "github.com/streamingfast/substreams/pb/sf/substreams/rpc/v2"
 	"github.com/streamingfast/substreams/pipeline"
 	"github.com/streamingfast/substreams/pipeline/cache"
+	"github.com/streamingfast/substreams/pipeline/exec"
 	"github.com/streamingfast/substreams/pipeline/outputmodules"
 	"github.com/streamingfast/substreams/reqctx"
 	"github.com/streamingfast/substreams/service/config"
@@ -45,10 +46,9 @@ type Tier1Service struct {
 	wasmExtensions    []wasm.WASMExtensioner
 	pipelineOptions   []pipeline.PipelineOptioner
 	streamFactoryFunc StreamFactoryFunc
-
-	runtimeConfig config.RuntimeConfig
-	tracer        ttrace.Tracer
-	logger        *zap.Logger
+	runtimeConfig     config.RuntimeConfig
+	tracer            ttrace.Tracer
+	logger            *zap.Logger
 
 	getRecentFinalBlock func() (uint64, error)
 	resolveCursor       pipeline.CursorResolver
@@ -83,7 +83,7 @@ func NewTier1(
 	s = &Tier1Service{
 		runtimeConfig: runtimeConfig,
 		blockType:     blockType,
-		tracer:        otel.GetTracerProvider().Tracer("service"),
+		tracer:        tracing.GetTracer(),
 	}
 
 	zlog.Info("registering substreams metrics")
@@ -135,11 +135,11 @@ func (s *Tier1Service) Blocks(request *pbsubstreamsrpc.Request, streamSrv pbsubs
 
 	logger := reqctx.Logger(ctx).Named("tier1")
 	respFunc := responseHandler(logger, streamSrv)
-
+	traceId := tracing.GetTraceID(ctx).String()
 	respFunc(&pbsubstreamsrpc.Response{
 		Message: &pbsubstreamsrpc.Response_Session{
 			Session: &pbsubstreamsrpc.SessionInit{
-				TraceId: tracing.GetTraceID(ctx).String(),
+				TraceId: traceId,
 			},
 		},
 	})
@@ -147,8 +147,10 @@ func (s *Tier1Service) Blocks(request *pbsubstreamsrpc.Request, streamSrv pbsubs
 	ctx = logging.WithLogger(ctx, logger)
 	ctx = reqctx.WithTracer(ctx, s.tracer)
 
-	ctx, span := reqctx.WithSpan(ctx, "substreams_request")
+	ctx, span := reqctx.WithSpan(ctx, "substreams/tier1/request")
 	defer span.EndWithErr(&err)
+
+	span.SetAttributes(attribute.Int64("substreams.tier", 1))
 
 	hostname := updateStreamHeadersHostname(streamSrv.SetHeader, logger)
 	span.SetAttributes(attribute.String("hostname", hostname))
@@ -183,17 +185,17 @@ func (s *Tier1Service) Blocks(request *pbsubstreamsrpc.Request, streamSrv pbsubs
 	}
 	logger.Info("incoming Substreams Blocks request", fields...)
 
-	err = s.blocks(ctx, s.runtimeConfig, request, respFunc)
+	err = s.blocks(ctx, request, respFunc)
 	grpcError = toGRPCError(err)
 
 	if grpcError != nil && status.Code(grpcError) == codes.Internal {
-		logger.Info("unexpected termination of stream of blocks", zap.Error(err))
+		logger.Info("unexpected termination of stream of blocks", zap.String("stream_processor", "tier1"), zap.Error(err))
 	}
 
 	return grpcError
 }
 
-func (s *Tier1Service) blocks(ctx context.Context, runtimeConfig config.RuntimeConfig, request *pbsubstreamsrpc.Request, respFunc substreams.ResponseFunc) error {
+func (s *Tier1Service) blocks(ctx context.Context, request *pbsubstreamsrpc.Request, respFunc substreams.ResponseFunc) error {
 	logger := reqctx.Logger(ctx)
 
 	if err := outputmodules.ValidateTier1Request(request, s.blockType); err != nil {
@@ -205,7 +207,7 @@ func (s *Tier1Service) blocks(ctx context.Context, runtimeConfig config.RuntimeC
 		return stream.NewErrInvalidArg(err.Error())
 	}
 
-	ctx, requestStats := setupRequestStats(ctx, logger, runtimeConfig.WithRequestStats, false)
+	ctx, requestStats := setupRequestStats(ctx, logger, s.runtimeConfig.WithRequestStats, false)
 
 	//bytesMeter := tracking.NewBytesMeter(ctx)
 	//bytesMeter.Launch(ctx, respFunc)
@@ -217,25 +219,29 @@ func (s *Tier1Service) blocks(ctx context.Context, runtimeConfig config.RuntimeC
 	}
 
 	ctx = reqctx.WithRequest(ctx, requestDetails)
+	if s.runtimeConfig.ModuleExecutionTracing {
+		ctx = reqctx.WithModuleExecutionTracing(ctx)
+	}
 
 	if err := outputGraph.ValidateRequestStartBlock(requestDetails.ResolvedStartBlockNum); err != nil {
 		return stream.NewErrInvalidArg(err.Error())
 	}
 
-	wasmRuntime := wasm.NewRuntime(s.wasmExtensions, runtimeConfig.MaxWasmFuel)
+	wasmRuntime := wasm.NewRuntime(s.wasmExtensions, s.runtimeConfig.MaxWasmFuel)
 
-	execOutputConfigs, err := execout.NewConfigs(runtimeConfig.BaseObjectStore, outputGraph.UsedModules(), outputGraph.ModuleHashes(), runtimeConfig.CacheSaveInterval, logger)
+	execOutputConfigs, err := execout.NewConfigs(s.runtimeConfig.BaseObjectStore, outputGraph.UsedModules(), outputGraph.ModuleHashes(), s.runtimeConfig.CacheSaveInterval, logger)
 	if err != nil {
 		return fmt.Errorf("new config map: %w", err)
 	}
 
-	storeConfigs, err := store.NewConfigMap(runtimeConfig.BaseObjectStore, outputGraph.Stores(), outputGraph.ModuleHashes())
+	storeConfigs, err := store.NewConfigMap(s.runtimeConfig.BaseObjectStore, outputGraph.Stores(), outputGraph.ModuleHashes(), tracing.GetTraceID(ctx).String())
 	if err != nil {
 		return fmt.Errorf("configuring stores: %w", err)
 	}
-	stores := pipeline.NewStores(storeConfigs, runtimeConfig.CacheSaveInterval, requestDetails.ResolvedStartBlockNum, request.StopBlockNum, false)
 
-	execOutputCacheEngine, err := cache.NewEngine(ctx, runtimeConfig, nil, s.blockType)
+	stores := pipeline.NewStores(storeConfigs, s.runtimeConfig.CacheSaveInterval, requestDetails.LinearHandoffBlockNum, request.StopBlockNum, false, "tier1")
+
+	execOutputCacheEngine, err := cache.NewEngine(ctx, s.runtimeConfig, nil, s.blockType)
 	if err != nil {
 		return fmt.Errorf("error building caching engine: %w", err)
 	}
@@ -260,8 +266,10 @@ func (s *Tier1Service) blocks(ctx context.Context, runtimeConfig config.RuntimeC
 		execOutputConfigs,
 		wasmRuntime,
 		execOutputCacheEngine,
-		runtimeConfig,
+		s.runtimeConfig,
 		respFunc,
+		"tier1",
+		tracing.GetTraceID(ctx).String(),
 		opts...,
 	)
 
@@ -277,8 +285,9 @@ func (s *Tier1Service) blocks(ctx context.Context, runtimeConfig config.RuntimeC
 		zap.String("resolved_cursor", requestDetails.ResolvedCursor),
 		zap.String("output_module", request.OutputModule),
 	)
+
 	if err := pipe.InitStoresAndBackprocess(ctx); err != nil {
-		return fmt.Errorf("error building pipeline: %w", err)
+		return fmt.Errorf("error during init_stores_and_backprocess: %w", err)
 	}
 	if requestDetails.LinearHandoffBlockNum == request.StopBlockNum {
 		return pipe.OnStreamTerminated(ctx, nil)
@@ -308,11 +317,15 @@ func (s *Tier1Service) blocks(ctx context.Context, runtimeConfig config.RuntimeC
 		cursor,
 		request.FinalBlocksOnly,
 		cursorIsTarget,
+		logger.Named("stream"),
 	)
 	if err != nil {
 		return fmt.Errorf("error getting stream: %w", err)
 	}
+
+	ctx, span := reqctx.WithSpan(ctx, "substreams/tier1/pipeline/blocks_stream")
 	streamErr = blockStream.Run(ctx)
+	span.EndWithErr(&streamErr)
 
 	return pipe.OnStreamTerminated(ctx, streamErr)
 }
@@ -320,7 +333,7 @@ func (s *Tier1Service) blocks(ctx context.Context, runtimeConfig config.RuntimeC
 func (s *Tier1Service) buildPipelineOptions(ctx context.Context) (opts []pipeline.Option) {
 	reqDetails := reqctx.Details(ctx)
 	for _, pipeOpts := range s.pipelineOptions {
-		opts = append(opts, pipeOpts.PipelineOptions(ctx, reqDetails.ResolvedStartBlockNum, reqDetails.StopBlockNum, tracing.GetTraceID(ctx).String())...)
+		opts = append(opts, pipeOpts.PipelineOptions(ctx, reqDetails.ResolvedStartBlockNum, reqDetails.StopBlockNum, reqDetails.UniqueIDString())...)
 	}
 	return
 }
@@ -391,6 +404,12 @@ func toGRPCError(err error) error {
 	if errors.Is(err, context.DeadlineExceeded) {
 		return status.Error(codes.DeadlineExceeded, "source deadline exceeded")
 	}
+
+	if errors.Is(err, exec.ErrWasmDeterministicExec) {
+		return status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	dgrpc.AsGRPCError(err)
 
 	var errInvalidArg *stream.ErrInvalidArg
 	if errors.As(err, &errInvalidArg) {

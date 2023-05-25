@@ -19,9 +19,10 @@ type Stores struct {
 	configs         store.ConfigMap
 	StoreMap        store.Map
 	partialsWritten block.Ranges // when backprocessing, to report back to orchestrator
+	tier            string
 }
 
-func NewStores(storeConfigs store.ConfigMap, storeSnapshotSaveInterval, requestStartBlockNum, stopBlockNum uint64, isSubRequest bool) *Stores {
+func NewStores(storeConfigs store.ConfigMap, storeSnapshotSaveInterval, requestStartBlockNum, stopBlockNum uint64, isSubRequest bool, tier string) *Stores {
 	// FIXME(abourget): a StoreBoundary should exist for EACH Store
 	//  because the module's Initial Block could change the range of each
 	//  store.
@@ -30,6 +31,7 @@ func NewStores(storeConfigs store.ConfigMap, storeSnapshotSaveInterval, requestS
 		configs:      storeConfigs,
 		isSubRequest: isSubRequest,
 		bounder:      bounder,
+		tier:         tier,
 	}
 }
 
@@ -87,11 +89,11 @@ func (s *Stores) saveStoresSnapshots(ctx context.Context, boundaryBlock uint64) 
 }
 
 func (s *Stores) saveStoreSnapshot(ctx context.Context, saveStore store.Store, boundaryBlock uint64) (err error) {
-	ctx, span := reqctx.WithSpan(ctx, "save_store_snapshot")
-	span.SetAttributes(attribute.String("store", saveStore.Name()))
+	ctx, span := reqctx.WithSpan(ctx, fmt.Sprintf("substreams/%s/stores/save_store_snapshot", s.tier))
+	span.SetAttributes(attribute.String("subtreams.store", saveStore.Name()))
 	defer span.EndWithErr(&err)
 
-	blockRange, writer, err := saveStore.Save(boundaryBlock)
+	file, writer, err := saveStore.Save(boundaryBlock)
 	if err != nil {
 		return fmt.Errorf("saving store %q at boundary %d: %w", saveStore.Name(), boundaryBlock, err)
 	}
@@ -101,8 +103,12 @@ func (s *Stores) saveStoreSnapshot(ctx context.Context, saveStore store.Store, b
 	}
 
 	if reqctx.Details(ctx).ShouldReturnWrittenPartials(saveStore.Name()) {
-		s.partialsWritten = append(s.partialsWritten, blockRange)
-		reqctx.Logger(ctx).Debug("adding partials written", zap.Object("range", blockRange), zap.Stringer("ranges", s.partialsWritten), zap.Uint64("boundary_block", boundaryBlock))
+		s.partialsWritten = append(s.partialsWritten, file.Range)
+		reqctx.Logger(ctx).Debug("adding partials written",
+			zap.Stringer("range", file.Range),
+			zap.Stringer("ranges", s.partialsWritten),
+			zap.Uint64("boundary_block", boundaryBlock),
+		)
 
 		if v, ok := saveStore.(store.PartialStore); ok {
 			reqctx.Span(ctx).AddEvent("store_roll_trigger")

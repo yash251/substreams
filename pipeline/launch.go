@@ -28,6 +28,8 @@ func (p *Pipeline) OnStreamTerminated(ctx context.Context, err error) error {
 		executor.FreeMem()
 	}
 
+	p.runPostJobHooks(ctx, p.lastFinalClock)
+
 	if !errors.Is(err, stream.ErrStopBlockReached) && !errors.Is(err, io.EOF) {
 		return err
 	}
@@ -46,6 +48,11 @@ func (p *Pipeline) OnStreamTerminated(ctx context.Context, err error) error {
 		return fmt.Errorf("end of stream: %w", err)
 	}
 
+	// WARN/FIXME: calling flushStores once at the end of a process
+	// is super risky, as this function was made to b e called at each
+	// block to flush stores supporting holes in chains.
+	// And it will write multiple stores with the same content
+	// when presented with multiple boundaries / ranges.
 	if err := p.stores.flushStores(ctx, reqDetails.StopBlockNum); err != nil {
 		return fmt.Errorf("step new irr: stores end of stream: %w", err)
 	}
@@ -62,6 +69,7 @@ func (p *Pipeline) OnStreamTerminated(ctx context.Context, err error) error {
 			Type: &pbssinternal.ProcessRangeResponse_Completed{
 				Completed: &pbssinternal.Completed{
 					AllProcessedRanges: toPBInternalBlockRanges(p.stores.partialsWritten),
+					TraceId:            p.traceID,
 				},
 			},
 		})

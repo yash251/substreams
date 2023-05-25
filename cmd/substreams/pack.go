@@ -7,8 +7,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/streamingfast/substreams/tools"
-
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/cli"
 	"github.com/streamingfast/substreams/manifest"
@@ -42,16 +40,15 @@ func init() {
 }
 
 func runPack(cmd *cobra.Command, args []string) error {
-	manifestPathRaw := ""
-
+	manifestPath := ""
 	if len(args) == 1 {
-		manifestPathRaw = args[0]
+		manifestPath = args[0]
 	}
-	manifestPath, err := tools.ResolveManifestFile(manifestPathRaw)
+
+	manifestReader, err := manifest.NewReader(manifestPath)
 	if err != nil {
-		return fmt.Errorf("resolving manifest: %w", err)
+		return fmt.Errorf("manifest reader: %w", err)
 	}
-	manifestReader := manifest.NewReader(manifestPath)
 
 	if !manifestReader.IsLocalManifest() {
 		return fmt.Errorf(`"pack" can only be use to pack local manifest file`)

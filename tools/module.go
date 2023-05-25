@@ -20,8 +20,8 @@ var moduleCmd = &cobra.Command{
 	Use:   "module <module_name> [<manifest|spkg_path>] <substreams_state_store_url>",
 	Short: "returns the state of the module on the state store",
 	Long: cli.Dedent(`
-		Returns the state of the module on the state store. The manifest is optional as it will try to find a file named 
-		'substreams.yaml' in current working directory if nothing entered. You may enter a directory that contains a 'substreams.yaml' 
+		Returns the state of the module on the state store. The manifest is optional as it will try to find a file named
+		'substreams.yaml' in current working directory if nothing entered. You may enter a directory that contains a 'substreams.yaml'
 		file in place of '<manifest_file>'.
 	`),
 	Args: cobra.RangeArgs(2, 3),
@@ -36,17 +36,13 @@ func moduleRunE(cmd *cobra.Command, args []string) error {
 	ctx := cmd.Context()
 
 	moduleName := args[0]
-	manifestPathRaw := ""
+	manifestPath := ""
 	if len(args) == 3 {
-		manifestPathRaw = args[1]
+		manifestPath = args[1]
 		args = args[1:]
 	}
 
 	stateStoreURL := args[1]
-	manifestPath, err := ResolveManifestFile(manifestPathRaw)
-	if err != nil {
-		return fmt.Errorf("resolving manifest: %w", err)
-	}
 
 	zlog.Info("found state store",
 		zap.String("module_name", moduleName),
@@ -58,7 +54,11 @@ func moduleRunE(cmd *cobra.Command, args []string) error {
 	cli.NoError(err, "New state store")
 
 	zlog.Info("Reading Substreams manifest")
-	manifestReader := manifest.NewReader(manifestPath)
+	manifestReader, err := manifest.NewReader(manifestPath)
+	if err != nil {
+		return fmt.Errorf("manifest reader: %w", err)
+	}
+
 	pkg, err := manifestReader.Read()
 	cli.NoError(err, "Read Substreams manifest")
 
@@ -117,6 +117,7 @@ func moduleRunE(cmd *cobra.Command, args []string) error {
 			module.GetKindStore().UpdatePolicy,
 			module.GetKindStore().ValueType,
 			stateStore,
+			"",
 		)
 		cli.NoError(err, "unable to create store config")
 
@@ -158,6 +159,7 @@ func moduleRunE(cmd *cobra.Command, args []string) error {
 
 func walkFiles(ctx context.Context, store dstore.Store, processor func(filename string) string) (files []string, err error) {
 	err = derr.RetryContext(ctx, 3, func(ctx context.Context) error {
+		files = nil
 		if err := store.Walk(ctx, "", func(filename string) (err error) {
 			files = append(files, processor(filename))
 			return nil

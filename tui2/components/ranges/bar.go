@@ -17,6 +17,7 @@ type Bar struct {
 	common.Common
 	name           string
 	targetEndBlock uint64
+	totalBlocks    uint64
 
 	ranges ranges
 }
@@ -38,12 +39,17 @@ func (b *Bar) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				End:   v.EndBlock,
 			})
 		}
+		var totalBlocks uint64
+		for _, r := range b.ranges {
+			totalBlocks += (r.End - r.Start)
+		}
+		b.totalBlocks = totalBlocks
 	}
 	return b, nil
 }
 
 func (b *Bar) View() string {
-	width := uint64(b.Width)
+	width := uint64(b.Width - 2)
 	if width > 1000 {
 		return "[borked]"
 	}

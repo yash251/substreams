@@ -31,8 +31,8 @@ var decodeOutputsModuleCmd = &cobra.Command{
 	Use:   "outputs [<manifest_file>] <module_name> <output_url> <block_number> <key>",
 	Short: "Decode outputs base 64 encoded bytes to protobuf data structure",
 	Long: cli.Dedent(`
-		When running this outputs command with a mapper or a store the key will be the block hash.  The manifest is optional as it will try to find a file named 
-		'substreams.yaml' in current working directory if nothing entered. You may enter a directory that contains a 'substreams.yaml' 
+		When running this outputs command with a mapper or a store the key will be the block hash.  The manifest is optional as it will try to find a file named
+		'substreams.yaml' in current working directory if nothing entered. You may enter a directory that contains a 'substreams.yaml'
 		file in place of '<manifest_file>'.
 	`),
 	Example: string(cli.ExamplePrefixed("substreams tools decode outputs", `
@@ -50,8 +50,8 @@ var decodeStatesModuleCmd = &cobra.Command{
 	Short: "Decode states base 64 encoded bytes to protobuf data structure",
 	Long: cli.Dedent(`
 		Running the states command only works if the module is a store. If it is a map an error message will be returned
-		to the user. The user needs to specify a key as it is required. The manifest is optional as it will try to find a file named 
-		'substreams.yaml' in current working directory if nothing entered. You may enter a directory that contains a 'substreams.yaml' 
+		to the user. The user needs to specify a key as it is required. The manifest is optional as it will try to find a file named
+		'substreams.yaml' in current working directory if nothing entered. You may enter a directory that contains a 'substreams.yaml'
 		file in place of '<manifest_file>'.
 	`),
 	Example: string(cli.ExamplePrefixed("substreams tools decode states", `
@@ -78,18 +78,14 @@ func runDecodeStatesModuleRunE(cmd *cobra.Command, args []string) error {
 	ctx := cmd.Context()
 	saveInterval := mustGetUint64(cmd, "save-interval")
 
-	manifestPathRaw := ""
+	manifestPath := ""
 	if len(args) == 5 {
-		manifestPathRaw = args[0]
+		manifestPath = args[0]
 		args = args[1:]
 	}
 
 	moduleName := args[0]
 	storeURL := args[1]
-	manifestPath, err := ResolveManifestFile(manifestPathRaw)
-	if err != nil {
-		return fmt.Errorf("resolving manifest: %w", err)
-	}
 	blockNumber, err := strconv.ParseUint(args[2], 10, 64)
 	if err != nil {
 		return fmt.Errorf("converting blockNumber to uint: %w", err)
@@ -110,7 +106,12 @@ func runDecodeStatesModuleRunE(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("initializing dstore for %q: %w", storeURL, err)
 	}
 
-	pkg, err := manifest.NewReader(manifestPath).Read()
+	manifestReader, err := manifest.NewReader(manifestPath)
+	if err != nil {
+		return fmt.Errorf("manifest reader: %w", err)
+	}
+
+	pkg, err := manifestReader.Read()
 	if err != nil {
 		return fmt.Errorf("read manifest %q: %w", manifestPath, err)
 	}
@@ -150,7 +151,7 @@ func runDecodeStatesModuleRunE(cmd *cobra.Command, args []string) error {
 	case *pbsubstreams.Module_KindMap_:
 		return fmt.Errorf("no states are available for a mapper")
 	case *pbsubstreams.Module_KindStore_:
-		return searchStateModule(ctx, startBlock, saveInterval, moduleHash, key, matchingModule, objStore, protoFiles)
+		return searchStateModule(ctx, startBlock, moduleHash, key, matchingModule, objStore, protoFiles)
 	}
 	return fmt.Errorf("module has an unknown")
 }
@@ -159,18 +160,14 @@ func runDecodeOutputsModuleRunE(cmd *cobra.Command, args []string) error {
 	ctx := cmd.Context()
 	saveInterval := mustGetUint64(cmd, "save-interval")
 
-	manifestPathRaw := ""
+	manifestPath := ""
 	if len(args) == 5 {
-		manifestPathRaw = args[0]
+		manifestPath = args[0]
 		args = args[1:]
 	}
 
 	moduleName := args[0]
 	storeURL := args[1]
-	manifestPath, err := ResolveManifestFile(manifestPathRaw)
-	if err != nil {
-		return fmt.Errorf("resolving manifest: %w", err)
-	}
 	blockNumber, err := strconv.ParseUint(args[2], 10, 64)
 	if err != nil {
 		return fmt.Errorf("converting blockNumber to uint: %w", err)
@@ -191,7 +188,12 @@ func runDecodeOutputsModuleRunE(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("initializing dstore for %q: %w", storeURL, err)
 	}
 
-	pkg, err := manifest.NewReader(manifestPath).Read()
+	manifestReader, err := manifest.NewReader(manifestPath)
+	if err != nil {
+		return fmt.Errorf("manifest reader: %w", err)
+	}
+
+	pkg, err := manifestReader.Read()
 	if err != nil {
 		return fmt.Errorf("read manifest %q: %w", manifestPath, err)
 	}
@@ -247,6 +249,10 @@ func searchOutputsModule(
 	protoFiles []*descriptorpb.FileDescriptorProto,
 ) error {
 	modStore, err := execout.NewConfig(module.Name, module.InitialBlock, pbsubstreams.ModuleKindMap, moduleHash, stateStore, zlog)
+	if err != nil {
+		return fmt.Errorf("execout new config: %w", err)
+	}
+
 	moduleStore, err := stateStore.SubStore(moduleHash + "/outputs")
 	if err != nil {
 		return fmt.Errorf("can't find substore for hash %q: %w", moduleHash, err)
@@ -255,12 +261,14 @@ func searchOutputsModule(
 	targetRange := block.NewBoundedRange(module.InitialBlock, saveInterval, startBlock, startBlock-startBlock%saveInterval+saveInterval)
 	outputCache := modStore.NewFile(targetRange)
 	zlog.Info("loading block from store", zap.Uint64("start_block", startBlock), zap.Uint64("block_num", blockNumber))
-	found, err := outputCache.Load(ctx)
-	if err != nil {
-		return fmt.Errorf("loading cache %s file %s : %w", moduleStore.BaseURL(), outputCache.String(), err)
-	}
-	if !found {
-		return fmt.Errorf("can't find cache at block %d storeURL %q", blockNumber, moduleStore.BaseURL().String())
+	if err := outputCache.Load(ctx); err != nil {
+		if err == dstore.ErrNotFound {
+			return fmt.Errorf("can't find cache at block %d storeURL %q", blockNumber, moduleStore.BaseURL().String())
+		}
+
+		if err != nil {
+			return fmt.Errorf("loading cache %s file %s : %w", moduleStore.BaseURL(), outputCache.String(), err)
+		}
 	}
 
 	fmt.Println()
@@ -279,20 +287,21 @@ func searchOutputsModule(
 
 func searchStateModule(
 	ctx context.Context,
-	startBlock,
-	saveInterval uint64,
+	startBlock uint64,
 	moduleHash string,
 	key string,
 	module *pbsubstreams.Module,
 	stateStore dstore.Store,
 	protoFiles []*descriptorpb.FileDescriptorProto,
 ) error {
-	config, err := store.NewConfig(module.Name, module.InitialBlock, moduleHash, module.GetKindStore().GetUpdatePolicy(), module.GetKindStore().GetValueType(), stateStore)
+	config, err := store.NewConfig(module.Name, module.InitialBlock, moduleHash, module.GetKindStore().GetUpdatePolicy(), module.GetKindStore().GetValueType(), stateStore, "")
 	if err != nil {
 		return fmt.Errorf("initializing store config module %q: %w", module.Name, err)
 	}
 	moduleStore := config.NewFullKV(zlog)
-	if err = moduleStore.Load(ctx, startBlock+saveInterval); err != nil {
+
+	file := store.NewCompleteFileInfo(module.InitialBlock, startBlock)
+	if err = moduleStore.Load(ctx, file); err != nil {
 		return fmt.Errorf("unable to load file: %w", err)
 	}
 
@@ -325,7 +334,7 @@ func printObject(module *pbsubstreams.Module, protoFiles []*descriptorpb.FileDes
 		msgDesc = file.FindMessage(strings.TrimPrefix(protoDefinition, "proto:"))
 		if msgDesc != nil {
 			switch module.Kind.(type) {
-			case *pbsubstreams.Module_KindMap_:
+			case *pbsubstreams.Module_KindMap_, *pbsubstreams.Module_KindStore_:
 				dynMsg := dynamic.NewMessageFactoryWithDefaults().NewDynamicMessage(msgDesc)
 				val, err := unmarshalData(data, dynMsg)
 				if err != nil {

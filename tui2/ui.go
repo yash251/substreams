@@ -1,8 +1,8 @@
 package tui2
 
 import (
-	"fmt"
 	"log"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -30,6 +30,9 @@ const (
 )
 
 type UI struct {
+	memoized string
+	lastView time.Time
+
 	msgDescs      map[string]*manifest.ModuleDescriptor
 	stream        *streamui.Stream
 	replayLog     *replaylog.File
@@ -52,9 +55,9 @@ func New(reqConfig *request.RequestConfig) *UI {
 	ui := &UI{
 		Common: c,
 		pages: []common.Component{
-			request.New(c, reqConfig),
+			request.New(c),
 			progress.New(c),
-			output.New(c, reqConfig.ManifestPath, reqConfig.OutputModule),
+			output.New(c, reqConfig.ManifestPath, reqConfig.OutputModule, reqConfig),
 		},
 		activePage:    progressPage,
 		tabs:          tabs.New(c, []string{"Request", "Progress", "Output"}),
@@ -104,11 +107,8 @@ func (ui *UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (ui *UI) update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 	switch msg := msg.(type) {
-	case streamui.StreamErrorMsg:
-		ui.activePage = page(2)
-		ui.footer.SetKeyMap(ui.pages[ui.activePage])
-		ui.SetSize(ui.Width, ui.Height)
 	case tea.WindowSizeMsg:
+		ui.forceRefresh()
 		ui.SetSize(msg.Width, msg.Height)
 	case common.SetModalUpdateFuncMsg:
 		ui.currentModalFunc = common.ModalUpdateFunc(msg)
@@ -117,6 +117,7 @@ func (ui *UI) update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case modsearch.ApplyModuleSearchQueryMsg:
 		ui.currentModalFunc = nil
 	case tea.KeyMsg:
+		ui.forceRefresh()
 		if msg.String() == "ctrl+c" {
 			return ui, tea.Quit
 		}
@@ -152,10 +153,12 @@ func (ui *UI) update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case streamui.InterruptStreamMsg:
 		}
 	case tabs.SelectTabMsg:
+		ui.forceRefresh()
 		ui.activePage = page(msg)
 		ui.footer.SetKeyMap(ui.pages[ui.activePage])
 		ui.SetSize(ui.Width, ui.Height)
 	case tabs.ActiveTabMsg:
+		ui.forceRefresh()
 		ui.activePage = page(msg)
 		ui.footer.SetKeyMap(ui.pages[ui.activePage])
 		ui.SetSize(ui.Width, ui.Height) // For when the footer changes size here
@@ -190,19 +193,31 @@ func (ui *UI) SetSize(w, h int) {
 	}
 }
 
+func (ui *UI) forceRefresh() {
+	ui.lastView = time.Time{}
+}
+
 func (ui *UI) View() string {
-	headline := ui.Styles.Header.Copy().Render("Substreams GUI")
+	switch ui.activePage {
+	case progressPage:
+		if time.Since(ui.lastView) < time.Millisecond*100 {
+			return ui.memoized
+		}
+		ui.lastView = time.Now()
+	}
+	headline := ui.Styles.Header.Render("Substreams GUI")
 
 	if ui.stream != nil {
 		headline = ui.Styles.Header.Copy().Foreground(lipgloss.Color(ui.stream.StreamColor())).Render("Substreams GUI")
 	}
 
-	return lipgloss.JoinVertical(0,
+	ui.memoized = lipgloss.JoinVertical(0,
 		headline,
 		ui.Styles.Tabs.Render(ui.tabs.View()),
 		ui.pages[ui.activePage].View(),
 		ui.footer.View(),
 	)
+	return ui.memoized
 }
 
 func (ui *UI) restartStream() tea.Cmd {
@@ -210,7 +225,6 @@ func (ui *UI) restartStream() tea.Cmd {
 	requestInstance, err := ui.requestConfig.NewInstance()
 	if err != nil {
 		return func() tea.Msg {
-			fmt.Printf("error: %+v\n", request.NewRequestInstance(requestInstance))
 			return streamui.StreamErrorMsg(err)
 		}
 	}

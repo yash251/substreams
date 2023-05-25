@@ -15,6 +15,9 @@ import (
 )
 
 func TestReader_Read(t *testing.T) {
+	absolutePathToInferredManifest, err := filepath.Abs("testdata/inferred_manifest")
+	require.NoError(t, err)
+
 	absolutePathToDep2, err := filepath.Abs("testdata/dep2.yaml")
 	require.NoError(t, err)
 
@@ -30,15 +33,19 @@ func TestReader_Read(t *testing.T) {
 	defer remoteServer.Close()
 
 	type args struct {
-		env            map[string]string
-		validateBinary bool
+		// If nil, the input is taken from the name
+		input            *string
+		env              map[string]string
+		validateBinary   bool
+		workingDirectory string
 	}
 
 	tests := []struct {
-		name      string
-		args      args
-		want      *pbsubstreams.Package
-		assertion require.ErrorAssertionFunc
+		name          string
+		args          args
+		want          *pbsubstreams.Package
+		assertionNew  require.ErrorAssertionFunc
+		assertionRead require.ErrorAssertionFunc
 	}{
 		{
 			"bare_minimum.yaml",
@@ -54,6 +61,44 @@ func TestReader_Read(t *testing.T) {
 					},
 				},
 			},
+			require.NoError,
+			require.NoError,
+		},
+		{
+			"from_folder",
+			args{},
+			&pbsubstreams.Package{
+				Version:    1,
+				ProtoFiles: readSystemProtoDescriptors(t),
+				Modules:    &pbsubstreams.Modules{},
+				PackageMeta: []*pbsubstreams.PackageMetadata{
+					{
+						Name:    "test",
+						Version: "v0.0.0",
+					},
+				},
+			},
+			require.NoError,
+			require.NoError,
+		},
+		{
+			"empty_input",
+			args{
+				input:            new(string),
+				workingDirectory: absolutePathToInferredManifest,
+			},
+			&pbsubstreams.Package{
+				Version:    1,
+				ProtoFiles: readSystemProtoDescriptors(t),
+				Modules:    &pbsubstreams.Modules{},
+				PackageMeta: []*pbsubstreams.PackageMetadata{
+					{
+						Name:    "test",
+						Version: "v0.0.0",
+					},
+				},
+			},
+			require.NoError,
 			require.NoError,
 		},
 		{
@@ -74,6 +119,7 @@ func TestReader_Read(t *testing.T) {
 					},
 				},
 			},
+			require.NoError,
 			require.NoError,
 		},
 		{
@@ -99,6 +145,7 @@ func TestReader_Read(t *testing.T) {
 				},
 			},
 			require.NoError,
+			require.NoError,
 		},
 		{
 			"imports_http_url.yaml",
@@ -122,6 +169,7 @@ func TestReader_Read(t *testing.T) {
 					},
 				},
 			},
+			require.NoError,
 			require.NoError,
 		},
 		{
@@ -152,6 +200,7 @@ func TestReader_Read(t *testing.T) {
 				},
 			},
 			require.NoError,
+			require.NoError,
 		},
 		{
 			"protobuf_files_relative_path.yaml",
@@ -170,6 +219,7 @@ func TestReader_Read(t *testing.T) {
 				},
 			},
 			require.NoError,
+			require.NoError,
 		},
 		{
 			"protobuf_importPaths_relative_path.yaml",
@@ -187,6 +237,7 @@ func TestReader_Read(t *testing.T) {
 					},
 				},
 			},
+			require.NoError,
 			require.NoError,
 		},
 		{
@@ -212,25 +263,25 @@ func TestReader_Read(t *testing.T) {
 				},
 			},
 			require.NoError,
+			require.NoError,
 		},
 		{
 			"invalid_map_module.yaml",
 			args{},
 			nil,
+			require.NoError,
 			require.Error,
 		},
 		{
 			"invalid_unknown_field.yaml",
 			args{},
 			nil,
+			require.NoError,
 			require.Error,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			manifestPath, err := filepath.Abs(filepath.Join("testdata", tt.name))
-			require.NoError(t, err)
-
 			for envKey, envValue := range tt.args.env {
 				t.Setenv(envKey, envValue)
 			}
@@ -240,9 +291,25 @@ func TestReader_Read(t *testing.T) {
 				readerOptions = append(readerOptions, SkipSourceCodeReader())
 			}
 
-			r := NewReader(manifestPath, readerOptions...)
-			got, err := r.Read()
-			tt.assertion(t, err)
+			var manifestPath string
+			if tt.args.input != nil {
+				manifestPath = *tt.args.input
+			} else {
+				var err error
+				manifestPath, err = filepath.Abs(filepath.Join("testdata", tt.name))
+				require.NoError(t, err)
+			}
+
+			workingDir := ""
+			if tt.args.workingDirectory != "" {
+				workingDir = tt.args.workingDirectory
+			}
+
+			r, err := newReader(manifestPath, workingDir, readerOptions...)
+			tt.assertionNew(t, err)
+
+			got, err := r.read(workingDir)
+			tt.assertionRead(t, err)
 			assertProtoEqual(t, tt.want, got)
 		})
 	}

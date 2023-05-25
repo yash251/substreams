@@ -12,6 +12,9 @@ type Bars struct {
 	common.Common
 	targetBlock uint64
 
+	TotalBlocks uint64
+	BarCount    uint64
+
 	labelWidth int
 	Mode       int
 	bars       []*Bar
@@ -43,13 +46,19 @@ func (b *Bars) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			bar.Update(mod.Type)
 		}
 	}
+	var totalBlocks uint64
+	for _, bar := range b.bars {
+		totalBlocks += bar.totalBlocks
+	}
+	b.TotalBlocks = totalBlocks
+	b.BarCount = uint64(len(b.bars))
 	return b, nil
 }
 
 func (b *Bars) SetSize(w, h int) {
 	b.Common.SetSize(w, h)
 	for _, bar := range b.bars {
-		bar.SetSize(w-b.labelWidth, 1)
+		bar.SetSize(w-b.labelWidth-1 /* padding here and there */, 1)
 	}
 }
 
@@ -57,7 +66,11 @@ func (b *Bars) View() string {
 	var labels []string
 	var bars []string
 	for _, bar := range b.bars {
-		labels = append(labels, lipgloss.NewStyle().Margin(0, 2).Render(bar.name))
+		barName := bar.name
+		if len(barName) > b.labelWidth-4 {
+			barName = barName[:b.labelWidth-4]
+		}
+		labels = append(labels, lipgloss.NewStyle().Margin(0, 1).Render(barName))
 		switch b.Mode {
 		case 0:
 			bars = append(bars, bar.View())

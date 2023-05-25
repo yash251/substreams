@@ -4,6 +4,90 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+* BREAKING: The module hashing algorithm wrongfully changed the hash for imported modules, which made it impossible to leverage caches when composing new substreams off of imported ones.
+  * Operationally, if you want to keep your caches, you will need to copy or move the old hashes to the new ones.
+    * You can obtain the prior hashes for a given spkg with: `substreams info my.spkg`, using a prior release of the `substreams`
+    * With a more recent `substreams` release, you can obtain the new hashes with the same command.
+    * You can then `cp` or `mv` the caches for each module hash.
+  * You can also ignore this change. This will simply invalidate your cache.
+
+* Jobs that fail deterministically (during WASM execution) on tier2 will fail faster, without retries from tier1.
+
+### Added
+
+* Added Tracing capabilities, using https://github.com/streamingfast/sf-tracing . See repository for details on how to enable.
+
+## [v1.1.3](https://github.com/streamingfast/substreams/releases/tag/v1.1.3)
+
+### Highlights
+
+This release contains fixes for race conditions that happen when multiple request tries to sync the same range using the same `.spkg`. Those fixes will avoid weird state error at the cost of duplicating work in some circumstances. A future refactor of the Substreams engine scheduler will come later to fix those inefficiencies.
+
+Operators, please read the operators section for upgrade instructions.
+
+#### Operators
+
+> **Note** This upgrade procedure is applies if your Substreams deployment topology includes both `tier1` and `tier2` processes. If you have defined somewhere the config value `substreams-tier2: true`, then this applies to you, otherwise, if you can ignore the upgrade procedure.
+
+This release includes a small change in the internal RPC layer between `tier1` processes and `tier2` processes. This change requires an ordered upgrade of the processes to avoid errors.
+
+The components should be deployed in this order:
+1. Deploy and roll out `tier1` processes first
+2. Deploy and roll out `tier2` processes in second
+
+If you upgrade in the wrong order or if somehow `tier2` processes start using the new protocol without `tier1` being aware, user will end up with backend error(s) saying that some partial file are not found. Those will be resolved only when `tier1` processes have been upgraded successfully.
+
+### Fixed
+
+* Fixed a race when multiple Substreams request execute on the same `.spkg`, it was causing races between the two executors.
+* GUI: fixed an issue which would slow down message consumption when progress page was shown in ascii art "bars" mode
+* GUI: fixed the display of blocks per second to represent actual blocks, not messages count
+
+### Changed
+
+* [`binary`]: Commands `substreams <...>` that fails now correctly return an exit code 1.
+
+* [`library`]: The `manifest.NewReader` signature changed and will now return a `*Reader, error` (previously `*Reader`).
+
+### Added
+
+* [`library`]: The `manifest.Reader` gained the ability to infer the path if provided with input `""` based on the current working directory.
+
+* [`library`]: The `manifest.Reader` gained the ability to infer the path if provided with input that is a directory.
+
+## [v1.1.2](https://github.com/streamingfast/substreams/releases/tag/v1.1.2)
+
+### Highlights
+
+This release contains bug fixes and speed/scaling improvements around the Substreams engine. It also contains few small enhancements for `substreams gui`.
+
+This release contains an important bug that could have generated corrupted `store` state files. This is important for developers and operators.
+
+#### Sinkers & Developers
+
+The `store` state files will be fully deleted on the Substreams server to start fresh again. The impact for you as a developer is that Substreams that were fully synced will now need to re-generate from initial block the store's state. So you might see long delays before getting a new block data while the Substreams engine is re-computing the `store` states from scratch.
+
+### Operators
+
+You need to clear the state store and remove all the files that are stored under `substreams-state-store-url` flag. You can also make it point to a brand new folder and delete the old one after the rollout.
+
+### Fixed
+
+* Fix a bug where not all extra modules would be sent back on debug mode
+* Fixed a bug in tier1 that could result in corrupted state files when getting close to chain HEAD
+* Fixed some performance and stalling issues when using GCS for blocks
+* Fixed storage logs not being shown properly
+* GUI: Fixed panic race condition
+* GUI: Cosmetic changes
+
+### Added
+
+* GUI: Added traceID
+
 ## [v1.1.1](https://github.com/streamingfast/substreams/releases/tag/v1.1.1)
 
 ### Highlights

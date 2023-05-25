@@ -2,12 +2,13 @@ package explorer
 
 import (
 	"fmt"
+	"strings"
+	"sync"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/streamingfast/substreams/manifest"
 	"github.com/streamingfast/substreams/tui2/common"
-	"strings"
-	"sync"
 )
 
 type NavigatorMemory struct {
@@ -73,13 +74,14 @@ type Navigator struct {
 	mutex             sync.RWMutex
 
 	longestModuleName int
+	FrameHeight       int
 }
 
 type Option func(*Navigator)
 
 func WithManifestFilePath(path string) Option {
 	return func(n *Navigator) {
-		n.graph = manifest.MustNewModuleGraph(manifest.NewReader(path).MustRead().Modules.Modules)
+		n.graph = manifest.MustNewModuleGraph(manifest.MustNewReader(path).MustRead().Modules.Modules)
 	}
 }
 
@@ -342,6 +344,8 @@ func (n *Navigator) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			n.CurrentGrandChildPreviewColumn = []string{}
 			n.CurrentGrandParentPreviewColumn = []string{}
 			n.CurrentPreviewColumn = []string{}
+
+			cmds = append(cmds, common.EmitModuleSelectedMsg(n.SelectedModule))
 		}
 	}
 
@@ -350,6 +354,26 @@ func (n *Navigator) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (n *Navigator) dispatchModuleSelected() tea.Msg {
 	return common.EmitModuleSelectedMsg(n.HighlightedModule)
+}
+
+func tallestCol(arrs ...[]string) int {
+	max := 0
+
+	for _, arr := range arrs {
+		if len(arr) > max {
+			max = len(arr)
+		}
+	}
+
+	return max
+}
+
+func (n *Navigator) getRemainingLines(occupiedHeight int) string {
+	str := ""
+	for i := 0; i < n.FrameHeight-occupiedHeight-1; i++ {
+		str += "\n"
+	}
+	return str
 }
 
 func (n *Navigator) View() string {
@@ -569,13 +593,19 @@ func (n *Navigator) View() string {
 		rightPreviewSide = lipgloss.JoinVertical(lipgloss.Left, append([]string{spaces}, grandchildren...)...)
 	}
 
-	res := lipgloss.JoinHorizontal(lipgloss.Center,
+	verticalSpace := tallestCol(parents, children, grandparents, grandchildren, preview)
+	content := lipgloss.JoinHorizontal(lipgloss.Center,
 		leftPreviewSide,
 		leftSide,
 		middle,
 		rightSide,
 		rightPreviewSide,
 	)
+	res := lipgloss.JoinVertical(0,
+		content,
+		fmt.Sprintf("%s", n.getRemainingLines(verticalSpace)),
+	)
+
 	return res
 }
 
