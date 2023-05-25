@@ -15,14 +15,10 @@ type StoreStorageState struct {
 	ModuleName         string
 	ModuleInitialBlock uint64
 
-	InitialCompleteFile *store.FileInfo // Points to a complete .kv file, to initialize the store upon getting started.
-	MissingCompletedRanges MissingFullStoreFiles // 0-10.kv, 0-30.kv -> missing 0-20.kv
+	InitialCompleteFile *store.FileInfo
+	MissingCompleteFile block.Ranges // TODO: change to FileInfo
 	PartialsMissing     block.Ranges
 }
-
-type FullStoreFile = block.Range
-type MissingFullStoreFiles = block.Ranges
-type PartialStoreFiles = block.Ranges
 
 func NewStoreStorageState(modName string, storeSaveInterval, modInitBlock, workUpToBlockNum uint64, snapshots *storeSnapshots) (out *StoreStorageState, err error) {
 	out = &StoreStorageState{ModuleName: modName, ModuleInitialBlock: modInitBlock}
@@ -36,7 +32,7 @@ func NewStoreStorageState(modName string, storeSaveInterval, modInitBlock, workU
 	}
 
 	if completeSnapshot != nil {
-		out.MissingCompletedRanges = computeMissingRanges(storeSaveInterval, modInitBlock, completeSnapshot, snapshots)
+		out.MissingCompleteFile = computeMissingRanges(storeSaveInterval, modInitBlock, completeSnapshot.Range, snapshots)
 	}
 
 	parallelProcessStartBlock := modInitBlock
@@ -84,19 +80,19 @@ func (w *StoreStorageState) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 	if w.InitialCompleteFile != nil {
 		bRange = w.InitialCompleteFile.Range.String()
 	}
-	enc.AddString("intial_range", bRange)
+	enc.AddString("initial_range", bRange)
 	enc.AddInt("partial_missing", len(w.PartialsMissing))
 	return nil
 }
 
-func computeMissingRanges(storeSaveInterval uint64, modInitBlock uint64, completeSnapshot *block.Range, snapshots *storeSnapshots) MissingFullStoreFiles {
+func computeMissingRanges(storeSaveInterval uint64, modInitBlock uint64, completeSnapshot *block.Range, snapshots *storeSnapshots) block.Ranges {
 	var missingFullStoreFiles block.Ranges
 
 	totalNumberOfCompletedRanges := completeSnapshot.ExclusiveEndBlock / storeSaveInterval
-	if totalNumberOfCompletedRanges != uint64(snapshots.Completes.Len()) {
+	if totalNumberOfCompletedRanges != uint64(snapshots.Completes.Ranges().Len()) {
 		missingRangesCounter := completeSnapshot.ExclusiveEndBlock / storeSaveInterval
-		for i := snapshots.Completes.Len() - 1; i >= 0; i-- {
-			completedEndBlock := snapshots.Completes[i].ExclusiveEndBlock / storeSaveInterval
+		for i := snapshots.Completes.Ranges().Len() - 1; i >= 0; i-- {
+			completedEndBlock := snapshots.Completes[i].Range.ExclusiveEndBlock / storeSaveInterval
 			if completedEndBlock == totalNumberOfCompletedRanges {
 				totalNumberOfCompletedRanges--
 				missingRangesCounter--

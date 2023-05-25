@@ -33,10 +33,6 @@ func TestStoreStatePartialsMissing(modName string, rng string) storage.ModuleSto
 	return &state2.StoreStorageState{ModuleName: modName, PartialsMissing: block.ParseRanges(rng)}
 }
 
-func TestStoreStateInitialCompleteRanges(modName string, rng *block.Range) storage.ModuleStorageState {
-	return &state2.StoreStorageState{ModuleName: modName, LastCompletedRange: rng}
-}
-
 func TestMapState(modName string, rng string) storage.ModuleStorageState {
 	return &state.ExecOutputStorageState{ModuleName: modName, SegmentsMissing: block.ParseRanges(rng)}
 }

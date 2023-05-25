@@ -13,6 +13,10 @@ var stateFileRegex = regexp.MustCompile(`([\d]+)-([\d]+)(?:\.([^\.]+))?\.(kv|par
 
 type FileInfos []*FileInfo
 
+func NewFileInfos(fileInfos ...*FileInfo) FileInfos {
+	return fileInfos
+}
+
 func (f FileInfos) Ranges() (out block.Ranges) {
 	if len(f) == 0 {
 		return nil

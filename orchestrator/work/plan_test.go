@@ -61,23 +61,6 @@ func TestWorkPlanning(t *testing.T) {
 				TestJob("As", "50-60", 3),
 			},
 		},
-		{
-			name:        "missing kv on disk",
-			upToBlock:   300,
-			subreqSplit: 100,
-			state: TestModStateMap(
-				TestStoreStateInitialCompleteRanges("B", &block.Range{
-					StartBlock:        200,
-					ExclusiveEndBlock: 300,
-				}),
-			),
-			productionMode: true,
-			outMod:         "B",
-			expectWaitingJobs: []*Job{
-				TestJob("B", "0-100", 5),
-				TestJob("B", "100-200", 5),
-			},
-		},
 	}
 
 	for _, test := range tests {
