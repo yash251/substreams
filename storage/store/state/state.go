@@ -89,7 +89,7 @@ func (w *StoreStorageState) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 	return nil
 }
 
-// / ComputeMissingRanges will check the complete block ranges on disk and find the missing full kvs
+// ComputeMissingRanges will check the complete block ranges on disk and find the missing full kvs
 func computeMissingRanges(storeSaveInterval uint64, modInitBlock uint64, completeSnapshot *block.Range, snapshots *storeSnapshots) block.Ranges {
 	var missingFullStoreBlockRanges block.Ranges
 
@@ -97,19 +97,20 @@ func computeMissingRanges(storeSaveInterval uint64, modInitBlock uint64, complet
 
 	if numberOfCompletedRanges != uint64(snapshots.Completes.Ranges().Len()) {
 		missingRangesCounter := completeSnapshot.ExclusiveEndBlock / storeSaveInterval
+		numberOfCompletedRangesFiles := snapshots.Completes.Ranges().Len()
 
-		for i := snapshots.Completes.Ranges().Len() - 1; i >= 0; i-- {
-			completedEndBlock := snapshots.Completes[i].Range.ExclusiveEndBlock / storeSaveInterval
+		for i := numberOfCompletedRangesFiles - 1; i >= 0; i-- {
+			lastCompletedFileEndRange := snapshots.Completes[i].Range.ExclusiveEndBlock / storeSaveInterval
 
-			if completedEndBlock == numberOfCompletedRanges {
+			if lastCompletedFileEndRange == numberOfCompletedRanges {
 				numberOfCompletedRanges--
 				missingRangesCounter--
 			} else {
-				for j := missingRangesCounter; j >= completedEndBlock; j-- {
+				for j := missingRangesCounter; j >= lastCompletedFileEndRange; j-- {
 					// [0-10, 0-20, 0-30, 0-60]
-					// completedEndBlock 30 -> totalNumberOfCompletedRanges -> 50
+					// lastCompletedFileEndRange 30 -> totalNumberOfCompletedRanges -> 50
 					// => add 50, 40 BUT not 30 as it's there
-					if missingRangesCounter != completedEndBlock {
+					if missingRangesCounter != lastCompletedFileEndRange {
 						missingFullStoreBlockRanges = append(missingFullStoreBlockRanges, block.NewRange(modInitBlock, numberOfCompletedRanges*storeSaveInterval))
 					}
 					numberOfCompletedRanges--
