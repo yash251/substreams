@@ -99,6 +99,7 @@ func computeMissingRanges(storeSaveInterval uint64, modInitBlock uint64, complet
 		missingRangesCounter := completeSnapshot.ExclusiveEndBlock / storeSaveInterval
 		numberOfCompletedRangesFiles := snapshots.Completes.Ranges().Len()
 
+		// Outer loop to loop over all the completed files
 		for i := numberOfCompletedRangesFiles - 1; i >= 0; i-- {
 			lastCompletedFileEndRange := snapshots.Completes[i].Range.ExclusiveEndBlock / storeSaveInterval
 
@@ -106,6 +107,7 @@ func computeMissingRanges(storeSaveInterval uint64, modInitBlock uint64, complet
 				numberOfCompletedRanges--
 				missingRangesCounter--
 			} else {
+				// Inner loop to loop over the difference between the current lastCompletedFile until the next full completed file
 				for j := missingRangesCounter; j >= lastCompletedFileEndRange; j-- {
 					// [0-10, 0-20, 0-30, 0-60]
 					// lastCompletedFileEndRange 30 -> totalNumberOfCompletedRanges -> 50
