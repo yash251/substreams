@@ -45,6 +45,10 @@ func (r Ranges) Contains(input *Range) bool {
 	return false
 }
 
+func (r Ranges) Add(input Ranges) Ranges {
+	return append(r, input...)
+}
+
 func (r Ranges) Merged() (out Ranges) {
 	for i := 0; i < len(r); i++ {
 		curRange := r[i]

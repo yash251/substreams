@@ -15,9 +15,9 @@ type StoreStorageState struct {
 	ModuleName         string
 	ModuleInitialBlock uint64
 
-	InitialCompleteFile *store.FileInfo
-	MissingCompleteFile block.Ranges // TODO: change to FileInfo
-	PartialsMissing     block.Ranges
+	InitialCompleteFile        *store.FileInfo
+	MissingCompleteBlockRanges block.Ranges
+	PartialsMissing            block.Ranges
 }
 
 func NewStoreStorageState(modName string, storeSaveInterval, modInitBlock, workUpToBlockNum uint64, snapshots *storeSnapshots) (out *StoreStorageState, err error) {
@@ -32,7 +32,7 @@ func NewStoreStorageState(modName string, storeSaveInterval, modInitBlock, workU
 	}
 
 	if completeSnapshot != nil {
-		out.MissingCompleteFile = computeMissingRanges(storeSaveInterval, modInitBlock, completeSnapshot.Range, snapshots)
+		out.MissingCompleteBlockRanges = computeMissingRanges(storeSaveInterval, modInitBlock, completeSnapshot.Range, snapshots)
 	}
 
 	parallelProcessStartBlock := modInitBlock
@@ -57,7 +57,10 @@ func NewStoreStorageState(modName string, storeSaveInterval, modInitBlock, workU
 func (s *StoreStorageState) Name() string { return s.ModuleName }
 
 func (s *StoreStorageState) BatchRequests(subreqSplitSize uint64) block.Ranges {
-	return s.PartialsMissing.MergedBuckets(subreqSplitSize)
+	// todo: add the missing full kv ranges here
+	partialsMissingRequests := s.PartialsMissing.MergedBuckets(subreqSplitSize)
+	missingCompleteBlockRangesRequests := s.MissingCompleteBlockRanges.MergedBuckets(subreqSplitSize)
+	return partialsMissingRequests.Add(missingCompleteBlockRangesRequests)
 }
 
 func (s *StoreStorageState) InitialProgressRanges() (out block.Ranges) {
@@ -82,31 +85,39 @@ func (w *StoreStorageState) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 	}
 	enc.AddString("initial_range", bRange)
 	enc.AddInt("partial_missing", len(w.PartialsMissing))
+	enc.AddString("missing_block_ranges", w.MissingCompleteBlockRanges.String())
 	return nil
 }
 
+// / ComputeMissingRanges will check the complete block ranges on disk and find the missing full kvs
 func computeMissingRanges(storeSaveInterval uint64, modInitBlock uint64, completeSnapshot *block.Range, snapshots *storeSnapshots) block.Ranges {
-	var missingFullStoreFiles block.Ranges
+	var missingFullStoreBlockRanges block.Ranges
 
-	totalNumberOfCompletedRanges := completeSnapshot.ExclusiveEndBlock / storeSaveInterval
-	if totalNumberOfCompletedRanges != uint64(snapshots.Completes.Ranges().Len()) {
+	numberOfCompletedRanges := completeSnapshot.ExclusiveEndBlock / storeSaveInterval
+
+	if numberOfCompletedRanges != uint64(snapshots.Completes.Ranges().Len()) {
 		missingRangesCounter := completeSnapshot.ExclusiveEndBlock / storeSaveInterval
+
 		for i := snapshots.Completes.Ranges().Len() - 1; i >= 0; i-- {
 			completedEndBlock := snapshots.Completes[i].Range.ExclusiveEndBlock / storeSaveInterval
-			if completedEndBlock == totalNumberOfCompletedRanges {
-				totalNumberOfCompletedRanges--
+
+			if completedEndBlock == numberOfCompletedRanges {
+				numberOfCompletedRanges--
 				missingRangesCounter--
 			} else {
 				for j := missingRangesCounter; j >= completedEndBlock; j-- {
+					// [0-10, 0-20, 0-30, 0-60]
+					// completedEndBlock 30 -> totalNumberOfCompletedRanges -> 50
+					// => add 50, 40 BUT not 30 as it's there
 					if missingRangesCounter != completedEndBlock {
-						missingFullStoreFiles = append(missingFullStoreFiles, block.NewRange(modInitBlock, totalNumberOfCompletedRanges*storeSaveInterval))
+						missingFullStoreBlockRanges = append(missingFullStoreBlockRanges, block.NewRange(modInitBlock, numberOfCompletedRanges*storeSaveInterval))
 					}
-					totalNumberOfCompletedRanges--
+					numberOfCompletedRanges--
 					missingRangesCounter--
 				}
 			}
 		}
 	}
 
-	return missingFullStoreFiles
+	return missingFullStoreBlockRanges
 }
