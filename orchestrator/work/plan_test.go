@@ -61,6 +61,245 @@ func TestWorkPlanning(t *testing.T) {
 				TestJob("As", "50-60", 3),
 			},
 		},
+		{
+			name:        "missing 1 full kv",
+			upToBlock:   500,
+			subreqSplit: 100,
+			state: TestModStateMap(
+				TestStoreStateCompleteRangesAndMissingRanges(
+					"As",
+					store.NewCompleteFileInfo(0, 500),
+					"0-200", // missing ranges
+				),
+			),
+			productionMode: false,
+			outMod:         "As",
+			expectReadyJobs: []*Job{
+				TestJob("As", "0-200", 6),
+			},
+		},
+		{
+			name:        "missing 1 full kv with single partial",
+			upToBlock:   500,
+			subreqSplit: 100,
+			state: TestModStateMap(
+				TestStoreStateCompleteRangesMissingRangesPartialsMissing(
+					"As",
+					store.NewCompleteFileInfo(0, 500),
+					"0-200", // missing ranges
+					"200-250,250-300",
+				),
+			),
+			productionMode: false,
+			outMod:         "As",
+			expectReadyJobs: []*Job{
+				TestJob("As", "0-200", 6),
+				TestJob("As", "200-300", 4),
+			},
+		},
+		{
+			name:        "missing 1 full kv with double partial",
+			upToBlock:   700,
+			subreqSplit: 100,
+			state: TestModStateMap(
+				TestStoreStateCompleteRangesMissingRangesPartialsMissing(
+					"As",
+					store.NewCompleteFileInfo(0, 700),
+					"0-200", // missing ranges
+					"200-250,250-300,400-450,450-500",
+				),
+			),
+			productionMode: false,
+			outMod:         "As",
+			expectReadyJobs: []*Job{
+				TestJob("As", "0-200", 8),
+				TestJob("As", "200-300", 6),
+				TestJob("As", "400-500", 4),
+			},
+		},
+		{
+			name:        "missing 2 full kv",
+			upToBlock:   500,
+			subreqSplit: 100,
+			state: TestModStateMap(
+				TestStoreStateCompleteRangesAndMissingRanges(
+					"As",
+					store.NewCompleteFileInfo(0, 500),
+					"0-200,0-300", // missing ranges
+				),
+			),
+			productionMode: false,
+			outMod:         "As",
+			expectReadyJobs: []*Job{
+				TestJob("As", "0-200", 6),
+				TestJob("As", "0-300", 6),
+			},
+		},
+		{
+			name:        "missing 2 full kv with single partial",
+			upToBlock:   500,
+			subreqSplit: 100,
+			state: TestModStateMap(
+				TestStoreStateCompleteRangesMissingRangesPartialsMissing(
+					"As",
+					store.NewCompleteFileInfo(0, 500),
+					"0-200,0-300", // missing ranges
+					"200-250,250-300",
+				),
+			),
+			productionMode: false,
+			outMod:         "As",
+			expectReadyJobs: []*Job{
+				TestJob("As", "0-200", 6),
+				TestJob("As", "0-300", 6),
+				TestJob("As", "200-300", 4),
+			},
+		},
+		{
+			name:        "missing 2 full kv with double partial",
+			upToBlock:   700,
+			subreqSplit: 100,
+			state: TestModStateMap(
+				TestStoreStateCompleteRangesMissingRangesPartialsMissing(
+					"As",
+					store.NewCompleteFileInfo(0, 700),
+					"0-200,0-300", // missing ranges
+					"200-250,250-300,400-450,450-500",
+				),
+			),
+			productionMode: false,
+			outMod:         "As",
+			expectReadyJobs: []*Job{
+				TestJob("As", "0-200", 8),
+				TestJob("As", "0-300", 8),
+				TestJob("As", "200-300", 6),
+				TestJob("As", "400-500", 4),
+			},
+		},
+		{
+			name:        "missing 2 full kv at different intervals",
+			upToBlock:   500,
+			subreqSplit: 100,
+			state: TestModStateMap(
+				TestStoreStateCompleteRangesAndMissingRanges(
+					"As",
+					store.NewCompleteFileInfo(0, 500),
+					"0-200,0-400", // missing ranges
+				),
+			),
+			productionMode: false,
+			outMod:         "As",
+			expectReadyJobs: []*Job{
+				TestJob("As", "0-200", 6),
+				TestJob("As", "0-400", 6),
+			},
+		},
+		{
+			name:        "missing 2 full kv at different intervals with single partial",
+			upToBlock:   500,
+			subreqSplit: 100,
+			state: TestModStateMap(
+				TestStoreStateCompleteRangesMissingRangesPartialsMissing(
+					"As",
+					store.NewCompleteFileInfo(0, 500),
+					"0-200,0-400", // missing ranges
+					"200-250,250-300",
+				),
+			),
+			productionMode: false,
+			outMod:         "As",
+			expectReadyJobs: []*Job{
+				TestJob("As", "0-200", 6),
+				TestJob("As", "0-400", 6),
+				TestJob("As", "200-300", 4),
+			},
+		},
+		{
+			name:        "missing 2 full kv at different intervals with double partial",
+			upToBlock:   700,
+			subreqSplit: 100,
+			state: TestModStateMap(
+				TestStoreStateCompleteRangesMissingRangesPartialsMissing(
+					"As",
+					store.NewCompleteFileInfo(0, 700),
+					"0-200,0-400", // missing ranges
+					"200-250,250-300,500-550,550-600",
+				),
+			),
+			productionMode: false,
+			outMod:         "As",
+			expectReadyJobs: []*Job{
+				TestJob("As", "0-200", 8),
+				TestJob("As", "0-400", 8),
+				TestJob("As", "200-300", 6),
+				TestJob("As", "500-600", 3),
+			},
+		},
+		{
+			name:        "missing multiple full kvs at different intervals",
+			upToBlock:   1000,
+			subreqSplit: 100,
+			state: TestModStateMap(
+				TestStoreStateCompleteRangesAndMissingRanges(
+					"As",
+					store.NewCompleteFileInfo(0, 900),
+					"0-200,0-300,0-800,0-1000", // missing ranges
+				),
+			),
+			productionMode: false,
+			outMod:         "As",
+			expectReadyJobs: []*Job{
+				TestJob("As", "0-200", 11),
+				TestJob("As", "0-300", 11),
+				TestJob("As", "0-800", 11),
+				TestJob("As", "0-1000", 11),
+			},
+		},
+		{
+			name:        "missing multiple full kvs at different intervals with single partial",
+			upToBlock:   1000,
+			subreqSplit: 100,
+			state: TestModStateMap(
+				TestStoreStateCompleteRangesMissingRangesPartialsMissing(
+					"As",
+					store.NewCompleteFileInfo(0, 900),
+					"0-200,0-300,0-800,0-1000", // missing ranges
+					"500-550,550-600",
+				),
+			),
+			productionMode: false,
+			outMod:         "As",
+			expectReadyJobs: []*Job{
+				TestJob("As", "0-200", 11),
+				TestJob("As", "0-300", 11),
+				TestJob("As", "0-800", 11),
+				TestJob("As", "0-1000", 11),
+				TestJob("As", "500-600", 6),
+			},
+		},
+		{
+			name:        "missing 2 full kv at different intervals with double partial",
+			upToBlock:   1000,
+			subreqSplit: 100,
+			state: TestModStateMap(
+				TestStoreStateCompleteRangesMissingRangesPartialsMissing(
+					"As",
+					store.NewCompleteFileInfo(0, 900),
+					"0-200,0-300,0-800,0-1000", // missing ranges
+					"100-150,150-200,500-550,550-600",
+				),
+			),
+			productionMode: false,
+			outMod:         "As",
+			expectReadyJobs: []*Job{
+				TestJob("As", "0-200", 11),
+				TestJob("As", "0-300", 11),
+				TestJob("As", "0-800", 11),
+				TestJob("As", "0-1000", 11),
+				TestJob("As", "100-200", 10),
+				TestJob("As", "500-600", 6),
+			},
+		},
 	}
 
 	for _, test := range tests {

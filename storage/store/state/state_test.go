@@ -120,6 +120,160 @@ func TestWorkUnits_init(t *testing.T) {
 	}
 }
 
+func Test_computeMissingRanges(t *testing.T) {
+	tests := []struct {
+		name              string
+		storeSaveInterval uint64
+		modInitBlock      uint64
+		completeSnapshot  *block.Range
+		snapshots         *storeSnapshots
+
+		expectedMissingFullStoreFiles block.Ranges
+	}{
+		{
+			name:              "no holes",
+			storeSaveInterval: 100,
+			modInitBlock:      0,
+			completeSnapshot: &block.Range{
+				StartBlock:        0,
+				ExclusiveEndBlock: 2000,
+			},
+			snapshots: &storeSnapshots{
+				Completes: store.NewFileInfos(
+					store.NewCompleteFileInfo(0, 100),
+					store.NewCompleteFileInfo(0, 200),
+					store.NewCompleteFileInfo(0, 300),
+					store.NewCompleteFileInfo(0, 400),
+					store.NewCompleteFileInfo(0, 500),
+					store.NewCompleteFileInfo(0, 600),
+					store.NewCompleteFileInfo(0, 700),
+					store.NewCompleteFileInfo(0, 800),
+					store.NewCompleteFileInfo(0, 900),
+					store.NewCompleteFileInfo(0, 1000),
+					store.NewCompleteFileInfo(0, 1100),
+					store.NewCompleteFileInfo(0, 1200),
+					store.NewCompleteFileInfo(0, 1300),
+					store.NewCompleteFileInfo(0, 1400),
+					store.NewCompleteFileInfo(0, 1500),
+					store.NewCompleteFileInfo(0, 1600),
+					store.NewCompleteFileInfo(0, 1700),
+					store.NewCompleteFileInfo(0, 1800),
+					store.NewCompleteFileInfo(0, 1900),
+					store.NewCompleteFileInfo(0, 2000),
+				),
+				Partials: nil,
+			},
+			expectedMissingFullStoreFiles: nil,
+		},
+		{
+			name:              "missing 1 full store",
+			storeSaveInterval: 100,
+			modInitBlock:      0,
+			completeSnapshot: &block.Range{
+				StartBlock:        0,
+				ExclusiveEndBlock: 500,
+			},
+			snapshots: &storeSnapshots{
+				Completes: store.NewFileInfos(
+					store.NewCompleteFileInfo(0, 100),
+					store.NewCompleteFileInfo(0, 200),
+					store.NewCompleteFileInfo(0, 300),
+					store.NewCompleteFileInfo(0, 500),
+				),
+				Partials: nil,
+			},
+			expectedMissingFullStoreFiles: block.ParseRanges("0-400"),
+		},
+		{
+			name:              "missing 2 full stores",
+			storeSaveInterval: 100,
+			modInitBlock:      0,
+			completeSnapshot: &block.Range{
+				StartBlock:        0,
+				ExclusiveEndBlock: 500,
+			},
+			snapshots: &storeSnapshots{
+				Completes: store.NewFileInfos(
+					store.NewCompleteFileInfo(0, 100),
+					store.NewCompleteFileInfo(0, 200),
+					store.NewCompleteFileInfo(0, 500),
+				),
+				Partials: nil,
+			},
+			expectedMissingFullStoreFiles: block.ParseRanges("0-400,0-300"),
+		},
+		{
+			name:              "missing 2 full stores at different intervals",
+			storeSaveInterval: 100,
+			modInitBlock:      0,
+			completeSnapshot: &block.Range{
+				StartBlock:        0,
+				ExclusiveEndBlock: 500,
+			},
+			snapshots: &storeSnapshots{
+				Completes: store.NewFileInfos(
+					store.NewCompleteFileInfo(0, 100),
+					store.NewCompleteFileInfo(0, 300),
+					store.NewCompleteFileInfo(0, 500),
+				),
+				Partials: nil,
+			},
+			expectedMissingFullStoreFiles: block.ParseRanges("0-400,0-200"),
+		},
+		{
+			name:              "missing multiple full stores at different intervals",
+			storeSaveInterval: 100,
+			modInitBlock:      0,
+			completeSnapshot: &block.Range{
+				StartBlock:        0,
+				ExclusiveEndBlock: 1000,
+			},
+			snapshots: &storeSnapshots{
+				Completes: store.NewFileInfos(
+					store.NewCompleteFileInfo(0, 100),
+					store.NewCompleteFileInfo(0, 300),
+					store.NewCompleteFileInfo(0, 500),
+					store.NewCompleteFileInfo(0, 700),
+					store.NewCompleteFileInfo(0, 900),
+				),
+				Partials: nil,
+			},
+			expectedMissingFullStoreFiles: block.ParseRanges("0-1000,0-800,0-600,0-400,0-200"),
+		},
+		{
+			name:              "missing more full stores at different intervals",
+			storeSaveInterval: 100,
+			modInitBlock:      0,
+			completeSnapshot: &block.Range{
+				StartBlock:        0,
+				ExclusiveEndBlock: 2000,
+			},
+			snapshots: &storeSnapshots{
+				Completes: store.NewFileInfos(
+					store.NewCompleteFileInfo(0, 100),
+					store.NewCompleteFileInfo(0, 200),
+					store.NewCompleteFileInfo(0, 500),
+					store.NewCompleteFileInfo(0, 700),
+					store.NewCompleteFileInfo(0, 900),
+					store.NewCompleteFileInfo(0, 1200),
+					store.NewCompleteFileInfo(0, 1700),
+					store.NewCompleteFileInfo(0, 1800),
+					store.NewCompleteFileInfo(0, 1900),
+				),
+				Partials: nil,
+			},
+			expectedMissingFullStoreFiles: block.ParseRanges("0-2000,0-1600,0-1500,0-1400,0-1300,0-1100,0-1000,0-800,0-600,0-400,0-300"),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			missingRanges := computeMissingRanges(test.storeSaveInterval, test.modInitBlock, test.completeSnapshot, test.snapshots)
+			assert.Equal(t, test.expectedMissingFullStoreFiles, missingRanges)
+		})
+	}
+}
+
 func parseSnapshotSpec(in string) *storeSnapshots {
 	out := &storeSnapshots{}
 	if in == "" {
