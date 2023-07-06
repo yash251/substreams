@@ -44,6 +44,7 @@ type Tier1Config struct {
 	PipelineOptions []pipeline.PipelineOptioner
 
 	DebugRequestsStates bool
+	RequestStats        bool
 	Tracing             bool
 }
 
@@ -140,6 +141,7 @@ func (a *Tier1App) Run() error {
 	)
 	opts := []service.Option{
 		service.WithCacheSaveInterval(a.config.StateBundleSize),
+		service.WithRequestStats(),
 	}
 	for _, ext := range a.config.WASMExtensions {
 		opts = append(opts, service.WithWASMExtension(ext))
@@ -151,6 +153,10 @@ func (a *Tier1App) Run() error {
 
 	if a.config.Tracing {
 		opts = append(opts, service.WithModuleExecutionTracing())
+	}
+
+	if a.config.RequestStats {
+		opts = append(opts, service.WithRequestStats())
 	}
 
 	svc := service.NewTier1(
