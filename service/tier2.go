@@ -160,7 +160,7 @@ func (s *Tier2Service) processRange(ctx context.Context, request *pbssinternal.P
 		return stream.NewErrInvalidArg(err.Error())
 	}
 
-	ctx, requestStats := setupRequestStats(ctx, logger, s.runtimeConfig.WithRequestStats, true)
+	ctx, requestStats := setupRequestStats(ctx, logger, s.runtimeConfig.WithRequestStats, false)
 
 	requestDetails := pipeline.BuildRequestDetailsFromSubrequest(request)
 	ctx = reqctx.WithRequest(ctx, requestDetails)
