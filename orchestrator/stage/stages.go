@@ -196,7 +196,7 @@ func (s *Stages) CmdTryMerge(stageIdx int) loop.Cmd {
 	}
 
 	if s.getState(mergeUnit) != UnitPartialPresent {
-		return CmdMergeNotReady(mergeUnit, "next unit's partial isn't present")
+		return CmdMergeNotReady(mergeUnit, "next unit partial not present")
 	}
 
 	if !s.previousUnitComplete(mergeUnit) {
