@@ -8,7 +8,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/abourget/llerrgroup"
 	"github.com/streamingfast/dstore"
 	"github.com/streamingfast/shutter"
 	"github.com/streamingfast/substreams/block"
@@ -209,8 +208,6 @@ func TestStoreSquasher_processRange(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			eg := llerrgroup.New(250)
-
 			savedFullKCStore := false
 			loadedPartialFilename := ""
 			testStore := dstore.NewMockStore(nil)
@@ -234,8 +231,7 @@ func TestStoreSquasher_processRange(t *testing.T) {
 			ctx := reqctx.WithRequest(context.Background(), &reqctx.RequestDetails{
 				ProductionMode: false,
 			})
-			err := squasher.processSquashableFile(ctx, eg, test.squashableFile)
-			require.NoError(t, eg.Wait())
+			err := squasher.processSquashableFile(ctx, test.squashableFile)
 
 			if test.expectError != nil {
 				assert.Equal(t, test.expectError, err)

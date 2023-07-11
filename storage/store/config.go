@@ -15,7 +15,7 @@ import (
 type Config struct {
 	name       string
 	moduleHash string
-	objStore   dstore.Store
+	ObjStore   dstore.Store
 
 	moduleInitialBlock uint64
 	updatePolicy       pbsubstreams.Module_KindStore_UpdatePolicy
@@ -49,7 +49,7 @@ func NewConfig(
 		name:               name,
 		updatePolicy:       updatePolicy,
 		valueType:          valueType,
-		objStore:           subStore,
+		ObjStore:           subStore,
 		moduleInitialBlock: moduleInitialBlock,
 		moduleHash:         moduleHash,
 		appendLimit:        8_388_608,     // 8MiB = 8 * 1024 * 1024,
@@ -103,7 +103,7 @@ func (c *Config) NewPartialKV(initialBlock uint64, logger *zap.Logger) *PartialK
 func (c *Config) FileSize(ctx context.Context, fileInfo *FileInfo) (int64, error) {
 	var size int64
 	err := derr.RetryContext(ctx, 3, func(ctx context.Context) error {
-		attr, err := c.objStore.ObjectAttributes(ctx, fileInfo.Filename)
+		attr, err := c.ObjStore.ObjectAttributes(ctx, fileInfo.Filename)
 		if err != nil {
 			return fmt.Errorf("getting object attributes: %w", err)
 		}
@@ -127,7 +127,7 @@ func (c *Config) ListSnapshotFiles(ctx context.Context, below uint64) (files []*
 		// We need to clear each time we start because a previous retry could have accumulated a partial state
 		files = nil
 
-		return c.objStore.Walk(ctx, "", func(filename string) (err error) {
+		return c.ObjStore.Walk(ctx, "", func(filename string) (err error) {
 			fileInfo, ok := parseFileName(filename)
 			if !ok {
 				logger.Warn("seen snapshot file that we don't know how to parse", zap.String("filename", filename))

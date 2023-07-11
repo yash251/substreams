@@ -3,13 +3,14 @@ package service
 import (
 	"context"
 	"fmt"
+	"os"
+
 	"github.com/streamingfast/bstream/stream"
 	"github.com/streamingfast/dauth"
 	"github.com/streamingfast/dmetering"
 	"github.com/streamingfast/dstore"
 	"github.com/streamingfast/logging"
 	tracing "github.com/streamingfast/sf-tracing"
-	"os"
 
 	"github.com/streamingfast/substreams"
 	"github.com/streamingfast/substreams/metrics"

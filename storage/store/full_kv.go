@@ -38,7 +38,7 @@ func (s *FullKV) Load(ctx context.Context, file *FileInfo) error {
 	s.loadedFrom = file.Filename
 	s.logger.Debug("loading full store state from file", zap.String("fileName", file.Filename))
 
-	data, err := loadStore(ctx, s.objStore, file.Filename)
+	data, err := loadStore(ctx, s.ObjStore, file.Filename)
 	if err != nil {
 		return fmt.Errorf("load full store %s at %s: %w", s.name, file.Filename, err)
 	}
@@ -81,7 +81,7 @@ func (s *FullKV) Save(endBoundaryBlock uint64) (*FileInfo, *fileWriter, error) {
 	)
 
 	fw := &fileWriter{
-		store:    s.objStore,
+		store:    s.ObjStore,
 		filename: file.Filename,
 		content:  content,
 	}

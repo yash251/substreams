@@ -41,12 +41,12 @@ type FileInfo struct {
 	Partial  bool
 }
 
-func NewCompleteFileInfo(moduleInitialBlock uint64, exlusiveEnd uint64) *FileInfo {
-	bRange := block.NewRange(moduleInitialBlock, exlusiveEnd)
+func NewCompleteFileInfo(moduleInitialBlock uint64, exclusiveEnd uint64) *FileInfo {
+	bRange := block.NewRange(moduleInitialBlock, exclusiveEnd)
 
 	return &FileInfo{
 		Filename: FullStateFileName(bRange),
-		Range:    block.NewRange(moduleInitialBlock, exlusiveEnd),
+		Range:    block.NewRange(moduleInitialBlock, exclusiveEnd),
 		Partial:  false,
 	}
 }

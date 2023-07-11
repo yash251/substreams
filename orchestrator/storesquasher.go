@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"go.opentelemetry.io/otel/attribute"
 	"sort"
 	"time"
+
+	"go.opentelemetry.io/otel/attribute"
 
 	"github.com/abourget/llerrgroup"
 	"github.com/streamingfast/shutter"
@@ -122,16 +123,11 @@ func (s *StoreSquasher) processPartials(ctx context.Context) error {
 			return err
 		}
 
-		eg := llerrgroup.New(250)
 		start := time.Now()
 
-		out, err := s.processRanges(ctx, eg)
+		out, err := s.processRanges(ctx)
 		if err != nil {
 			return err
-		}
-
-		if err := eg.Wait(); err != nil {
-			return fmt.Errorf("waiting: %w", err)
 		}
 
 		totalDuration := time.Since(start)
@@ -198,38 +194,25 @@ func (s *StoreSquasher) accumulateMorePartials(ctx context.Context) error {
 	return nil
 }
 
-// store_save_interval = 1K
-// 0 -> 10K
-
-//j2 0 -> 2		pw => 0-1, 1-2
-//j3 2 -> 4 	pw => 2-3, 3-4
-//j4 4 -> 6
-//j5 6 -> 8
-//j6 8 -> 10
-
-func (s *StoreSquasher) processRanges(ctx context.Context, eg *llerrgroup.Group) (*rangeProgress, error) {
+func (s *StoreSquasher) processRanges(ctx context.Context) (*rangeProgress, error) {
 	logger := s.logger(ctx)
 	logger.Info("processing range", zap.Int("range_count", len(s.files)))
 	out := &rangeProgress{}
 	for {
-		if eg.Stop() {
-			break
-		}
-
 		if len(s.files) == 0 {
 			logger.Info("no more ranges to squash")
 			return out, nil
 		}
 
 		squashableFile := s.files[0]
-		err := s.processSquashableFile(ctx, eg, squashableFile)
+		err := s.processSquashableFile(ctx, squashableFile)
 		if err == SkipFile {
 			break
 		}
 		if err != nil {
 			return nil, fmt.Errorf("process squashable file on range %q: %w", squashableFile.Range.String(), err)
 		}
-		// This will inform the scheduler that this range has progressed, as it affects jobs dependending on it
+		// This will inform the scheduler that this range has progressed, as it affects jobs depending on it
 		s.onStoreCompletedUntilBlock(s.name, squashableFile.Range.ExclusiveEndBlock)
 
 		out.squashCount++
@@ -245,7 +228,9 @@ func (s *StoreSquasher) processRanges(ctx context.Context, eg *llerrgroup.Group)
 	return out, nil
 }
 
-func (s *StoreSquasher) processSquashableFile(ctx context.Context, eg *llerrgroup.Group, squashableFile *store.FileInfo) error {
+func (s *StoreSquasher) processSquashableFile(ctx context.Context, squashableFile *store.FileInfo) error {
+	eg := llerrgroup.New(2)
+
 	logger := s.logger(ctx)
 
 	startTime := time.Now()
@@ -313,7 +298,7 @@ func (s *StoreSquasher) processSquashableFile(ctx context.Context, eg *llerrgrou
 		)
 	}
 
-	return nil
+	return eg.Wait()
 }
 
 func (s *StoreSquasher) shouldSaveFullKV(storeInitialBlock uint64, squashableRange *block.Range) bool {

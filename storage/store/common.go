@@ -38,7 +38,7 @@ func loadStore(ctx context.Context, store dstore.Store, filename string) (out []
 	err = derr.RetryContext(ctx, 5, func(ctx context.Context) error {
 		r, err := store.OpenObject(ctx, filename)
 		if err != nil {
-			return fmt.Errorf("opening file: %w", err)
+			return fmt.Errorf("opening file %s: %w", store.BaseURL().String(), err)
 		}
 
 		defer r.Close()

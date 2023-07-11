@@ -31,7 +31,7 @@ func (p *PartialKV) Load(ctx context.Context, file *FileInfo) error {
 	p.loadedFrom = file.Filename
 	p.logger.Debug("loading partial store state from file", zap.String("filename", file.Filename))
 
-	data, err := loadStore(ctx, p.objStore, file.Filename)
+	data, err := loadStore(ctx, p.ObjStore, file.Filename)
 	if err != nil {
 		return fmt.Errorf("load partial store %s at %s: %w", p.name, file.Filename, err)
 	}
@@ -69,7 +69,7 @@ func (p *PartialKV) Save(endBoundaryBlock uint64) (*FileInfo, *fileWriter, error
 	p.logger.Info("partial store save written", zap.String("file_name", file.Filename), zap.Stringer("block_range", file.Range))
 
 	fw := &fileWriter{
-		store:    p.objStore,
+		store:    p.ObjStore,
 		filename: file.Filename,
 		content:  content,
 	}
@@ -89,7 +89,7 @@ func (p *PartialKV) DeletePrefix(ord uint64, prefix string) {
 func (p *PartialKV) DeleteStore(ctx context.Context, file *FileInfo) (err error) {
 	zlog.Debug("deleting partial store file", zap.String("file_name", file.Filename))
 
-	if err = p.objStore.DeleteObject(ctx, file.Filename); err != nil {
+	if err = p.ObjStore.DeleteObject(ctx, file.Filename); err != nil {
 		zlog.Warn("deleting file", zap.String("file_name", file.Filename), zap.Error(err))
 	}
 	return err
