@@ -1,9 +1,3 @@
-// import {
-//   TextEncoder as TextEncoderShim,
-//   TextDecoder as TextDecoderShim,
-// } from "fastestsmallesttextencoderdecoder"
-
-import "./shims/textEncodeDecoder"
 import bigInt from "./shims/bigInt"
 
 import { Block, TransactionTraceStatus } from "./pb/sf/ethereum/type/v2/type_pb"
@@ -58,8 +52,7 @@ export function map_block(data: Uint8Array) {
           change.table = "Approval"
           change.primaryKey = { case: "pk", value: `${bytesToHex(trace.hash)}-${log.index}` }
           change.operation = TableChange_Operation.CREATE
-          // @ts-ignore
-          change.ordinal = bigInt(0)
+          change.ordinal = bigInt(0) as unknown as bigint
           change.fields = [
             new Field({ name: "timestamp", newValue: blockTimestampStr }),
             new Field({ name: "block_number", newValue: blockNumberStr }),
@@ -79,8 +72,7 @@ export function map_block(data: Uint8Array) {
           change.table = "Transfer"
           change.primaryKey = { case: "pk", value: `${bytesToHex(trace.hash)}-${log.index}` }
           change.operation = TableChange_Operation.CREATE
-          // @ts-ignore
-          change.ordinal = bigInt(0)
+          change.ordinal = bigInt(0) as unknown as bigint
           change.fields = [
             new Field({ name: "timestamp", newValue: blockTimestampStr }),
             new Field({ name: "block_number", newValue: blockNumberStr }),
@@ -112,7 +104,6 @@ function stripZeroBytes(input: Uint8Array): Uint8Array {
 }
 
 function bytesToHex(input: Uint8Array): string {
-  // @ts-ignore
   return Buffer.from(input).toString("hex")
 }
 

@@ -49,12 +49,6 @@ func newInstance(ctx context.Context, program *goja.Program) (*instance, error) 
 		vmTypeUint8Array: vm.Get("Uint8Array"),
 	}
 
-	// fmt.Println("Adding property to Uint8Array")
-	// inst.vmTypeUint8Array.ToObject(vm).Prototype().DefineAccessorProperty("byteLength", vm.ToValue(goja.Callable(func(this goja.Value, args ...goja.Value) (goja.Value, error) {
-	// 	fmt.Println("Uint8Array byteLength called")
-	// 	return this.ToObject(vm).Get("length"), nil
-	// })), nil, goja.FLAG_TRUE, goja.FLAG_TRUE)
-
 	if err := inst.registerBuiltIns(); err != nil {
 		return nil, fmt.Errorf("registering builtins: %w", err)
 	}
@@ -116,12 +110,17 @@ func (i *instance) registerBuiltIns() error {
 	utilModule := i.newJSModule()
 	util.Require(i.vm, utilModule)
 
+	textModule := i.newJSModule()
+	RequireTextEncoder(i.vm, textModule)
+	RequireTextDecoder(i.vm, textModule)
+
 	// Must come after `util`!
 	consoleModule := i.newJSModule()
 	requireConsole(i.vm, utilModule.Get("exports").ToObject(i.vm), consoleModule)
 
 	i.exposeModuleExportsGlobally("node:buffer", bufferModule)
 	i.exposeModuleExportsGlobally("node:util", utilModule)
+	i.exposeModuleExportsGlobally("node:text", textModule)
 	i.exposeModuleGlobally("console", consoleModule)
 
 	return nil
