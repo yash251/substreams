@@ -6,6 +6,7 @@ use pb::sf::{
     },
 };
 use substreams::{errors::Error, hex, Hex};
+use substreams_solana::pb::sf::solana::r#type::v1::Block as SolBlock;
 
 mod pb;
 
@@ -24,6 +25,12 @@ pub const TRANSFER_TOPIC: [u8; 32] =
 #[no_mangle]
 pub extern "C" fn map_decode_proto_only(blk_ptr: *mut u8, blk_len: usize) {
     let _blk: Block = substreams::proto::decode_ptr(blk_ptr, blk_len).unwrap();
+}
+
+#[cfg(target_arch = "wasm32")]
+#[no_mangle]
+pub extern "C" fn map_sol_block_decoding(blk_ptr: *mut u8, blk_len: usize) {
+    let _blk: SolBlock = substreams::proto::decode_ptr(blk_ptr, blk_len).unwrap();
 }
 
 #[substreams::handlers::map]
@@ -162,6 +169,82 @@ fn map_block(blk: Block) -> Result<DatabaseChanges, Error> {
                     continue;
                 }
             }
+        }
+    }
+
+    Ok(changes)
+}
+
+#[substreams::handlers::map]
+fn map_sol_block(block: SolBlock) -> Result<DatabaseChanges, Error> {
+    let mut changes = DatabaseChanges::default();
+
+    let slot = block.slot.to_string();
+    let timestamp = block.block_time.as_ref().unwrap().timestamp;
+    for trx in block.transactions() {
+        if let Some(trx) = &trx.transaction {
+            let trx_hash = bs58::encode(&trx.signatures[0]).into_string();
+            changes.table_changes.push(TableChange {
+                table: "trx".to_string(),
+                primary_key: Some(PrimaryKey::Pk(format!("{}", trx_hash))),
+                operation: Operation::Create as i32,
+                ordinal: 0,
+                fields: vec![
+                    Field {
+                        name: "timestamp".to_string(),
+                        old_value: "".to_string(),
+                        new_value: timestamp.to_string(),
+                    },
+                    Field {
+                        name: "block_number".to_string(),
+                        old_value: "".to_string(),
+                        new_value: slot.to_string(),
+                    },
+                    Field {
+                        name: "tx_hash".to_string(),
+                        old_value: "".to_string(),
+                        new_value: trx_hash,
+                    },
+                ],
+            });
+        }
+    }
+
+    Ok(changes)
+}
+
+#[substreams::handlers::map]
+fn map_sol_block_owned(block: SolBlock) -> Result<DatabaseChanges, Error> {
+    let mut changes = DatabaseChanges::default();
+
+    let timestamp = block.block_time.as_ref().unwrap().timestamp;
+    let slot = block.slot.to_string();
+    for trx in block.transactions_owned() {
+        if let Some(trx) = trx.transaction {
+            let trx_hash = bs58::encode(&trx.signatures[0]).into_string();
+            changes.table_changes.push(TableChange {
+                table: "trx".to_string(),
+                primary_key: Some(PrimaryKey::Pk(format!("{}", trx_hash))),
+                operation: Operation::Create as i32,
+                ordinal: 0,
+                fields: vec![
+                    Field {
+                        name: "timestamp".to_string(),
+                        old_value: "".to_string(),
+                        new_value: timestamp.to_string(),
+                    },
+                    Field {
+                        name: "block_number".to_string(),
+                        old_value: "".to_string(),
+                        new_value: slot.to_string(),
+                    },
+                    Field {
+                        name: "tx_hash".to_string(),
+                        old_value: "".to_string(),
+                        new_value: trx_hash,
+                    },
+                ],
+            });
         }
     }
 

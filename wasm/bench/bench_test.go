@@ -34,12 +34,16 @@ func BenchmarkExecution(b *testing.B) {
 	}
 
 	for _, testCase := range []*testCase{
-		{"bare", "map_noop", args(wasm.NewParamsInput("")), []int{0}},
+		//{"bare", "map_noop", args(wasm.NewParamsInput("")), []int{0}},
+		//
+		//// Decode proto only decode and returns the block.number as the output (to ensure the block is not elided at compile time)
+		//{"decode_proto_only", "map_decode_proto_only", args(blockInputFile(b, "testdata/ethereum_mainnet_block_16021772.binpb", "sf.ethereum.type.v2.Block")), []int{0}},
+		//
+		//{"map_block", "map_block", args(blockInputFile(b, "testdata/ethereum_mainnet_block_16021772.binpb", "sf.ethereum.type.v2.Block")), []int{44957, 45081}},
 
-		// Decode proto only decode and returns the block.number as the output (to ensure the block is not elided at compile time)
-		{"decode_proto_only", "map_decode_proto_only", args(blockInputFile(b, "testdata/ethereum_mainnet_block_16021772.binpb")), []int{0}},
-
-		{"map_block", "map_block", args(blockInputFile(b, "testdata/ethereum_mainnet_block_16021772.binpb")), []int{44957, 45081}},
+		{"map_sol_block_decoding", "map_sol_block_decoding", args(blockInputFile(b, "testdata/solana_mainnet_block_180279461.binpb", "sf.solana.type.v1.Block")), []int{0}},
+		{"map_sol_block", "map_sol_block", args(blockInputFile(b, "testdata/solana_mainnet_block_180279461.binpb", "sf.solana.type.v1.Block")), []int{208395}},
+		{"map_sol_block_owned", "map_sol_block_owned", args(blockInputFile(b, "testdata/solana_mainnet_block_180279461.binpb", "sf.solana.type.v1.Block")), []int{208395}},
 	} {
 		var reuseInstance = true
 		var freshInstanceEachRun = false
@@ -102,11 +106,11 @@ func args(ins ...wasm.Argument) []wasm.Argument {
 	return ins
 }
 
-func blockInputFile(t require.TestingT, filename string) wasm.Argument {
+func blockInputFile(t require.TestingT, filename string, sourceInput string) wasm.Argument {
 	content, err := os.ReadFile(filename)
 	require.NoError(t, err)
 
-	input := wasm.NewSourceInput("sf.ethereum.type.v2.Block")
+	input := wasm.NewSourceInput(sourceInput)
 	input.SetValue(content)
 
 	return input

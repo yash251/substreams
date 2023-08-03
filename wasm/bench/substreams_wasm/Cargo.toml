@@ -9,8 +9,11 @@ crate-type = ["cdylib"]
 
 [dependencies]
 substreams = "0.5"
+substreams-solana = { git = "https://github.com/streamingfast/substreams-solana", branch = "feature/owned" }
+bs58 = "0.4.0"
 prost = "0.11"
 prost-types = "0.11"
+anyhow = "1"
 
 [profile.release]
 lto = true
