@@ -43,7 +43,10 @@ type Tier1Config struct {
 	StateBundleSize      uint64
 	BlockType            string
 
-	MaxSubrequests       uint64
+	DefaultSubrequests uint64
+	InitSubrequests    uint64
+	SubrequestsRampup  time.Duration
+
 	SubrequestsEndpoint  string
 	SubrequestsInsecure  bool
 	SubrequestsPlaintext bool
@@ -63,6 +66,9 @@ type Tier1App struct {
 }
 
 func NewTier1(logger *zap.Logger, config *Tier1Config, modules *Tier1Modules) *Tier1App {
+	if config.InitSubrequests == 0 {
+		config.InitSubrequests = config.DefaultSubrequests
+	}
 	return &Tier1App{
 		Shutter: shutter.New(),
 		config:  config,
@@ -166,7 +172,9 @@ func (a *Tier1App) Run() error {
 		stateStore,
 		a.config.StateStoreDefaultTag,
 		a.config.BlockType,
-		a.config.MaxSubrequests,
+		a.config.DefaultSubrequests,
+		a.config.InitSubrequests,
+		a.config.SubrequestsRampup,
 		a.config.StateBundleSize,
 		subrequestsClientConfig,
 		opts...,

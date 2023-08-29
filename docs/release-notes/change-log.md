@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+### Added
+
+* Config params added to allow ramping up the number of active subrequests from an 'Init' value to the target value (specified by DefaultSubrequests or through the auth layer), over a defined period of time.
+  - `tier1.Config.InitSubrequests` (number of initial subrequests)
+  - `tier1.Config.SubrequestsRampup` (period over which the available workers grows up to nominal value)
+
+### Changed
+
+* tier1.Config `MaxSubrequests` renamed to `DefaultSubrequests`, because it can be overriden per-request by the authentication layer.
+
+## Unreleased
+
 ## Highlights
 
 * Complete redesign of the progress messages:

@@ -58,6 +58,8 @@ func NewTier2(
 		stateBundleSize,
 		0, // tier2 don't send subrequests
 		0, // tier2 don't send subrequests
+		0, // tier2 don't send subrequests
+		0, // tier2 don't send subrequests
 		0,
 		stateStore,
 		defaultCacheTag,

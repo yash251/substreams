@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/streamingfast/bstream/hub"
 	"github.com/streamingfast/bstream/stream"
@@ -79,6 +80,8 @@ func NewTier1(
 	blockType string,
 
 	parallelSubRequests uint64,
+	initParallelSubRequests uint64,
+	parallelSubRequestsRampup time.Duration,
 	stateBundleSize uint64,
 
 	substreamsClientConfig *client.SubstreamsClientConfig,
@@ -91,6 +94,8 @@ func NewTier1(
 	runtimeConfig := config.NewRuntimeConfig(
 		stateBundleSize,
 		parallelSubRequests,
+		initParallelSubRequests,
+		parallelSubRequestsRampup,
 		10,
 		0,
 		stateStore,
@@ -291,12 +296,12 @@ func (s *Tier1Service) blocks(ctx context.Context, request *pbsubstreamsrpc.Requ
 		return fmt.Errorf("build request details: %w", err)
 	}
 
-	requestDetails.MaxParallelJobs = s.runtimeConfig.DefaultParallelSubrequests
+	requestDetails.MaxSubrequests = s.runtimeConfig.DefaultSubrequests
 	requestDetails.CacheTag = s.runtimeConfig.DefaultCacheTag
 	if auth := dauth.FromContext(ctx); auth != nil {
 		if parallelJobs := auth.Get("X-Sf-Substreams-Parallel-Jobs"); parallelJobs != "" {
 			if ll, err := strconv.ParseUint(parallelJobs, 10, 64); err == nil {
-				requestDetails.MaxParallelJobs = ll
+				requestDetails.MaxSubrequests = int(ll)
 			}
 		}
 		if cacheTag := auth.Get("X-Sf-Substreams-Cache-Tag"); cacheTag != "" {
@@ -320,7 +325,7 @@ func (s *Tier1Service) blocks(ctx context.Context, request *pbsubstreamsrpc.Requ
 				TraceId:            traceId,
 				ResolvedStartBlock: requestDetails.ResolvedStartBlockNum,
 				LinearHandoffBlock: requestDetails.LinearHandoffBlockNum,
-				MaxParallelWorkers: requestDetails.MaxParallelJobs,
+				MaxParallelWorkers: uint64(requestDetails.MaxSubrequests),
 			},
 		},
 	})

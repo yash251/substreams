@@ -257,7 +257,7 @@ func (p *Pipeline) runParallelProcess(ctx context.Context, reqPlan *plan.Request
 		ctx,
 		reqPlan,
 		p.runtimeConfig,
-		int(reqDetails.MaxParallelJobs),
+		int(reqDetails.MaxSubrequests),
 		p.outputGraph,
 		p.execoutStorage,
 		p.respFunc,

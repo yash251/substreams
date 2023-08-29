@@ -28,7 +28,7 @@ func BuildParallelProcessor(
 	ctx context.Context,
 	reqPlan *plan.RequestPlan,
 	runtimeConfig config.RuntimeConfig,
-	maxParallelJobs int,
+	maxSubrequests int,
 	outputGraph *outputmodules.Graph,
 	execoutStorage *execout.Configs,
 	respFunc func(resp substreams.ResponseFromAnyTier) error,
@@ -121,7 +121,7 @@ func BuildParallelProcessor(
 	//  -
 	//  This is an optimization and is not solved herein.
 
-	workerPool := work.NewWorkerPool(ctx, maxParallelJobs, runtimeConfig.WorkerFactory)
+	workerPool := work.NewWorkerPool(ctx, runtimeConfig.InitSubrequests, maxSubrequests, runtimeConfig.SubrequestsRampup, runtimeConfig.WorkerFactory)
 	sched.WorkerPool = workerPool
 
 	return &ParallelProcessor{

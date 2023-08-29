@@ -19,7 +19,7 @@ type RequestDetails struct {
 
 	LinearHandoffBlockNum uint64
 	StopBlockNum          uint64
-	MaxParallelJobs       uint64
+	MaxSubrequests        int
 	CacheTag              string
 	UniqueID              uint64
 

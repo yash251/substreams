@@ -2,6 +2,7 @@ package work
 
 import (
 	"context"
+	"time"
 
 	"go.uber.org/zap"
 
@@ -15,7 +16,8 @@ type WorkerPool struct {
 type WorkerState int
 
 const (
-	WorkerFree WorkerState = iota
+	WorkerUnset WorkerState = iota
+	WorkerFree
 	WorkerWorking
 )
 
@@ -24,21 +26,73 @@ type WorkerStatus struct {
 	Worker Worker
 }
 
-func NewWorkerPool(ctx context.Context, workerCount int, workerFactory WorkerFactory) *WorkerPool {
+func NewWorkerPool(ctx context.Context, initialWorkers, targetWorkers int, rampupPeriod time.Duration, workerFactory WorkerFactory) *WorkerPool {
 	logger := reqctx.Logger(ctx)
 
-	logger.Info("initializing worker pool", zap.Int("worker_count", workerCount))
+	if initialWorkers > targetWorkers || rampupPeriod == 0 {
+		initialWorkers = targetWorkers
+	}
 
-	workers := make([]*WorkerStatus, workerCount)
-	for i := 0; i < workerCount; i++ {
-		workers[i] = &WorkerStatus{
-			Worker: workerFactory(logger),
-			State:  WorkerFree,
-		}
+	logger.Info("initializing worker pool",
+		zap.Int("target_count", targetWorkers),
+		zap.Int("initial_workers", initialWorkers),
+		zap.Duration("rampup_period", rampupPeriod),
+	)
+	workers := initWorkers(initialWorkers, targetWorkers, workerFactory, logger)
+
+	if targetWorkers > initialWorkers {
+		go rampupWorkers(targetWorkers, rampupPeriod, workers)
 	}
 
 	return &WorkerPool{
 		workers: workers,
+	}
+}
+
+func initWorkers(initialWorkers, targetWorkers int, workerFactory WorkerFactory, logger *zap.Logger) []*WorkerStatus {
+	workers := make([]*WorkerStatus, targetWorkers)
+	for i := 0; i < targetWorkers; i++ {
+		workers[i] = &WorkerStatus{
+			Worker: workerFactory(logger),
+		}
+		if i < initialWorkers {
+			workers[i].State = WorkerFree
+		}
+	}
+	return workers
+}
+
+// this particular function is thread-safe, no need for lock because nobody else ever touches workers with state=Unset, we just enable them for future use
+func rampupWorkers(target int, rampup time.Duration, workers []*WorkerStatus) {
+	begin := time.Now()
+	rampupFloat := float32(rampup)
+	targetFloat := float32(target)
+
+	var currentlySet int
+	for _, worker := range workers {
+		if worker.State > WorkerUnset {
+			currentlySet++
+		}
+	}
+
+	for currentlySet < target {
+		time.Sleep(time.Second)
+		ratio := float32(time.Since(begin)) / rampupFloat
+		currentTarget := int(targetFloat * ratio)
+		if currentTarget > target {
+			currentTarget = target
+		}
+		if currentTarget > currentlySet {
+			for _, worker := range workers {
+				if worker.State == WorkerUnset {
+					worker.State = WorkerFree
+					currentlySet++
+					if currentTarget == currentlySet {
+						break
+					}
+				}
+			}
+		}
 	}
 }
 
@@ -50,16 +104,6 @@ func (p *WorkerPool) WorkerAvailable() bool {
 	}
 	return false
 }
-
-//func (p *WorkerPool) FreeWorkers() int {
-//	count := 0
-//	for _, w := range p.workers {
-//		if w.State == WorkerFree {
-//			count++
-//		}
-//	}
-//	return count
-//}
 
 func (p *WorkerPool) Borrow() Worker {
 	for _, status := range p.workers {

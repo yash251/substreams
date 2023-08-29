@@ -257,6 +257,8 @@ func processInternalRequest(
 		0,
 		0,
 		0,
+		0,
+		0,
 		baseStoreStore,
 		"tag",
 		workerFactory,
@@ -296,6 +298,8 @@ func processRequest(
 	runtimeConfig := config.NewRuntimeConfig(
 		10,
 		parallelSubrequests,
+		parallelSubrequests,
+		0,
 		10,
 		0,
 		baseStoreStore,
