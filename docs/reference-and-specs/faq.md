@@ -46,7 +46,7 @@ The Substreams documentation also [provides general instructions surrounding aut
 
 Developers create their own Substreams implementations in a variety of ways. Use these [examples](reference-and-specs/examples.md) as a reference and starting point.
 
-The Substreams documentation [provides a Developer's guide](https://substreams.streamingfast.io/developer-guide/overview) to assist you to understand and use Substreams.
+The Substreams documentation [provides a Developer's guide](https://substreams.streamingfast.io/developers-guide/overview) to assist you to understand and use Substreams.
 
 ### **What is Substreams used for?**
 
