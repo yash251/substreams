@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"os"
 	"strings"
 
 	"go.uber.org/zap"
@@ -45,6 +47,22 @@ func runPublish(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	var apiKey string
+	registryTokenBytes, err := os.ReadFile(registryTokenFilename)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			return fmt.Errorf("failed to read registry token: %w", err)
+		}
+	}
+
+	substreamsRegistryToken := os.Getenv("SUBSTREAMS_REGISTRY_TOKEN")
+	apiKey = string(registryTokenBytes)
+	if apiKey == "" || substreamsRegistryToken != "" {
+		apiKey = substreamsRegistryToken
+	}
+
+	zlog.Debug("loaded api key", zap.String("api_key", apiKey))
+
 	publishPackageEndpoint := fmt.Sprintf("%s/sf.substreams.dev.Api/PublishPackage", apiEndpoint)
 	zlog.Debug("publishing package", zap.String("registry_url", publishPackageEndpoint))
 
@@ -53,6 +71,7 @@ func runPublish(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-Api-Key", apiKey)
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -60,8 +79,13 @@ func runPublish(cmd *cobra.Command, args []string) error {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode >= http.StatusBadRequest {
-		return fmt.Errorf("failed to publish package: %s", resp.Status)
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read body")
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to publish package: %s, reason: %s", resp.Status, string(b))
 	}
 
 	fmt.Println("Package published successfully")

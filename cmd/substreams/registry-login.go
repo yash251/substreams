@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 )
@@ -16,10 +17,10 @@ var registryLoginCmd = &cobra.Command{
 	RunE:         runRegistryLoginE,
 }
 
-var registryFileName = "registry-token"
+var registryTokenFilename = filepath.Join(os.Getenv("HOME"), ".config", "substreams", "registry-token")
 
 func init() {
-	registryLoginCmd.Flags().String("registry", "https://api.substreams.dev", "Substreams registry URL")
+	registryLoginCmd.Flags().String("registry", "https://substreams.dev", "Substreams registry URL")
 
 	registryCmd.AddCommand(registryLoginCmd)
 }
@@ -43,7 +44,7 @@ func runRegistryLoginE(cmd *cobra.Command, args []string) error {
 
 	fmt.Println("")
 
-	isFileExists := checkFileExists(registryFileName)
+	isFileExists := checkFileExists(registryTokenFilename)
 	if isFileExists {
 		fmt.Println("Token already saved to registry-token")
 		fmt.Printf("Do you want to overwrite it? [y/N] ")
@@ -71,8 +72,7 @@ func runRegistryLoginE(cmd *cobra.Command, args []string) error {
 }
 
 func writeRegistryToken(token string) error {
-	token = fmt.Sprintf("SUBSTREAMS_REGISTRY_TOKEN=%s", token)
-	return os.WriteFile(registryFileName, []byte(token), 0644)
+	return os.WriteFile(registryTokenFilename, []byte(token), 0644)
 }
 
 func checkFileExists(filePath string) bool {
