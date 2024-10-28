@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/tidwall/gjson"
 	"go.uber.org/zap"
 
 	"github.com/spf13/cobra"
@@ -88,7 +89,13 @@ func runPublish(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to publish package: %s, reason: %s", resp.Status, string(b))
 	}
 
+	spkgUrlPath := gjson.Get(string(b), "spkgLink").String()
+
 	fmt.Println("Package published successfully")
+	if spkgUrlPath != "" {
+		fmt.Printf("Start streaming your package with: substreams gui %s\n", spkgUrlPath)
+	}
+
 	return nil
 }
 
