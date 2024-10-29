@@ -86,7 +86,10 @@ func runPublish(cmd *cobra.Command, args []string) error {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("failed to publish package: %s, reason: %s", resp.Status, string(b))
+		msg := gjson.Get(string(b), "message").String()
+		fmt.Println("Failed to publish package")
+		fmt.Printf("\tReason: %s\n", msg)
+		return nil
 	}
 
 	spkgUrlPath := gjson.Get(string(b), "spkgLink").String()
