@@ -87,25 +87,27 @@ func (c *Config) NewInstance() (out *Instance, err error) {
 		readerOptions = append(readerOptions, manifest.SkipPackageValidationReader())
 	}
 
-	manifestReader, err := manifest.NewReader(c.ManifestPath, readerOptions...)
-	if err != nil {
-		return nil, fmt.Errorf("reading package: %w", err)
-	}
+	if c.Pkg == nil || c.Graph == nil {
+		manifestReader, err := manifest.NewReader(c.ManifestPath, readerOptions...)
+		if err != nil {
+			return nil, fmt.Errorf("reading package: %w", err)
+		}
 
-	pkgBundle, err := manifestReader.Read()
-	if err != nil {
-		return nil, fmt.Errorf("parsing package at %q: %w", c.ManifestPath, err)
-	}
+		pkgBundle, err := manifestReader.Read()
+		if err != nil {
+			return nil, fmt.Errorf("parsing package at %q: %w", c.ManifestPath, err)
+		}
 
-	if pkgBundle == nil {
-		return nil, fmt.Errorf("no package found")
-	}
+		if pkgBundle == nil {
+			return nil, fmt.Errorf("no package found")
+		}
 
-	pkg := pkgBundle.Package
-	graph := pkgBundle.Graph
+		c.Pkg = pkgBundle.Package
+		c.Graph = pkgBundle.Graph
+	}
 
 	if c.OutputModule == "" {
-		mods, ok := graph.TopologicalSort()
+		mods, ok := c.Graph.TopologicalSort()
 		if ok {
 			c.OutputModule = mods[0].Name
 		}
@@ -120,7 +122,7 @@ func (c *Config) NewInstance() (out *Instance, err error) {
 	core := zapcore.NewCore(encoder, writer, zap.InfoLevel)
 	logger := zap.New(core)
 
-	endpoint, err := manifest.ExtractNetworkEndpoint(pkg.Network, c.Endpoint, logger)
+	endpoint, err := manifest.ExtractNetworkEndpoint(c.Pkg.Network, c.Endpoint, logger)
 	if err != nil {
 		return nil, fmt.Errorf("extracting network endpoint: %w", err)
 	}
@@ -131,9 +133,6 @@ func (c *Config) NewInstance() (out *Instance, err error) {
 		log.Println("Accumulated these logs:", logBuffer.String())
 	}
 	c.SubstreamsClientConfig.SetEndpoint(endpoint)
-
-	c.Pkg = pkg
-	c.Graph = graph
 
 	var startBlock int64
 	if c.StartBlock != "" {

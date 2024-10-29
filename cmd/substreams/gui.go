@@ -159,10 +159,10 @@ func runGui(cmd *cobra.Command, args []string) (err error) {
 	stopBlock := sflags.MustGetString(cmd, "stop-block")
 
 	requestConfig := &request.Config{
-		ManifestPath: manifestPath,
-		// Pkg:                         pkg,
-		SkipPackageValidation: sflags.MustGetBool(cmd, "skip-package-validation"),
-		// Graph:                       graph,
+		ManifestPath:                manifestPath,
+		Pkg:                         packageBundle.Package,
+		SkipPackageValidation:       sflags.MustGetBool(cmd, "skip-package-validation"),
+		Graph:                       packageBundle.Graph,
 		ProdMode:                    productionMode,
 		DebugModulesOutput:          debugModulesOutput,
 		DebugModulesInitialSnapshot: debugModulesInitialSnapshot,

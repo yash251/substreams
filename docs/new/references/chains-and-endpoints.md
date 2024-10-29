@@ -31,11 +31,11 @@ Protobuf definitions and public endpoints are provided for the supported protoco
 | Ethereum | [`sf.ethereum.type.v2.Block`](https://github.com/streamingfast/firehose-ethereum/blob/develop/proto/sf/ethereum/type/v2/type.proto)           | [ethereum-v0.10.4.spkg](https://github.com/streamingfast/sf-ethereum/releases/download/v0.10.2/ethereum-v0.10.4.spkg) |
 | NEAR     | [`sf.near.type.v1.Block`](https://github.com/streamingfast/firehose-near/blob/develop/proto/sf/near/type/v1/type.proto)                       |                                                                                                                       |
 | Solana   | [`sf.solana.type.v1.Block`](https://github.com/streamingfast/firehose-solana/blob/develop/proto/sf/solana/type/v1/type.proto)                 | [solana-v0.1.0.spkg](https://github.com/streamingfast/sf-solana/releases/download/v0.1.0/solana-v0.1.0.spkg)          |
-| Cosmos   | [`sf.cosmos.type.v2.Block`](https://github.com/streamingfast/firehose-cosmos/blob/develop/cosmos/proto/sf/cosmos/type/v2/block.proto#L10)                          |                                                                                                                       |                                                                                                                       |                                                                                                       
+| Cosmos   | [`sf.cosmos.type.v2.Block`](https://github.com/streamingfast/firehose-cosmos/blob/develop/cosmos/proto/sf/cosmos/type/v2/block.proto#L10)                          |                                                                                                                       |                                                                                                                       |
 | Bitcoin  | [`sf.bitcoin.type.v1.Block`](https://github.com/streamingfast/firehose-bitcoin/blob/develop/proto/sf/bitcoin/type/v1/type.proto)              |                                                                                                                       |
 | Antelope  | [`sf.antelope.type.v1.Block`](https://buf.build/pinax/firehose-antelope/docs/main:sf.antelope.type.v1#sf.antelope.type.v1.Block)              |                                                                                                                       |
 | Starknet  | [`sf.starknet.type.v1.Block`](https://github.com/streamingfast/firehose-starknet/blob/main/proto/sf/starknet/type/v1/block.proto#L8)              |                                                                                                                       |
-| Gara  | [`sf.gear.type.v1.Block`](https://github.com/streamingfast/firehose-gear/blob/main/proto/sf/gear/type/v1/block.proto#L7)              |                                                                                                                       |
+| Vara  | [`sf.gear.type.v1.Block`](https://github.com/streamingfast/firehose-gear/blob/main/proto/sf/gear/type/v1/block.proto#L7)              |                                                                                                                       |
 
 ### EVM Extended vs Base Block Model
 
@@ -64,7 +64,8 @@ The data missing in the Base Block makes the corresponding Protobuf field empty.
 * **Avalanche C-Chain Mainnet**: `avalanche-mainnet.streamingfast.io:443`
 * **NEAR Mainnet**: `mainnet.near.streamingfast.io:443`
 * **NEAR Testnet**: `testnet.near.streamingfast.io:443`
-* **Solana mainnet-beta**: `mainnet.sol.streamingfast.io:443`
+* **Solana Mainnet-Beta**: `mainnet.sol.streamingfast.io:443`
+* **Solana Devnet**: `devnet.sol.streamingfast:443`
 * **Bitcoin Mainnet**: `mainnet.btc.streamingfast.io:443`
 * **Injective Mainnet**: `mainnet.injective.streamingfast.io:443`
 * **Injective Testnet**: `testnet.injective.streamingfast.io:443`
@@ -73,6 +74,8 @@ The data missing in the Base Block makes the corresponding Protobuf field empty.
 * **Base Mainnet**: `base-mainnet.streamingfast.io:443`
 * **Vara Mainnet**: `mainnet.vara.streamingfast.io:443`
 * **Vara Testnet**: `testnet.vara.streamingfast.io:443`
+* **Mantra Mainnet**: `mainnet.mantra.streamingfast.io:443`
+* **Mantra Testnet**: `testnet.mantra.streamingfast.io:443`
 
 ## Community Endpoints
 

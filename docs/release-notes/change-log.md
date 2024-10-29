@@ -11,8 +11,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+* Add Mantra Mainnet and Testnet to the HardcodedEndpoints map.
+* Add Vara Mainnet and Testnet to the HardcodedEndpoints map.
+* Fix `substreams gui` command downloading spkg twice which would cause some issues with spkg that are very big.
+
+## v1.10.8
+
 ### Server
 
+> **Note** All caches for stores using the updatePolicy `set_sum` (added in substreams v1.7.0) and modules that depend on them will need to be deleted, since they may contain bad data.
+
+* Fix bad data in stores using `set_sum` policy: squashing of store segments incorrectly "summed" some values that should have been "set" if the last event for a key on this segment was a "sum"
 * Fix panic in initialization (`metrics sender not set`)
 
 ## v1.10.7
@@ -46,7 +55,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Server
 
 * Fix "cannot resolve 'old cursor' from files in passthrough mode" error on some requests with an old cursor
-* Fix handling of 'special case' substreams module with only "params" as its input: should not skip this execution (used in graph-node for head tracking) 
+* Fix handling of 'special case' substreams module with only "params" as its input: should not skip this execution (used in graph-node for head tracking)
   -> empty files in module cache with hash `d3b1920483180cbcd2fd10abcabbee431146f4c8` should be deleted for consistency
 
 ### CLI
@@ -77,6 +86,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## v1.10.0
 
 ### Server
+
 * Add `sf.substreams.rpc.v2.EndpointInfo/Info` endpoint (if the infoserver is given as a module, i.e. from firehose-core)
 * Add an execution timeout of 3 minutes per block by default (can be overriden in tier1/tier2 Configs) -- this is useful when an external (eth_call) is stuck on a forked block hash.
 * Revert 'initialBlocks' changes from v1.9.1 because a 'changing module hash' causes more trouble.
@@ -85,8 +95,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 * Manifest reader: increase timeout of remote spkg fetch to 5 minutes, up from 30 seconds
 
 ### Client
+
 * Add `substreams auth` command, to authenticate via `thegraph.market` and to get a dev API Key.
-* Rename `--discovery-endpoint` into `codegen-endpoint` in `substreams init` command. 
+* Rename `--discovery-endpoint` into `codegen-endpoint` in `substreams init` command.
 * Add `substreams codegen subgraph` command that takes a substreams `module` and an `spkg` and that generates a simple `subgraph` from the `module` output.  
 * On `substreams init` command, if flag `--state-file` is provided, the state file is used by default for project generation.
 * In `substreams init` command, the state file is named using a `Date format` and not using `Unix` anymore.
@@ -123,9 +134,9 @@ Fixed substreams hanging in production-mode on chains with a 'first-streamable-b
 
 ### Important BUG FIX
 
-* Fix a bug introduced in v1.6.0 that could result in corrupted store "state" file if all 
+* Fix a bug introduced in v1.6.0 that could result in corrupted store "state" file if all
   the "outputs" were already cached for a module in a given segment (rare occurence)
-* We recommend clearing your substreams cache after this upgrade and re-processing or 
+* We recommend clearing your substreams cache after this upgrade and re-processing or
   validating your data if you use stores.
 
 ### Fixed
@@ -135,7 +146,7 @@ Fixed substreams hanging in production-mode on chains with a 'first-streamable-b
 ### Added
 
 * Expose a new intrinsic to modules: `skip_empty_output`, which causes the module output to be skipped if it has zero bytes. (Watch out, a protobuf object with all its default values will have zero bytes)
-* Improve schedule order (faster time to first block) for substreams with multiple stages when starting mid-chain 
+* Improve schedule order (faster time to first block) for substreams with multiple stages when starting mid-chain
 
 ## v1.8.2
 
@@ -149,19 +160,22 @@ Fixed substreams hanging in production-mode on chains with a 'first-streamable-b
 
 ### Remote Code Generation
 
-The `substreams init` command now fetches a list of available 'code generators' to "https://codegen.substreams.dev".
+The `substreams init` command now fetches a list of available 'code generators' to "<https://codegen.substreams.dev>".
 Upon selection of a code generator, it launches an interactive session to gather the information necessary to build your substreams.
 This allows flexibility and getting anything from "skeleton" of a substreams for a given chain up to a fully built .spkg file with subgraph bindings.
 
 ### Added
+
 * Add 'compressed' boolean field to the 'incoming request' log
 * Add a substreams `live back filler`, so a request running close to HEAD in production-mode on tier1 will trigger jobs on tier2 when boundaries are passed by final blocks, backfilling the cache. These jobs will be "unmetered".
 
 ### Fixed
+
 * Fixed Substreams tier1 active worker request metrics that was not decrementing correctly.
 * Truncate error messages log lines to 18k characters to prevent them from disappearing through some load balancers.
 
 ### Removed
+
 * Removed local ethereum code generation from `init` command.
 
 ## v1.7.3
@@ -175,16 +189,16 @@ This allows flexibility and getting anything from "skeleton" of a substreams for
 
 ### Improvements on the `use` attribute
 
-- If module with `use` attribute has not `inputs` at all, inputs are replaced by used module inputs
-- If module with `use` attribute has no `blockFilter`, it's replaced by used module `blockFilter`
-- If `blockFilter` is set to `{}`, it will be considered as `nil` in the spkg, enabling module with `use`
+* If module with `use` attribute has not `inputs` at all, inputs are replaced by used module inputs
+* If module with `use` attribute has no `blockFilter`, it's replaced by used module `blockFilter`
+* If `blockFilter` is set to `{}`, it will be considered as `nil` in the spkg, enabling module with `use`
   attribute to override the `blockFilter` by a `nil` one
 
 ## v1.7.1
 
 ### Highlights
 
-- Substreams engine is now able run Rust code that depends on `solana_program` in Solana land to decode and `alloy/ether-rs` in Ethereum land
+* Substreams engine is now able run Rust code that depends on `solana_program` in Solana land to decode and `alloy/ether-rs` in Ethereum land
 
 #### How to use `solana_program` or `alloy`/`ether-rs`
 
@@ -255,7 +269,7 @@ binaries:
 
 * *Index Modules* and *Block Filter* can now be used to speed up processing and reduce the amount of parsed data.
 * When indexes are used along with the `BlockFilter` attribute on a mapper, blocks can be skipped completely: they will not be run in downstreams modules or sent in the output stream, except in live segment or in dev-mode, where an empty 'clock' is still sent.
-* See https://github.com/streamingfast/substreams-foundational-modules for an example implementation
+* See <https://github.com/streamingfast/substreams-foundational-modules> for an example implementation
 * Blocks that are skipped will still appear in the metering as "read bytes" (unless a full segment is skipped), but the index stores themselves are not "metered"
 
 #### Scheduling / speed improvements
@@ -307,6 +321,7 @@ binaries:
 * add `substreams_tier1_worker_rejected_overloaded_counter` metric to count only worker errors with string "service currently overloaded"
 * add `google/protobuf/duration.proto` to system proto files
 * Support for buf build urls in substreams manifest. Ex.:
+
 ```yaml
 protobuf:
   buf_build:
@@ -476,7 +491,7 @@ This release brings important server-side improvements regarding performance, es
 
 ### Added
 
-* Added `networks` field at the top level of the manifest definition, with `initialBlock` and `params` overrides for each module. See the substreams.yaml.example file in the repository or https://substreams.streamingfast.io/reference-and-specs/manifests for more details and example usage.
+* Added `networks` field at the top level of the manifest definition, with `initialBlock` and `params` overrides for each module. See the substreams.yaml.example file in the repository or <https://substreams.streamingfast.io/reference-and-specs/manifests> for more details and example usage.
 * The networks `params` and `initialBlock`` overrides for the chosen network are applied to the module directly before being sent to the server. All network configurations are kept when packing an .spkg file.
 * Added the `--network` flag for choosing the network on `run`, `gui` and `alpha service deploy` commands. Default behavior is to use the one defined as `network` in the manifest.
 * Added the `--endpoint` flag to `substreams alpha service serve` to specify substreams endpoint to connect to
@@ -540,7 +555,7 @@ This release brings important server-side improvements regarding performance, es
     ```
 
     where "./dbt" is a folder containing the dbt project.
-*   Sink server: added REST interface support for clickhouse sinks. Example manifest file segment:
+* Sink server: added REST interface support for clickhouse sinks. Example manifest file segment:
 
     ```yaml
     [...]
@@ -619,10 +634,10 @@ This release brings important server-side improvements regarding performance, es
 
 ### Added
 
-*   Sink configs can now use protobuf annotations (aka Field Options) to determine how the field will be interpreted in substreams.yaml:
+* Sink configs can now use protobuf annotations (aka Field Options) to determine how the field will be interpreted in substreams.yaml:
 
-    * `load_from_file` will put the content of the file directly in the field (string and bytes contents are supported).
-    * `zip_from_folder` will create a zip archive and put its content in the field (field type must be bytes).
+  * `load_from_file` will put the content of the file directly in the field (string and bytes contents are supported).
+  * `zip_from_folder` will create a zip archive and put its content in the field (field type must be bytes).
 
     Example protobuf definition:
 
@@ -652,12 +667,13 @@ This release brings important server-side improvements regarding performance, es
         pgweb_frontend:
           enabled: true
     ```
+
 * `substreams info` command now properly displays the content of sink configs, optionally writing the fields that were bundled from files to disk with `--output-sinkconfig-files-path=</some/path>`
 
 ### Changed
 
 * `substreams alpha init` renamed to `substreams init`. It now includes `db_out` module and `schema.sql` to support the substreams-sql-sink directly.
-*   The override feature has been overhauled. Users may now override an existing substreams by pointing to an override file in `run` or `gui` command. This override manifest will have a `deriveFrom` field which points to the original substreams which is to be overriden. This is useful to port a substreams to one network to another. Example of an override manifest:
+* The override feature has been overhauled. Users may now override an existing substreams by pointing to an override file in `run` or `gui` command. This override manifest will have a `deriveFrom` field which points to the original substreams which is to be overriden. This is useful to port a substreams to one network to another. Example of an override manifest:
 
     ```
     deriveFrom: path/to/mainnet-substreams.spkg #this can also be a remote url
@@ -673,6 +689,7 @@ This release brings important server-side improvements regarding performance, es
     params:
       module1: "address=2a75ca72679cf1299936d6104d825c9654489058"
     ```
+
 * The `substreams run` and `substreams gui` commands now determine the endpoint from the 'network' field in the manifest if no value is passed in the `--substreams-endpoint` flag.
 * The endpoint for each network can be set by using an environment variable `SUBSTREAMS_ENDPOINTS_CONFIG_<network_name>`, ex: `SUBSTREAMS_ENDPOINTS_CONFIG_MAINNET=my-endpoint:443`
 * The `substreams alpha init` has been moved to `substreams init`
@@ -710,8 +727,8 @@ This release brings important server-side improvements regarding performance, es
 
 > \[!IMPORTANT] The client and servers will both need to be upgraded at the same time for the new progress messages to be parsed:
 >
-> * The new Substreams servers will _NOT_ send the old `modules` field as part of its `progress` message, only the new `running_jobs`, `modules_stats`, `stages`.
-> * The new Substreams clients will _NOT_ be able to decode the old progress information when connecting to older servers.
+> * The new Substreams servers will *NOT* send the old `modules` field as part of its `progress` message, only the new `running_jobs`, `modules_stats`, `stages`.
+> * The new Substreams clients will *NOT* be able to decode the old progress information when connecting to older servers.
 
 However, the actual data (and cursor) will work correctly between versions. Only incompatible progress information will be ignored.
 
@@ -729,7 +746,7 @@ However, the actual data (and cursor) will work correctly between versions. Only
 #### Added
 
 * `substreams info` now takes an optional second parameter `<output-module>` to show how the substreams modules can be divided into stages
-*   Pack command: added `-c` flag to allow overriding of certain substreams.yaml values by passing in the path of a yaml file. example yaml contents:
+* Pack command: added `-c` flag to allow overriding of certain substreams.yaml values by passing in the path of a yaml file. example yaml contents:
 
     ```yaml
     package:
@@ -759,7 +776,7 @@ However, the actual data (and cursor) will work correctly between versions. Only
 ### Backend changes
 
 * Fixed/Removed: jobs would hang when config parameter `StateBundleSize` was different from `SubrequestsSize`. The latter has been removed completely: Subrequests size will now always be aligned with bundle size.
-* Auth: added support for _continuous authentication_ via the grpc auth plugin (allowing cutoff triggered by the auth system).
+* Auth: added support for *continuous authentication* via the grpc auth plugin (allowing cutoff triggered by the auth system).
 
 ### CLI changes
 
@@ -812,29 +829,29 @@ However, the actual data (and cursor) will work correctly between versions. Only
 
 * In GUI, module output now shows fields with default values, i.e. `0`, `""`, `false`
 
-## v1.1.7 (https://github.com/streamingfast/substreams/releases/tag/v1.1.7)
+## v1.1.7 (<https://github.com/streamingfast/substreams/releases/tag/v1.1.7>)
 
 ### Highlights
 
 Now using `plugin: buf.build/community/neoeinstein-prost-crate:v0.3.1` when generating the Protobuf Rust `mod.rs` which fixes the warning that remote plugins are deprecated.
 
-Previously we were using `remote: buf.build/prost/plugins/crate:v0.3.1-1`. But remote plugins when using https://buf.build (which we use to generate the Protobuf) are now deprecated and will cease to function on July 10th, 2023.
+Previously we were using `remote: buf.build/prost/plugins/crate:v0.3.1-1`. But remote plugins when using <https://buf.build> (which we use to generate the Protobuf) are now deprecated and will cease to function on July 10th, 2023.
 
 The net effect of this is that if you don't update your Substreams CLI to `1.1.7`, on July 10th 2023 and after, the `substreams protogen` will not work anymore.
 
-## v1.1.6 (https://github.com/streamingfast/substreams/releases/tag/v1.1.6)
+## v1.1.6 (<https://github.com/streamingfast/substreams/releases/tag/v1.1.6>)
 
 ### Backend changes
 
-* `substreams-tier1` and `substreams-tier2` are now standalone **Apps**, to be used as such by server implementations (_firehose-ethereum_, etc.)
+* `substreams-tier1` and `substreams-tier2` are now standalone **Apps**, to be used as such by server implementations (*firehose-ethereum*, etc.)
 * `substreams-tier1` now listens to [Connect](https://buf.build/blog/connect-a-better-grpc) protocol, enabling browser-based substreams clients
-* **Authentication** has been overhauled to take advantage of https://github.com/streamingfast/dauth, allowing the use of a GRPC-based sidecar or reverse-proxy to provide authentication.
-* **Metering** has been overhauled to take advantage of https://github.com/streamingfast/dmetering plugins, allowing the use of a GRPC sidecar or logs to expose usage metrics.
+* **Authentication** has been overhauled to take advantage of <https://github.com/streamingfast/dauth>, allowing the use of a GRPC-based sidecar or reverse-proxy to provide authentication.
+* **Metering** has been overhauled to take advantage of <https://github.com/streamingfast/dmetering> plugins, allowing the use of a GRPC sidecar or logs to expose usage metrics.
 * The **tier2 logs** no longer show a `parent_trace_id`: the `trace_id` is now the same as tier1 jobs. Unique tier2 jobs can be distinguished by their `stage` and `segment`, corresponding to the `output_module_name` and `startblock:stopblock`
 
 ### CLI changes
 
-* The `substreams protogen` command now uses this Buf plugin https://buf.build/community/neoeinstein-prost to generate the Rust code for your Substreams definitions.
+* The `substreams protogen` command now uses this Buf plugin <https://buf.build/community/neoeinstein-prost> to generate the Rust code for your Substreams definitions.
 * The `substreams protogen` command no longer generate the `FILE_DESCRIPTOR_SET` constant which generates an unsued warning in Rust. We don't think nobody relied on having the `FILE_DESCRIPTOR_SET` constant generated, but if it's the case, you can provide your own `buf.gen.yaml` that will be used instead of the generated one when doing `substreams protogen`.
 * Added `-H` flag on the `substreams run` command, to set HTTP Headers in the Substreams request.
 
@@ -894,11 +911,11 @@ This release fixes data determinism issues. This comes at a 20% performance cost
 
 ### Added
 
-* Added Tracing capabilities, using https://github.com/streamingfast/sf-tracing . See repository for details on how to enable.
+* Added Tracing capabilities, using <https://github.com/streamingfast/sf-tracing> . See repository for details on how to enable.
 
 ### Known issues
 
-* If the cached substreams states are missing a 'full-kv' file in its sequence (not a normal scenario), requests will fail with `opening file: not found` https://github.com/streamingfast/substreams/issues/222
+* If the cached substreams states are missing a 'full-kv' file in its sequence (not a normal scenario), requests will fail with `opening file: not found` <https://github.com/streamingfast/substreams/issues/222>
 
 ## [v1.1.3](https://github.com/streamingfast/substreams/releases/tag/v1.1.3)
 
@@ -1051,7 +1068,7 @@ This should be the last release before a breaking change in the API and handling
 
 ## [1.0.2](https://github.com/streamingfast/substreams/releases/tag/v1.0.2)
 
-* Release was retracted because it contained the refactoring expected for 1.1.0 by mistake, check https://github.com/streamingfast/substreams/releases/tag/v1.0.3 instead.
+* Release was retracted because it contained the refactoring expected for 1.1.0 by mistake, check <https://github.com/streamingfast/substreams/releases/tag/v1.0.3> instead.
 
 ## [1.0.1](https://github.com/streamingfast/substreams/releases/tag/v1.0.1)
 
@@ -1101,7 +1118,7 @@ This change keeps backwards compatibility. Old Substreams Packages will still wo
 ### Highlights
 
 * Improved execution speed and module loading speed by bumping to WASM Time to version 4.0.
-*   Improved developer experience on the CLI by making the `<manifest>` argument optional.
+* Improved developer experience on the CLI by making the `<manifest>` argument optional.
 
     The CLI when `<manifest>` argument is not provided will now look in the current directory for a `substreams.yaml` file and is going to use it if present. So if you are in your Substreams project and your file is named `substreams.yaml`, you can simply do `substreams pack`, `substreams protogen`, etc.
 
@@ -1413,7 +1430,7 @@ The state output format for `map` and `store` modules has changed internally to 
 * `code:` is now defined in the `binaries` section of the manifest, instead of in each module. A module can select which binary with the `binary:` field on the Module definition.
 * Added `substreams inspect ./substreams.yaml` or `inspect some.spkg` to see what's inside. Requires `protoc` to be installed (which you should have anyway).
 * Added command `substreams protogen` that writes a temporary `buf.gen.yaml` and generates Rust structs based on the contents of the provided manifest or package.
-*   Added `substreams::handlers` macros to reduce boilerplate when create substream modules.
+* Added `substreams::handlers` macros to reduce boilerplate when create substream modules.
 
     `substreams::handlers::map` is used for the handlers corresponding to modules of type `map`. Modules of type `map` should return a `Result` where the error is of type `Error`
 
@@ -1472,7 +1489,7 @@ The state output format for `map` and `store` modules has changed internally to 
 
 First chain-agnostic release. THIS IS BETA SOFTWARE. USE AT YOUR OWN RISK. WE PROVIDE NO BACKWARDS COMPATIBILITY GUARANTEES FOR THIS RELEASE.
 
-See https://github.com/streamingfast/substreams for usage docs..
+See <https://github.com/streamingfast/substreams> for usage docs..
 
 * Removed `local` command. See README.md for instructions on how to run locally now. Build `sfeth` from source for now.
 * Changed the `remote` command to `run`.
