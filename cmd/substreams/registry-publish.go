@@ -93,7 +93,7 @@ func runPublish(cmd *cobra.Command, args []string) error {
 
 	fmt.Println("Package published successfully")
 	if spkgUrlPath != "" {
-		fmt.Printf("Start streaming your package with: substreams gui %s\n", spkgUrlPath)
+		fmt.Printf("Start streaming your package with: `substreams gui %s`\n", spkgUrlPath)
 	}
 
 	return nil
