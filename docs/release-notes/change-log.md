@@ -11,6 +11,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+## v1.10.9
+
 * Add Mantra Mainnet and Testnet to the HardcodedEndpoints map.
 * Add Vara Mainnet and Testnet to the HardcodedEndpoints map.
 * Fix `substreams gui` command downloading spkg twice which would cause some issues with spkg that are very big.
