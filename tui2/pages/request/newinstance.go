@@ -80,9 +80,11 @@ func (c *Config) NewInstance() (out *Instance, err error) {
 		}
 		readerOptions = append(readerOptions, manifest.WithParams(params))
 	}
+
 	if c.OverrideNetwork != "" {
 		readerOptions = append(readerOptions, manifest.WithOverrideNetwork(c.OverrideNetwork))
 	}
+
 	if c.SkipPackageValidation {
 		readerOptions = append(readerOptions, manifest.SkipPackageValidationReader())
 	}

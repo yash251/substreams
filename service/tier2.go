@@ -206,6 +206,13 @@ func (s *Tier2Service) ProcessRange(request *pbssinternal.ProcessRangeRequest, s
 		return connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("validate request: %w", err))
 	}
 
+	execGraph, err := exec.NewOutputModuleGraph(request.OutputModule, true, request.Modules, request.FirstStreamableBlock) //production-mode flag is irrelevant here because it isn't used to calculate the hashes
+	if err != nil {
+		return bsstream.NewErrInvalidArg(err.Error())
+	}
+	outputModuleHash := execGraph.ModuleHashes().Get(request.OutputModule)
+	ctx = reqctx.WithOutputModuleHash(ctx, outputModuleHash)
+
 	emitter, err := dmetering.New(request.MeteringConfig, logger)
 	if err != nil {
 		return connect.NewError(connect.CodeInternal, fmt.Errorf("unable to initialize dmetering: %w", err))
@@ -507,6 +514,7 @@ func tier2ResponseHandler(ctx context.Context, logger *zap.Logger, streamSrv pbs
 		logger.Warn("no auth information available in tier2 response handler")
 	}
 
+	outputModuleHash := reqctx.OutputModuleHash(ctx)
 	metricsSender := metering.GetMetricsSender(ctx)
 
 	return func(respAny substreams.ResponseFromAnyTier) error {
@@ -523,7 +531,7 @@ func tier2ResponseHandler(ctx context.Context, logger *zap.Logger, streamSrv pbs
 			zap.String("user_meta", userMeta),
 			zap.String("endpoint", "sf.substreams.internal.v2/ProcessRange"),
 		)
-		metricsSender.Send(ctx, userID, apiKeyID, ip, userMeta, "sf.substreams.internal.v2/ProcessRange", resp)
+		metricsSender.Send(ctx, userID, apiKeyID, ip, userMeta, outputModuleHash, "sf.substreams.internal.v2/ProcessRange", resp)
 		return nil
 	}
 }

@@ -113,7 +113,7 @@ func NewMetricsSender() *MetricsSender {
 	}
 }
 
-func (ms *MetricsSender) Send(ctx context.Context, userID, apiKeyID, ip, userMeta, endpoint string, resp proto.Message) {
+func (ms *MetricsSender) Send(ctx context.Context, userID, apiKeyID, ip, userMeta, outputModuleHash, endpoint string, resp proto.Message) {
 	ms.Lock()
 	defer ms.Unlock()
 
@@ -143,10 +143,11 @@ func (ms *MetricsSender) Send(ctx context.Context, userID, apiKeyID, ip, userMet
 	meter.CountInc(TotalWriteBytes, int(totalWriteBytes))
 
 	event := dmetering.Event{
-		UserID:    userID,
-		ApiKeyID:  apiKeyID,
-		IpAddress: ip,
-		Meta:      userMeta,
+		UserID:           userID,
+		ApiKeyID:         apiKeyID,
+		IpAddress:        ip,
+		Meta:             userMeta,
+		OutputModuleHash: outputModuleHash,
 
 		Endpoint: endpoint,
 		Metrics: map[string]float64{
