@@ -70,10 +70,31 @@ func runGui(cmd *cobra.Command, args []string) (err error) {
 	default:
 		return fmt.Errorf("too many arguments")
 	}
-	// TODO: validate that the manifest is a valid substreams package
+
+	requestParams := sflags.MustGetStringArray(cmd, "params")
+
+	paramsStringMap := make(map[string]struct{})
+	for _, parameter := range requestParams {
+		moduleName := strings.Split(parameter, "=")[0]
+		paramsStringMap[moduleName] = struct{}{}
+	}
+
+	readerOptions := []manifest.Option{}
+
+	if len(requestParams) != 0 {
+		params, err := manifest.ParseParams(requestParams)
+		if err != nil {
+			return fmt.Errorf("parsing params: %w", err)
+		}
+		readerOptions = append(readerOptions, manifest.WithParams(params))
+	}
+
+	if sflags.MustGetBool(cmd, "skip-package-validation") {
+		readerOptions = append(readerOptions, manifest.SkipPackageValidationReader())
+	}
 
 	// Safe guard to ensure that the manifest file exists
-	manifestReader, err := manifest.NewReader(manifestPath)
+	manifestReader, err := manifest.NewReader(manifestPath, readerOptions...)
 	if err != nil {
 		return fmt.Errorf("manifest reader: %w", err)
 	}
@@ -102,14 +123,9 @@ func runGui(cmd *cobra.Command, args []string) (err error) {
 	network := sflags.MustGetString(cmd, "network")
 	if network == "" {
 		network = packageBundle.Package.Network
-	}
-
-	requestParams := sflags.MustGetStringArray(cmd, "params")
-
-	paramsStringMap := make(map[string]struct{})
-	for _, parameter := range requestParams {
-		moduleName := strings.Split(parameter, "=")[0]
-		paramsStringMap[moduleName] = struct{}{}
+		if network == "" {
+			return fmt.Errorf("network not set, please provide a network")
+		}
 	}
 
 	defaultParams := make([]string, 0)

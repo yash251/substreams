@@ -250,7 +250,7 @@ func (o *Output) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			o.searchEnabled = true
 			cmds = append(cmds, common.SetModalComponentCmd(o.searchCtx))
 		case "F":
-			o.bytesRepresentation = (o.bytesRepresentation + 1) % 3
+			o.bytesRepresentation = (o.bytesRepresentation + 1) % 4
 			o.statusBar.SetBytesRepresentation(o.bytesRepresentation)
 			o.setOutputViewContent(true)
 		case "N":
