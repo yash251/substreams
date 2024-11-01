@@ -22,23 +22,23 @@ func init() {
 }
 
 var registryPublish = &cobra.Command{
-	Use:   "publish <github_release_url>",
+	Use:   "publish <github_release_url | https_spkg_path | local_spkg_path>",
 	Short: "Publish a package to the Substreams.dev registry",
 	Args:  cobra.ExactArgs(1),
-	RunE:  runREgistryPublish,
+	RunE:  runRegistryPublish,
 }
 
-func runREgistryPublish(cmd *cobra.Command, args []string) error {
-	githubReleaseUrl := args[0]
+func runRegistryPublish(cmd *cobra.Command, args []string) error {
+	spkgReleasePath := args[0]
 
-	org, err := getOrganizationFromGithubUrl(githubReleaseUrl)
+	org, err := getOrganizationFromGithubUrl(spkgReleasePath)
 	if err != nil {
 		return err
 	}
 
 	request := &publishRequest{
 		OrganizationSlug: slugify(org),
-		GithubUrl:        githubReleaseUrl,
+		GithubUrl:        spkgReleasePath,
 	}
 	jsonRequest, _ := json.Marshal(request)
 	requestBody := bytes.NewBuffer(jsonRequest)
