@@ -25,6 +25,7 @@ func init() {
 	guiCmd.Flags().String("network", "", "Specify the network to use for params and initialBlocks, overriding the 'network' field in the substreams package")
 	guiCmd.Flags().Bool("insecure", false, "Skip certificate validation on GRPC connection")
 	guiCmd.Flags().Bool("plaintext", false, "Establish GRPC connection in plaintext")
+	guiCmd.Flags().String("spkg-registry", "https://spkg.io", "Substreams package registry")
 	guiCmd.Flags().StringSliceP("header", "H", nil, "Additional headers to be sent in the substreams request")
 	guiCmd.Flags().StringP("start-block", "s", "", "Start block to stream from. If empty, will be replaced by initialBlock of the first module you are streaming. If negative, will be resolved by the server relative to the chain head")
 	guiCmd.Flags().StringP("cursor", "c", "", "Cursor to stream from. Leave blank for no cursor")
@@ -47,6 +48,9 @@ var guiCmd = &cobra.Command{
 		Stream module output from a given package on a remote endpoint. The manifest is optional as it will try to find a file named
 		'substreams.yaml' in current working directory if nothing entered. You may enter a directory that contains a 'substreams.yaml'
 		file in place of '<manifest_file>, or a link to a remote .spkg file, using urls gs://, http(s)://, ipfs://, etc.'.
+
+		You can also use substreams gui my-package@v0.1.0 to specify a specific version of the package. This will fetch it from 
+		https://spkg.io/...
 	`),
 	RunE:         runGui,
 	Args:         cobra.RangeArgs(0, 2),
@@ -79,7 +83,9 @@ func runGui(cmd *cobra.Command, args []string) (err error) {
 		paramsStringMap[moduleName] = struct{}{}
 	}
 
-	readerOptions := []manifest.Option{}
+	readerOptions := []manifest.Option{
+		manifest.WithRegistryURL(sflags.MustGetString(cmd, "spkg-registry")),
+	}
 
 	if len(requestParams) != 0 {
 		params, err := manifest.ParseParams(requestParams)

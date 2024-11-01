@@ -16,19 +16,19 @@ import (
 )
 
 func init() {
-	publishCmd.PersistentFlags().String("registry", "https://api.substreams.dev", "Substreams dev endpoint")
+	registryPublish.PersistentFlags().String("registry", "https://api.substreams.dev", "Substreams dev endpoint")
 
-	rootCmd.AddCommand(publishCmd)
+	registryCmd.AddCommand(registryPublish)
 }
 
-var publishCmd = &cobra.Command{
+var registryPublish = &cobra.Command{
 	Use:   "publish <github_release_url>",
 	Short: "Publish a package to the Substreams.dev registry",
 	Args:  cobra.ExactArgs(1),
-	RunE:  runPublish,
+	RunE:  runREgistryPublish,
 }
 
-func runPublish(cmd *cobra.Command, args []string) error {
+func runREgistryPublish(cmd *cobra.Command, args []string) error {
 	githubReleaseUrl := args[0]
 
 	org, err := getOrganizationFromGithubUrl(githubReleaseUrl)

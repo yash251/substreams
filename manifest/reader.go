@@ -69,6 +69,7 @@ type Reader struct {
 	overrideNetwork                string
 	overrideOutputModule           string
 	params                         map[string]string
+	registryURL                    string
 }
 
 func NewReader(input string, opts ...Option) (*Reader, error) {
@@ -95,12 +96,12 @@ func newReader(input, workingDir string, opts ...Option) (*Reader, error) {
 		workingDir:    workingDir,
 	}
 
-	if err := r.resolveInputPath(); err != nil {
-		return nil, err
-	}
-
 	for _, opt := range opts {
 		opt(r)
+	}
+
+	if err := r.resolveInputPath(); err != nil {
+		return nil, err
 	}
 
 	return r, nil
@@ -307,7 +308,6 @@ func (cli *ipfsClient) read(hash string) ([]byte, error) {
 }
 
 func (r *Reader) readFromIPFS(input string) error {
-
 	ipfs := newIPFSClient()
 	b, err := ipfs.read(input)
 	if err != nil {
@@ -391,6 +391,16 @@ func (r *Reader) resolveInputPath() error {
 	input := r.originalInput
 	if r.IsRemotePackage(input) {
 		r.currentInput = input
+		return nil
+	}
+
+	if r.IsSpkgVersionStandardPackage(input) {
+		parts := strings.Split(input, "@")
+		registryURL := r.registryURL
+		if registryURL == "" {
+			registryURL = "https://spkg.io"
+		}
+		r.currentInput = fmt.Sprintf("%s/v1/packages/%s-%s.spkg", registryURL, parts[0], parts[1])
 		return nil
 	}
 
@@ -583,6 +593,10 @@ func (r *Reader) resolvePkg() (*pbsubstreams.Package, *Manifest, error) {
 // HTTP/HTTPS, Google Cloud Storage, S3 or Azure Storage.
 func (r *Reader) IsRemotePackage(input string) bool {
 	return hasRemotePrefix(input)
+}
+
+func (r *Reader) IsSpkgVersionStandardPackage(input string) bool {
+	return strings.Contains(input, "@")
 }
 
 // IsLocalManifest determines if reader's input to read the manifest is a local manifest file, which is determined

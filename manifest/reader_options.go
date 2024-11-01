@@ -52,3 +52,10 @@ func WithCollectProtoDefinitions(f func(protoDefinitions []*desc.FileDescriptor)
 		return r
 	}
 }
+
+func WithRegistryURL(url string) Option {
+	return func(r *Reader) *Reader {
+		r.registryURL = url
+		return r
+	}
+}

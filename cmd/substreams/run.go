@@ -29,6 +29,7 @@ func init() {
 	runCmd.Flags().Bool("final-blocks-only", false, "Only process blocks that have pass finality, to prevent any reorg and undo signal by staying further away from the chain HEAD")
 	runCmd.Flags().Bool("insecure", false, "Skip certificate validation on GRPC connection")
 	runCmd.Flags().Bool("plaintext", false, "Establish GRPC connection in plaintext")
+	runCmd.Flags().String("spkg-registry", "https://spkg.io", "Substreams package registry")
 	runCmd.Flags().StringP("output", "o", "", "Output mode, one of: [ui, json, jsonl, clock] Defaults to 'ui' when in a TTY is present, and 'json' otherwise")
 	runCmd.Flags().StringSlice("debug-modules-initial-snapshot", nil, "List of 'store' modules from which to print the initial data snapshot (Unavailable in Production Mode)")
 	runCmd.Flags().StringSlice("debug-modules-output", nil, "List of modules from which to print outputs, deltas and logs (Unavailable in Production Mode)")
@@ -49,6 +50,9 @@ var runCmd = &cobra.Command{
 		Stream module outputs from a given package on a remote endpoint. The manifest is optional as it will try to find a file named
 		'substreams.yaml' in current working directory if nothing entered. You may enter a directory that contains a 'substreams.yaml'
 		'substreams.yaml' file in place of '<manifest_file>', or a link to a remote .spkg file, using urls gs://, http(s)://, ipfs://, etc.'.
+
+		You can also use substreams run my-package@v0.1.0 to specify a specific version of the package. This will fetch it from 
+		https://spkg.io/...
 	`),
 	RunE:         runRun,
 	Args:         cobra.RangeArgs(1, 2),
@@ -84,6 +88,7 @@ func runRun(cmd *cobra.Command, args []string) error {
 		manifest.WithOverrideOutputModule(outputModule),
 		manifest.WithOverrideNetwork(network),
 		manifest.WithParams(params),
+		manifest.WithRegistryURL(sflags.MustGetString(cmd, "spkg-registry")),
 	}
 	if sflags.MustGetBool(cmd, "skip-package-validation") {
 		readerOptions = append(readerOptions, manifest.SkipPackageValidationReader())
