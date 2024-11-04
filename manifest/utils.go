@@ -107,6 +107,7 @@ var HardcodedEndpoints = map[string]string{
 	"sol":                 "mainnet.sol.streamingfast.io:443",
 	"solana-mainnet":      "mainnet.sol.streamingfast.io:443",
 	"solana-mainnet-beta": "mainnet.sol.streamingfast.io:443",
+	"solana-devnet":       "devnet.sol.streamingfast.io:443",
 	"optimism":            "optimism.streamingfast.io:443",
 	"bitcoin":             "btc-mainnet.streamingfast.io:443",
 	"chapel":              "chapel.substreams.pinax.network:443",
