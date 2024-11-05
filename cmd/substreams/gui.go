@@ -197,6 +197,9 @@ func runGui(cmd *cobra.Command, args []string) (err error) {
 		DefaultParams:               strings.Join(defaultParams, "\n"),
 		// ReaderOptions:               readerOptions,
 	}
+	if err := requestConfig.Normalize(); err != nil {
+		return err
+	}
 
 	ui, err := tui2.New(requestConfig)
 	if err != nil {

@@ -63,6 +63,11 @@ type Instance struct {
 	Graph          *manifest.ModuleGraph
 }
 
+func (c *Config) Normalize() error {
+	_, err := c.NewInstance()
+	return err
+}
+
 func (c *Config) NewInstance() (out *Instance, err error) {
 	// WARN: this is run in a goroutine, so there are risks of races when we mutate
 	// this *Config pointer, although it should be fairly low risk.
