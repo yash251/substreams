@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## Unreleased
 
 * Fix `substreams gui` selecting the wrong module in the 'outputs' view if there is no output the selected output_module.
+* Add the block 'age' printed clock headers in the`substreams run` command.
 
 ## v1.10.9
 
