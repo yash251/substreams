@@ -34,9 +34,8 @@ type Output struct {
 	lastDisplayContext *displayContext
 	lastOutputContent  string
 
-	lowBlock       *uint64
-	highBlock      uint64
-	firstBlockSeen bool
+	lowBlock  *uint64
+	highBlock uint64
 
 	blocksPerModule     map[string][]uint64
 	payloads            map[request.BlockContext]*pbsubstreamsrpc.AnyModuleOutput
@@ -92,7 +91,6 @@ func New(c common.Common, config *request.Config) (*Output, error) {
 		outputModule:        config.OutputModule,
 		logsEnabled:         true,
 		//moduleNavigator:     nav,
-		firstBlockSeen: true,
 	}
 	output.statusBar.SetShowLogs(output.logsEnabled)
 	return output, nil
@@ -163,6 +161,14 @@ func (o *Output) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		o.blockSelector.StretchBounds(*o.lowBlock, o.highBlock)
 
+		// this will run on first received data (whatever module)
+		// we always add the "output module" as soon as we get data
+		if o.moduleSelector.AddModule(o.outputModule) {
+			cmds = append(cmds, func() tea.Msg { return common.UpdateSeenModulesMsg(o.moduleSelector.Modules) })
+			o.active.Module = o.outputModule
+			o.active.BlockNum = blockNum
+		}
+
 		o.blockIDs[msg.Clock.Number] = msg.Clock.Id
 		for _, output := range msg.AllModuleOutputs() {
 			if output.IsEmpty() {
@@ -175,12 +181,17 @@ func (o *Output) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				BlockNum: blockNum,
 			}
 
+			forceRedraw := false
 			if _, found := o.payloads[blockCtx]; !found {
 				if o.moduleSelector.AddModule(modName) {
 					cmds = append(cmds, func() tea.Msg { return common.UpdateSeenModulesMsg(o.moduleSelector.Modules) })
 				}
 				if o.active.Module == "" {
 					o.active.Module = modName
+					o.active.BlockNum = blockNum
+				}
+				if o.active.Module == modName && len(o.blocksPerModule[modName]) == 0 {
+					forceRedraw = true
 					o.active.BlockNum = blockNum
 				}
 				o.blocksPerModule[modName] = append(o.blocksPerModule[modName], blockNum)
@@ -197,10 +208,7 @@ func (o *Output) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 			o.payloads[blockCtx] = output
-			if o.firstBlockSeen {
-				o.active = blockCtx
-			}
-			o.setOutputViewContent(false)
+			o.setOutputViewContent(forceRedraw)
 		}
 
 	case search.ApplySearchQueryMsg:
@@ -319,7 +327,7 @@ func (o *Output) setOutputViewContent(forcedRender bool) {
 		errReceived:       o.errReceived,
 	}
 
-	if o.firstBlockSeen || forcedRender {
+	if forcedRender {
 		vals := o.renderedOutput(displayCtx.payload, true)
 		content := o.renderPayload(vals)
 		if displayCtx.searchViewEnabled {
@@ -339,9 +347,6 @@ func (o *Output) setOutputViewContent(forcedRender bool) {
 		o.outputView.SetContent(content)
 
 		o.lastOutputContent = content
-		if content != "" {
-			o.firstBlockSeen = false
-		}
 	} else {
 		o.outputView.SetContent(o.lastOutputContent)
 	}
