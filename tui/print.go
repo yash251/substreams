@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/dustin/go-humanize"
 	"github.com/jhump/protoreflect/desc"
@@ -356,7 +357,7 @@ func decodeAsString(in []byte) []byte { return []byte(fmt.Sprintf("%q", string(i
 func decodeAsHex(in []byte) string    { return "(hex) " + hex.EncodeToString(in) }
 
 func printClock(block *pbsubstreamsrpc.BlockScopedData) {
-	fmt.Printf("----------- BLOCK #%s (%s) ---------------\n", humanize.Comma(int64(block.Clock.Number)), block.Clock.Id)
+	fmt.Printf("----------- BLOCK #%s (%s) age=%s ---------------\n", humanize.Comma(int64(block.Clock.Number)), block.Clock.Id, time.Since(block.Clock.Timestamp.AsTime()))
 }
 
 func printUndo(lastGoodClock *pbsubstreams.BlockRef, cursor string) {
