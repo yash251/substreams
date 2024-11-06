@@ -31,6 +31,22 @@ var registryPublish = &cobra.Command{
 func runRegistryPublish(cmd *cobra.Command, args []string) error {
 	spkgReleasePath := args[0]
 
+	var apiKey string
+	registryTokenBytes, err := os.ReadFile(registryTokenFilename)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			return fmt.Errorf("failed to read registry token: %w", err)
+		}
+	}
+
+	substreamsRegistryToken := os.Getenv("SUBSTREAMS_REGISTRY_TOKEN")
+	apiKey = string(registryTokenBytes)
+	if apiKey == "" || substreamsRegistryToken != "" {
+		apiKey = substreamsRegistryToken
+	}
+
+	zlog.Debug("loaded api key", zap.String("api_key", apiKey))
+
 	/// todo: accept local spkg path, remote spkg or local_substreams_path
 	org, err := getOrganizationFromGithubUrl(spkgReleasePath)
 	if err != nil {
@@ -52,22 +68,6 @@ func runRegistryPublish(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-
-	var apiKey string
-	registryTokenBytes, err := os.ReadFile(registryTokenFilename)
-	if err != nil {
-		if !os.IsNotExist(err) {
-			return fmt.Errorf("failed to read registry token: %w", err)
-		}
-	}
-
-	substreamsRegistryToken := os.Getenv("SUBSTREAMS_REGISTRY_TOKEN")
-	apiKey = string(registryTokenBytes)
-	if apiKey == "" || substreamsRegistryToken != "" {
-		apiKey = substreamsRegistryToken
-	}
-
-	zlog.Debug("loaded api key", zap.String("api_key", apiKey))
 
 	publishPackageEndpoint := fmt.Sprintf("%s/sf.substreams.dev.Api/PublishPackage", apiEndpoint)
 	zlog.Debug("publishing package", zap.String("registry_url", publishPackageEndpoint))
