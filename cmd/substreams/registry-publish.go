@@ -2,21 +2,25 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
+	"errors"
 	"fmt"
-	"io"
-	"net/http"
-	"os"
-	"strings"
-
+	"github.com/charmbracelet/huh"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/spf13/cobra"
+	"github.com/streamingfast/cli/sflags"
+	"github.com/streamingfast/substreams/manifest"
 	"github.com/tidwall/gjson"
 	"go.uber.org/zap"
-
-	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/proto"
+	"io"
+	"mime/multipart"
+	"net/http"
+	"os"
 )
 
 func init() {
-	registryPublish.PersistentFlags().String("registry", "https://api.substreams.dev", "Substreams dev endpoint")
+	registryPublish.PersistentFlags().String("spkg-registry", "https://spkg.io", "Substreams package registry")
+	registryPublish.PersistentFlags().Bool("local-development", false, "Set local development")
 
 	registryCmd.AddCommand(registryPublish)
 }
@@ -24,12 +28,26 @@ func init() {
 var registryPublish = &cobra.Command{
 	Use:   "publish [github_release_url | https_spkg_path | local_spkg_path | local_substreams_path]",
 	Short: "Publish a package to the Substreams.dev registry",
-	Args:  cobra.ExactArgs(1),
+	Args:  cobra.MaximumNArgs(1),
 	RunE:  runRegistryPublish,
 }
 
+// FLOW:
+// - The user get an API_KEY (registry token) on substreams.dev
+// - Set API_KEY :
+// 	- If the user doesn't have the API_KEY SET FOR REGISTRY, let's redirect him to `substreams.dev` and grab a registry token
+// 	- If it has one already, use it
+// - SET UP Publish request :
+// 	- If the user does the command on a manifest, pack it first
+//  - If the user does provide an spkg, use it as is
+//  - If the user does provide a github release url, download the spkg and pack it
+
 func runRegistryPublish(cmd *cobra.Command, args []string) error {
-	spkgReleasePath := args[0]
+	apiEndpoint := "https://substreams.dev"
+	isLocal := sflags.MustGetBool(cmd, "local-development")
+	if isLocal {
+		apiEndpoint = "http://localhost:9000"
+	}
 
 	var apiKey string
 	registryTokenBytes, err := os.ReadFile(registryTokenFilename)
@@ -41,42 +59,108 @@ func runRegistryPublish(cmd *cobra.Command, args []string) error {
 
 	substreamsRegistryToken := os.Getenv("SUBSTREAMS_REGISTRY_TOKEN")
 	apiKey = string(registryTokenBytes)
-	if apiKey == "" || substreamsRegistryToken != "" {
-		apiKey = substreamsRegistryToken
+	if apiKey == "" {
+		if substreamsRegistryToken != "" {
+			apiKey = substreamsRegistryToken
+		} else {
+			linkStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("12"))
+			//Let's redirect the user to substreams.dev to get a registry token and let them paste in the terminal
+			fmt.Println("`SUBSTREAMS_REGISTRY_TOKEN` env variable is missing...")
+			fmt.Println("You can get a token using the following link: ")
+			fmt.Println()
+			fmt.Println("    " + linkStyle.Render(fmt.Sprintf("%s/me", apiEndpoint)))
+			fmt.Println("")
+
+			var token string
+			form := huh.NewForm(
+				huh.NewGroup(
+					huh.NewInput().
+						EchoMode(huh.EchoModePassword).
+						Title("After retrieving your registry token, paste it here:").
+						Inline(true).
+						Value(&token).
+						Validate(func(s string) error {
+							if s == "" {
+								return errors.New("token cannot be empty")
+							}
+							return nil
+						}),
+				),
+			)
+
+			if err := form.Run(); err != nil {
+				return fmt.Errorf("error running form: %w", err)
+			}
+
+			// Set the API_KEY using the input token
+			apiKey = token
+		}
 	}
+
 
 	zlog.Debug("loaded api key", zap.String("api_key", apiKey))
 
-	/// todo: accept local spkg path, remote spkg or local_substreams_path
-	org, err := getOrganizationFromGithubUrl(spkgReleasePath)
-	if err != nil {
-		return err
+	var manifestPath string
+	switch len(args) {
+	case 0:
+		manifestPath, err = resolveManifestFile("")
+		if err != nil {
+			return fmt.Errorf("resolving manifest: %w", err)
+		}
+	case 1:
+		manifestPath = args[0]
 	}
 
-	// if local -> check if valid spkg file
-	// if not, return error
-	// if valid, send request
-
-	request := &publishRequest{
-		OrganizationSlug: slugify(org),
-		GithubUrl:        spkgReleasePath,
+	readerOptions := []manifest.Option{
+		manifest.WithRegistryURL(sflags.MustGetString(cmd, "spkg-registry")),
 	}
-	jsonRequest, _ := json.Marshal(request)
-	requestBody := bytes.NewBuffer(jsonRequest)
 
-	apiEndpoint, err := cmd.Flags().GetString("registry")
+	manifestReader, err := manifest.NewReader(manifestPath, readerOptions...)
 	if err != nil {
-		return err
+		return fmt.Errorf("manifest reader: %w", err)
+	}
+
+	pkgBundle, err := manifestReader.Read()
+	if err != nil {
+		return fmt.Errorf("read manifest %q: %w", manifestPath, err)
+	}
+
+	spkg := pkgBundle.Package
+
+	var requestBody bytes.Buffer
+	writer := multipart.NewWriter(&requestBody)
+
+	// Create form file to get it read from the `substreams.dev`  server
+
+	formFile, err := writer.CreateFormFile("file", "substreams_package")
+	if err != nil {
+		return fmt.Errorf("failed to create form file: %w", err)
+	}
+
+	data, err := proto.Marshal(spkg)
+	if err != nil {
+		return fmt.Errorf("marshalling substreams package: %w", err)
+	}
+
+	_, err = formFile.Write(data)
+	if err != nil {
+		return fmt.Errorf("failed to write file content: %w", err)
+	}
+
+	err = writer.Close()
+	if err != nil {
+		return fmt.Errorf("failed to close writer: %w", err)
 	}
 
 	publishPackageEndpoint := fmt.Sprintf("%s/sf.substreams.dev.Api/PublishPackage", apiEndpoint)
+
 	zlog.Debug("publishing package", zap.String("registry_url", publishPackageEndpoint))
 
-	req, err := http.NewRequest("POST", publishPackageEndpoint, requestBody)
+	req, err := http.NewRequest("POST", publishPackageEndpoint, &requestBody)
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Content-Type", writer.FormDataContentType())
 	req.Header.Set("X-Api-Key", apiKey)
 
 	resp, err := http.DefaultClient.Do(req)
@@ -91,9 +175,10 @@ func runRegistryPublish(cmd *cobra.Command, args []string) error {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		msg := gjson.Get(string(b), "message").String()
-		fmt.Println("Failed to publish package")
-		fmt.Printf("\tReason: %s\n", msg)
+		linkStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
+		fmt.Println("")
+		fmt.Println(linkStyle.Render("Failed to publish package")+ "\n")
+		fmt.Println("Reason:" + string(b))
 		return nil
 	}
 
@@ -107,28 +192,3 @@ func runRegistryPublish(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-type publishRequest struct {
-	//todo: remove this, it will be the user id
-	OrganizationSlug string `json:"organization_slug"`
-	// change this to spkg bytes
-	GithubUrl string `json:"github_url"`
-}
-
-func getOrganizationFromGithubUrl(url string) (string, error) {
-	if !strings.Contains(url, "github.com") {
-		return "", fmt.Errorf("invalid github url")
-	}
-
-	parts := strings.Split(url, "/")
-	for i, part := range parts {
-		if part == "github.com" && i < len(parts)-1 {
-			return strings.ToLower(parts[i+1]), nil
-		}
-	}
-
-	return "", fmt.Errorf("organization name not found in github url")
-}
-
-func slugify(s string) string {
-	return strings.ReplaceAll(strings.ToLower(s), " ", "-")
-}
