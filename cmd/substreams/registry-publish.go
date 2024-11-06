@@ -22,7 +22,7 @@ func init() {
 }
 
 var registryPublish = &cobra.Command{
-	Use:   "publish <github_release_url | https_spkg_path | local_spkg_path>",
+	Use:   "publish [github_release_url | https_spkg_path | local_spkg_path | local_substreams_path]",
 	Short: "Publish a package to the Substreams.dev registry",
 	Args:  cobra.ExactArgs(1),
 	RunE:  runRegistryPublish,
@@ -31,10 +31,15 @@ var registryPublish = &cobra.Command{
 func runRegistryPublish(cmd *cobra.Command, args []string) error {
 	spkgReleasePath := args[0]
 
+	/// todo: accept local spkg path, remote spkg or local_substreams_path
 	org, err := getOrganizationFromGithubUrl(spkgReleasePath)
 	if err != nil {
 		return err
 	}
+
+	// if local -> check if valid spkg file
+	// if not, return error
+	// if valid, send request
 
 	request := &publishRequest{
 		OrganizationSlug: slugify(org),
@@ -103,8 +108,10 @@ func runRegistryPublish(cmd *cobra.Command, args []string) error {
 }
 
 type publishRequest struct {
+	//todo: remove this, it will be the user id
 	OrganizationSlug string `json:"organization_slug"`
-	GithubUrl        string `json:"github_url"`
+	// change this to spkg bytes
+	GithubUrl string `json:"github_url"`
 }
 
 func getOrganizationFromGithubUrl(url string) (string, error) {
