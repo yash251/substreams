@@ -9,7 +9,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## v1.10.10
 
 * Fix `substreams gui` selecting the wrong module in the 'outputs' view if there is no output the selected output_module.
 * Add the block 'age' printed clock headers in the`substreams run` command.
@@ -104,7 +104,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 * Add `substreams auth` command, to authenticate via `thegraph.market` and to get a dev API Key.
 * Rename `--discovery-endpoint` into `codegen-endpoint` in `substreams init` command.
-* Add `substreams codegen subgraph` command that takes a substreams `module` and an `spkg` and that generates a simple `subgraph` from the `module` output.  
+* Add `substreams codegen subgraph` command that takes a substreams `module` and an `spkg` and that generates a simple `subgraph` from the `module` output.
 * On `substreams init` command, if flag `--state-file` is provided, the state file is used by default for project generation.
 * In `substreams init` command, the state file is named using a `Date format` and not using `Unix` anymore.
 * Tools->prometheus: added the possibility to override the start-block on an endpoint
