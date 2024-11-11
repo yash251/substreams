@@ -4,6 +4,11 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
+	"mime/multipart"
+	"net/http"
+	"os"
+
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
@@ -11,10 +16,6 @@ import (
 	"github.com/tidwall/gjson"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
-	"io"
-	"mime/multipart"
-	"net/http"
-	"os"
 )
 
 func init() {
@@ -89,7 +90,6 @@ func runRegistryPublish(cmd *cobra.Command, args []string) error {
 			apiKey = token
 		}
 	}
-
 
 	zlog.Debug("loaded api key", zap.String("api_key", apiKey))
 
@@ -172,7 +172,7 @@ func runRegistryPublish(cmd *cobra.Command, args []string) error {
 	if resp.StatusCode != http.StatusOK {
 		linkStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
 		fmt.Println("")
-		fmt.Println(linkStyle.Render("Failed to publish package")+ "\n")
+		fmt.Println(linkStyle.Render("Failed to publish package") + "\n")
 		fmt.Println("Reason:" + string(b))
 		return nil
 	}
@@ -186,4 +186,3 @@ func runRegistryPublish(cmd *cobra.Command, args []string) error {
 
 	return nil
 }
-
