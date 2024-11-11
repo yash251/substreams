@@ -32,16 +32,6 @@ var registryPublish = &cobra.Command{
 	RunE:  runRegistryPublish,
 }
 
-// FLOW:
-// - The user get an API_KEY (registry token) on substreams.dev
-// - Set API_KEY :
-// 	- If the user doesn't have the API_KEY SET FOR REGISTRY, let's redirect him to `substreams.dev` and grab a registry token
-// 	- If it has one already, use it
-// - SET UP Publish request :
-// 	- If the user does the command on a manifest, pack it first
-//  - If the user does provide an spkg, use it as is
-//  - If the user does provide a github release url, download the spkg and pack it
-
 func runRegistryPublish(cmd *cobra.Command, args []string) error {
 	apiEndpoint := "https://substreams.dev"
 	if newValue := os.Getenv("SUBSTREAMS_REGISTRY_ENDPOINT"); newValue != "" {

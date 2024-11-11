@@ -38,7 +38,7 @@ func runRegistryLoginE(cmd *cobra.Command, args []string) error {
 
 	isFileExists := checkFileExists(registryTokenFilename)
 	if isFileExists {
-		confirmOverwrite, err := runConfirmForm("Token already saved to registry-token")
+		confirmOverwrite, err := runConfirmForm("Token already saved to ~/.config/substreams/registry-token, do you want to overwrite it?")
 		if err != nil {
 			return fmt.Errorf("running confirm form: %w", err)
 		}
