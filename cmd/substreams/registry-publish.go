@@ -118,7 +118,7 @@ func runRegistryPublish(cmd *cobra.Command, args []string) error {
 	fmt.Println()
 	fmt.Println(headerStyle.Render("Package Details"))
 	fmt.Printf("%s: %s\n", style.Render("Name"), spkg.PackageMeta[0].Name)
-	fmt.Printf("%s: v%d\n", style.Render("Version"), spkg.Version)
+	fmt.Printf("%s: %s\n", style.Render("Version"), spkg.PackageMeta[0].Version)
 	fmt.Printf("%s: %s\n", style.Render("URL"), spkg.PackageMeta[0].Url)
 	fmt.Println()
 
