@@ -25,7 +25,6 @@ func init() {
 	guiCmd.Flags().String("network", "", "Specify the network to use for params and initialBlocks, overriding the 'network' field in the substreams package")
 	guiCmd.Flags().Bool("insecure", false, "Skip certificate validation on GRPC connection")
 	guiCmd.Flags().Bool("plaintext", false, "Establish GRPC connection in plaintext")
-	guiCmd.Flags().String("spkg-registry", "https://spkg.io", "Substreams package registry")
 	guiCmd.Flags().StringSliceP("header", "H", nil, "Additional headers to be sent in the substreams request")
 	guiCmd.Flags().StringP("start-block", "s", "", "Start block to stream from. If empty, will be replaced by initialBlock of the first module you are streaming. If negative, will be resolved by the server relative to the chain head")
 	guiCmd.Flags().StringP("cursor", "c", "", "Cursor to stream from. Leave blank for no cursor")
@@ -93,7 +92,7 @@ func runGui(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	readerOptions := []manifest.Option{
-		manifest.WithRegistryURL(sflags.MustGetString(cmd, "spkg-registry")),
+		manifest.WithRegistryURL(getSubstreamsRegistryEndpoint()),
 	}
 
 	if len(requestParams) != 0 {

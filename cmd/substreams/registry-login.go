@@ -3,10 +3,11 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/charmbracelet/huh"
-	"github.com/charmbracelet/lipgloss"
 	"os"
 	"path/filepath"
+
+	"github.com/charmbracelet/huh"
+	"github.com/charmbracelet/lipgloss"
 
 	"github.com/spf13/cobra"
 )
@@ -25,10 +26,7 @@ func init() {
 }
 
 func runRegistryLoginE(cmd *cobra.Command, args []string) error {
-	registryURL := "https://substreams.dev"
-	if newValue := os.Getenv("SUBSTREAMS_REGISTRY_ENDPOINT"); newValue != "" {
-		registryURL = newValue
-	}
+	registryURL := getSubstreamsRegistryEndpoint()
 
 	linkStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("12"))
 	token, err := copyPasteTokenForm(registryURL, linkStyle)

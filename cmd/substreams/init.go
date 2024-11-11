@@ -106,10 +106,7 @@ func runSubstreamsInitE(cmd *cobra.Command, args []string) error {
 		connect.WithGRPC(),
 	}
 
-	codegenEndpoint := "https://codegen.substreams.dev"
-	if newValue := os.Getenv("SUBSTREAMS_CODEGEN_ENDPOINT"); newValue != "" {
-		codegenEndpoint = newValue
-	}
+	codegenEndpoint := getSubstreamsCodegenEndpoint()
 
 	initConvoURL := codegenEndpoint
 	stateFile, stateFileFlagProvided := sflags.MustGetStringProvided(cmd, "state-file")

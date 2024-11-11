@@ -19,9 +19,6 @@ import (
 )
 
 func init() {
-	registryPublish.PersistentFlags().String("spkg-registry", "https://spkg.io", "Substreams package registry")
-	registryPublish.PersistentFlags().String("setup-mode", "production", "Setup mode (production, staging, local-development). Default: production")
-
 	registryCmd.AddCommand(registryPublish)
 }
 
@@ -33,10 +30,7 @@ var registryPublish = &cobra.Command{
 }
 
 func runRegistryPublish(cmd *cobra.Command, args []string) error {
-	apiEndpoint := "https://substreams.dev"
-	if newValue := os.Getenv("SUBSTREAMS_REGISTRY_ENDPOINT"); newValue != "" {
-		apiEndpoint = newValue
-	}
+	apiEndpoint := getSubstreamsRegistryEndpoint()
 
 	var apiKey string
 	registryTokenBytes, err := os.ReadFile(registryTokenFilename)
@@ -81,10 +75,7 @@ func runRegistryPublish(cmd *cobra.Command, args []string) error {
 		manifestPath = args[0]
 	}
 
-	spkgRegistry := "https://spkg.io"
-	if newValue := os.Getenv("SUBSTREAMS_DOWNLOAD_ENDPOINT"); newValue != "" {
-		apiEndpoint = newValue
-	}
+	spkgRegistry := getSubstreamsDownloadEndpoint()
 
 	readerOptions := []manifest.Option{
 		manifest.WithRegistryURL(spkgRegistry),
@@ -101,7 +92,6 @@ func runRegistryPublish(cmd *cobra.Command, args []string) error {
 	}
 
 	spkg := pkgBundle.Package
-
 
 	style := lipgloss.NewStyle().Foreground(lipgloss.Color("12"))
 	headerStyle := lipgloss.NewStyle().Bold(true)
