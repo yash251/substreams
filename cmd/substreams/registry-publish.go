@@ -162,7 +162,7 @@ func runRegistryPublish(cmd *cobra.Command, args []string) error {
 		linkStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
 		fmt.Println("")
 		fmt.Println(linkStyle.Render("Failed to publish package") + "\n")
-		fmt.Println("Reason:" + string(b))
+		fmt.Println("Reason: " + string(b))
 		return nil
 	}
 
@@ -182,7 +182,7 @@ func runRegistryPublish(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func copyPasteTokenForm(endpoint string) (string, error){
+func copyPasteTokenForm(endpoint string) (string, error) {
 	linkStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("12"))
 	fmt.Printf("Login to the Substreams registry.")
 	fmt.Println()
