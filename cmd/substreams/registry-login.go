@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/charmbracelet/huh"
-	"github.com/charmbracelet/lipgloss"
 	"os"
 	"path/filepath"
 
@@ -30,40 +29,15 @@ func runRegistryLoginE(cmd *cobra.Command, args []string) error {
 		registryURL = newValue
 	}
 
-	linkStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("12"))
-	fmt.Printf("Login to the Substreams registry.")
-	fmt.Println()
-	fmt.Println()
-	fmt.Println("Navigate to: ")
-	fmt.Println()
-	fmt.Println("    " + linkStyle.Render(fmt.Sprintf("%s/me", registryURL)))
-	fmt.Println("")
-
-	var token string
-	form := huh.NewForm(
-		huh.NewGroup(
-			huh.NewInput().
-				EchoMode(huh.EchoModePassword).
-				Title("Paste the token here:").
-				Inline(true).
-				Value(&token).
-				Validate(func(s string) error {
-					if s == "" {
-						return errors.New("token cannot be empty")
-					}
-					return nil
-				}),
-		),
-	)
-
-	if err := form.Run(); err != nil {
-		return fmt.Errorf("error running form: %w", err)
+	token, err := copyPasteTokenForm(registryURL)
+	if err != nil {
+		return fmt.Errorf("creating copy, paste token form %w", err)
 	}
 
 	isFileExists := checkFileExists(registryTokenFilename)
 	if isFileExists {
 		var confirmOverwrite bool
-		form = huh.NewForm(
+		form := huh.NewForm(
 			huh.NewGroup(
 				huh.NewConfirm().
 					Title("Token already saved to registry-token").

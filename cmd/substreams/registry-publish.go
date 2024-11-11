@@ -62,34 +62,12 @@ func runRegistryPublish(cmd *cobra.Command, args []string) error {
 		if substreamsRegistryToken != "" {
 			apiKey = substreamsRegistryToken
 		} else {
-			linkStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("12"))
 			fmt.Println("No registry token found...")
 			fmt.Println()
 			fmt.Println()
-			fmt.Println("Navigate to: ")
-			fmt.Println()
-			fmt.Println("    " + linkStyle.Render(fmt.Sprintf("%s/me", apiEndpoint)))
-			fmt.Println("")
-
-			var token string
-			form := huh.NewForm(
-				huh.NewGroup(
-					huh.NewInput().
-						EchoMode(huh.EchoModePassword).
-						Title("Paste the token here:").
-						Inline(true).
-						Value(&token).
-						Validate(func(s string) error {
-							if s == "" {
-								return errors.New("token cannot be empty")
-							}
-							return nil
-						}),
-				),
-			)
-
-			if err := form.Run(); err != nil {
-				return fmt.Errorf("error running form: %w", err)
+			token, err := copyPasteTokenForm(apiEndpoint)
+			if err != nil {
+				return fmt.Errorf("creating copy, paste token form %w", err)
 			}
 
 			// Set the API_KEY using the input token
@@ -200,4 +178,38 @@ func runRegistryPublish(cmd *cobra.Command, args []string) error {
 	fmt.Println("")
 
 	return nil
+}
+
+func copyPasteTokenForm(endpoint string) (string, error){
+	linkStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("12"))
+	fmt.Printf("Login to the Substreams registry.")
+	fmt.Println()
+	fmt.Println()
+	fmt.Println("Navigate to: ")
+	fmt.Println()
+	fmt.Println("    " + linkStyle.Render(fmt.Sprintf("%s/me", endpoint)))
+	fmt.Println("")
+
+	var token string
+	form := huh.NewForm(
+		huh.NewGroup(
+			huh.NewInput().
+				EchoMode(huh.EchoModePassword).
+				Title("Paste the token here:").
+				Inline(true).
+				Value(&token).
+				Validate(func(s string) error {
+					if s == "" {
+						return errors.New("token cannot be empty")
+					}
+					return nil
+				}),
+		),
+	)
+
+	if err := form.Run(); err != nil {
+		return "", fmt.Errorf("error running form: %w", err)
+	}
+
+	return token, nil
 }
