@@ -19,6 +19,9 @@ import (
 )
 
 func init() {
+	registryPublish.PersistentFlags().String("spkg-registry", "https://spkg.io", "Substreams package registry")
+	registryPublish.PersistentFlags().String("setup-mode", "production", "Setup mode (production, staging, local-development). Default: production")
+
 	registryCmd.AddCommand(registryPublish)
 }
 
@@ -183,12 +186,18 @@ func runRegistryPublish(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	spkgUrlPath := gjson.Get(string(b), "spkgLink").String()
+	registryURL := gjson.Get(string(b), "registry_url").String()
+	packageName := gjson.Get(string(b), "package_name").String()
+	releaseVersion := gjson.Get(string(b), "release_version").String()
 
-	fmt.Println("Package published successfully")
-	if spkgUrlPath != "" {
-		fmt.Printf("Start streaming your package with: `substreams gui %s`\n", spkgUrlPath)
-	}
+	fmt.Println("Package published successfully!")
+	fmt.Println("")
+	fmt.Println("View on the web at: ", registryURL)
+	fmt.Println("")
+	fmt.Println("Start streaming with:")
+	fmt.Println("")
+	fmt.Printf("    substreams gui %s@%s\n", packageName, releaseVersion)
+	fmt.Println("")
 
 	return nil
 }
