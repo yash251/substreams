@@ -9,6 +9,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v1.10.12
+
+* Add `substreams publish` to `publish` a package on the substreams registry (check on `https://substreams.dev`).
+* Add `substreams registry` to `login` and `publish` on the substreams registry (check on `https://substreams.dev`).
+
+
 ## v1.10.11
 
 * Add `avalanche-mainnet` to the CLI.
