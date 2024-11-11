@@ -56,6 +56,8 @@ func runRegistryPublish(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	registryTokenBytes = bytes.TrimSpace(registryTokenBytes)
+
 	substreamsRegistryToken := os.Getenv("SUBSTREAMS_REGISTRY_TOKEN")
 	apiKey = string(registryTokenBytes)
 	if apiKey == "" {
