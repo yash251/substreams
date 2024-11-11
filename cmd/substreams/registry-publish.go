@@ -20,8 +20,8 @@ import (
 
 func init() {
 	registryPublish.PersistentFlags().String("spkg-registry", "https://spkg.io", "Substreams package registry")
-	registryPublish.PersistentFlags().Bool("local-development", false, "Set local development")
-
+	registryPublish.PersistentFlags().String("setup-mode", "production", "Setup mode (production, staging, local-development). Default: production")
+	
 	registryCmd.AddCommand(registryPublish)
 }
 
@@ -43,10 +43,17 @@ var registryPublish = &cobra.Command{
 //  - If the user does provide a github release url, download the spkg and pack it
 
 func runRegistryPublish(cmd *cobra.Command, args []string) error {
-	apiEndpoint := "https://substreams.dev"
-	isLocal := sflags.MustGetBool(cmd, "local-development")
-	if isLocal {
+	var apiEndpoint string
+	setupValue := sflags.MustGetString(cmd, "setup-mode")
+	switch setupValue {
+	case "production" :
+		apiEndpoint = "https://substreams.dev"
+	case "staging" :
+		apiEndpoint = "https://staging.substreams.dev"
+	case "local-development" :
 		apiEndpoint = "http://localhost:9000"
+	default:
+		return fmt.Errorf("setup-mode does not exist")
 	}
 
 	var apiKey string
