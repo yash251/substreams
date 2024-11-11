@@ -67,7 +67,8 @@ func runRegistryPublish(cmd *cobra.Command, args []string) error {
 			fmt.Println("No registry token found...")
 			fmt.Println()
 			fmt.Println()
-			token, err := copyPasteTokenForm(apiEndpoint)
+			linkStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("12"))
+			token, err := copyPasteTokenForm(apiEndpoint, linkStyle)
 			if err != nil {
 				return fmt.Errorf("creating copy, paste token form %w", err)
 			}
@@ -110,6 +111,25 @@ func runRegistryPublish(cmd *cobra.Command, args []string) error {
 	}
 
 	spkg := pkgBundle.Package
+
+
+	style := lipgloss.NewStyle().Foreground(lipgloss.Color("12"))
+	headerStyle := lipgloss.NewStyle().Bold(true)
+	fmt.Println()
+	fmt.Println(headerStyle.Render("Package Details"))
+	fmt.Printf("%s: %s\n", style.Render("Name"), spkg.PackageMeta[0].Name)
+	fmt.Printf("%s: v%d\n", style.Render("Version"), spkg.Version)
+	fmt.Printf("%s: %s\n", style.Render("URL"), spkg.PackageMeta[0].Url)
+	fmt.Println()
+
+	confirm, err := runConfirmForm("Would you like to publish this package?")
+	if err != nil {
+		return fmt.Errorf("running confirm form %w", err)
+	}
+
+	if !confirm {
+		return nil
+	}
 
 	var requestBody bytes.Buffer
 	writer := multipart.NewWriter(&requestBody)
@@ -182,8 +202,7 @@ func runRegistryPublish(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func copyPasteTokenForm(endpoint string) (string, error) {
-	linkStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("12"))
+func copyPasteTokenForm(endpoint string, linkStyle lipgloss.Style) (string, error) {
 	fmt.Printf("Login to the Substreams registry.")
 	fmt.Println()
 	fmt.Println()

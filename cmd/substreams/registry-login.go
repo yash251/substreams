@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/charmbracelet/huh"
+	"github.com/charmbracelet/lipgloss"
 	"os"
 	"path/filepath"
 
@@ -29,26 +30,17 @@ func runRegistryLoginE(cmd *cobra.Command, args []string) error {
 		registryURL = newValue
 	}
 
-	token, err := copyPasteTokenForm(registryURL)
+	linkStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("12"))
+	token, err := copyPasteTokenForm(registryURL, linkStyle)
 	if err != nil {
 		return fmt.Errorf("creating copy, paste token form %w", err)
 	}
 
 	isFileExists := checkFileExists(registryTokenFilename)
 	if isFileExists {
-		var confirmOverwrite bool
-		form := huh.NewForm(
-			huh.NewGroup(
-				huh.NewConfirm().
-					Title("Token already saved to registry-token").
-					Value(&confirmOverwrite).
-					Affirmative("Yes").
-					Negative("No"),
-			),
-		)
-
-		if err := form.Run(); err != nil {
-			return fmt.Errorf("error running form: %w", err)
+		confirmOverwrite, err := runConfirmForm("Token already saved to registry-token")
+		if err != nil {
+			return fmt.Errorf("running confirm form: %w", err)
 		}
 
 		if confirmOverwrite {
@@ -80,4 +72,24 @@ func writeRegistryToken(token string) error {
 func checkFileExists(filePath string) bool {
 	_, err := os.Stat(filePath)
 	return !errors.Is(err, os.ErrNotExist)
+}
+
+func runConfirmForm(title string) (bool, error) {
+	var confirmOverwrite bool
+
+	form := huh.NewForm(
+		huh.NewGroup(
+			huh.NewConfirm().
+				Title(title).
+				Value(&confirmOverwrite).
+				Affirmative("Yes").
+				Negative("No"),
+		),
+	)
+
+	if err := form.Run(); err != nil {
+		return false, fmt.Errorf("error running form: %w", err)
+	}
+
+	return confirmOverwrite, nil
 }
