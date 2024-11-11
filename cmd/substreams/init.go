@@ -51,11 +51,6 @@ var initCmd = &cobra.Command{
 var huhTheme *huh.Theme
 
 func init() {
-	defaultEndpoint := "https://codegen.substreams.dev"
-	if newValue := os.Getenv("SUBSTREAMS_INIT_CODEGEN_ENDPOINT"); newValue != "" {
-		defaultEndpoint = newValue
-	}
-	initCmd.Flags().String("codegen-endpoint", defaultEndpoint, "Endpoint used to discover code generators")
 	initCmd.Flags().String("state-file", "./generator.json", "File to load/save the state of the code generator")
 	initCmd.Flags().Bool("force-download-cwd", false, "Force download at current dir")
 	rootCmd.AddCommand(initCmd)
@@ -111,7 +106,12 @@ func runSubstreamsInitE(cmd *cobra.Command, args []string) error {
 		connect.WithGRPC(),
 	}
 
-	initConvoURL := sflags.MustGetString(cmd, "codegen-endpoint")
+	codegenEndpoint := "https://codegen.substreams.dev"
+	if newValue := os.Getenv("SUBSTREAMS_CODEGEN_ENDPOINT"); newValue != "" {
+		codegenEndpoint = newValue
+	}
+
+	initConvoURL := codegenEndpoint
 	stateFile, stateFileFlagProvided := sflags.MustGetStringProvided(cmd, "state-file")
 	if !strings.HasSuffix(stateFile, ".json") {
 		return fmt.Errorf("state file must have a .json extension")

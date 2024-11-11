@@ -41,7 +41,9 @@ var registryPublish = &cobra.Command{
 
 func runRegistryPublish(cmd *cobra.Command, args []string) error {
 	apiEndpoint := "https://substreams.dev"
-	apiEndpoint = os.Getenv("SUBSTREAMS_DEV_ENDPOINT")
+	if newValue := os.Getenv("SUBSTREAMS_REGISTRY_ENDPOINT"); newValue != "" {
+		apiEndpoint = newValue
+	}
 
 	var apiKey string
 	registryTokenBytes, err := os.ReadFile(registryTokenFilename)
@@ -105,7 +107,10 @@ func runRegistryPublish(cmd *cobra.Command, args []string) error {
 	}
 
 	spkgRegistry := "https://spkg.io"
-	spkgRegistry = os.Getenv("SPKG_REGISTRY_BASE")
+	if newValue := os.Getenv("SUBSTREAMS_DOWNLOAD_ENDPOINT"); newValue != "" {
+		apiEndpoint = newValue
+	}
+
 	readerOptions := []manifest.Option{
 		manifest.WithRegistryURL(spkgRegistry),
 	}
