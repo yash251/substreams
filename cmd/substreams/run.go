@@ -6,7 +6,6 @@ import (
 	"io"
 
 	"github.com/spf13/cobra"
-	"github.com/streamingfast/cli"
 	"github.com/streamingfast/cli/sflags"
 	"github.com/streamingfast/substreams/client"
 	"github.com/streamingfast/substreams/manifest"
@@ -44,16 +43,9 @@ func init() {
 
 // runCmd represents the command to run substreams remotely
 var runCmd = &cobra.Command{
-	Use:   "run [<manifest>] <module_name>",
-	Short: "Stream module outputs from a given package on a remote endpoint",
-	Long: cli.Dedent(`
-		Stream module outputs from a given package on a remote endpoint. The manifest is optional as it will try to find a file named
-		'substreams.yaml' in current working directory if nothing entered. You may enter a directory that contains a 'substreams.yaml'
-		'substreams.yaml' file in place of '<manifest_file>', or a link to a remote .spkg file, using urls gs://, http(s)://, ipfs://, etc.'.
-
-		You can also use substreams run my-package@v0.1.0 to specify a specific version of the package. This will fetch it from 
-		https://spkg.io/...
-	`),
+	Use:          "run [<manifest> [<module_name>]]",
+	Short:        "Stream module to standard output. Use 'substreams gui' for more tools and a better experience.",
+	Long:         guiOrRunLongUsage,
 	RunE:         runRun,
 	Args:         cobra.RangeArgs(1, 2),
 	SilenceUsage: true,
@@ -62,17 +54,9 @@ var runCmd = &cobra.Command{
 func runRun(cmd *cobra.Command, args []string) error {
 	ctx := cmd.Context()
 
-	var manifestPath, outputModule string
-	if len(args) == 1 {
-		outputModule = args[0]
-
-		// Check common error where manifest is provided by module name is missing
-		if manifest.IsLikelyManifestInput(outputModule) {
-			return fmt.Errorf("missing <module_name> argument, check 'substreams run --help' for more information")
-		}
-	} else {
-		manifestPath = args[0]
-		outputModule = args[1]
+	manifestPath, outputModule, err := ruiOrGuiManifestModulePositionalParams(args)
+	if err != nil {
+		return err
 	}
 
 	outputMode := sflags.MustGetString(cmd, "output")

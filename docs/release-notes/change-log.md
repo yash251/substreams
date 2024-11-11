@@ -9,6 +9,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+* In `substreams run`, the two positional parameters now align with `gui`: `[package [module_name]]`. Before, it was using fuzzy heuristics to see if a single param was a module name or a package name. You need to be more explicit now, like `gui`.
+
 ## v1.10.12
 
 * Add `substreams publish` to `publish` a package on the substreams registry (check on `https://substreams.dev`).

@@ -40,31 +40,32 @@ func init() {
 	rootCmd.AddCommand(guiCmd)
 }
 
+var guiOrRunLongUsage = cli.Dedent(`
+Stream module output from a given package on a remote endpoint. The manifest is optional as it will try to find a file named
+'substreams.yaml' in current working directory if nothing entered. You may enter a directory that contains a 'substreams.yaml'
+file in place of '<manifest_file>, or a link to a remote .spkg file, using urls gs://, http(s)://, ipfs://, etc.'.
+
+You can also use substreams gui my-package@v0.1.0 to specify a specific version of the package. This will fetch it from 
+the Substreams registry at https://substreams.dev
+`)
+
 // guiCmd represents the command to run substreams remotely
 var guiCmd = &cobra.Command{
-	Use:   "gui [<manifest> [<module_name>]]",
-	Short: "Stream module outputs from a given package on a remote endpoint",
-	Long: cli.Dedent(`
-		Stream module output from a given package on a remote endpoint. The manifest is optional as it will try to find a file named
-		'substreams.yaml' in current working directory if nothing entered. You may enter a directory that contains a 'substreams.yaml'
-		file in place of '<manifest_file>, or a link to a remote .spkg file, using urls gs://, http(s)://, ipfs://, etc.'.
-
-		You can also use substreams gui my-package@v0.1.0 to specify a specific version of the package. This will fetch it from 
-		https://spkg.io/...
-	`),
+	Use:          "gui [<manifest> [<module_name>]]",
+	Short:        "Open the GUI to stream module outputs",
+	Long:         guiOrRunLongUsage,
 	RunE:         runGui,
 	Args:         cobra.RangeArgs(0, 2),
 	SilenceUsage: true,
 }
 
-func runGui(cmd *cobra.Command, args []string) (err error) {
-	var manifestPath string
-	var outputModule string
+func ruiOrGuiManifestModulePositionalParams(args []string) (manifestPath string, outputModule string, err error) {
 	switch len(args) {
 	case 0:
 		manifestPath, err = resolveManifestFile("")
 		if err != nil {
-			return fmt.Errorf("resolving manifest: %w", err)
+			err = fmt.Errorf("resolving manifest: %w", err)
+			return
 		}
 	case 1:
 		manifestPath = args[0]
@@ -72,7 +73,15 @@ func runGui(cmd *cobra.Command, args []string) (err error) {
 		manifestPath = args[0]
 		outputModule = args[1]
 	default:
-		return fmt.Errorf("too many arguments")
+		err = fmt.Errorf("too many arguments")
+	}
+	return
+}
+
+func runGui(cmd *cobra.Command, args []string) (err error) {
+	manifestPath, outputModule, err := ruiOrGuiManifestModulePositionalParams(args)
+	if err != nil {
+		return err
 	}
 
 	requestParams := sflags.MustGetStringArray(cmd, "params")
@@ -264,14 +273,6 @@ func loadSubstreamsAuthEnvFile(manifestPath string) {
 	}
 }
 
-// resolveManifestFile is solely nowadays by `substreams gui`. That is because manifest.Reader
-// now has the ability to resolve itself to the correct location.
-//
-// However `substreams gui` displays the value, so we want to display the resolved
-// value to the user.
-//
-// FIXME: Find a way to share this with manifest.Reader somehow. Maybe as a method on
-// on the reader which would resolve the file, sharing the internal logic.
 func resolveManifestFile(input string) (manifestName string, err error) {
 	if input == "" {
 		_, err := os.Stat("substreams.yaml")
