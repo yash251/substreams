@@ -226,6 +226,10 @@ func (r *Reader) readFromHttp(input string) error {
 		}
 	}
 
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("error downloading %q, status %s: %s", input, resp.Status, string(r.currentData))
+	}
+
 	b, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("error reading %q: %w", input, err)
@@ -398,9 +402,11 @@ func (r *Reader) resolveInputPath() error {
 		parts := strings.Split(input, "@")
 		registryURL := r.registryURL
 		if registryURL == "" {
+			// This is an extreme fallback, because this should be
+			// set by the WithRegistryURL option.
 			registryURL = "https://spkg.io"
 		}
-		r.currentInput = fmt.Sprintf("%s/v1/packages/%s-%s.spkg", registryURL, parts[0], parts[1])
+		r.currentInput = fmt.Sprintf("%s/v1/packages/%s/%s", registryURL, parts[0], parts[1])
 		return nil
 	}
 
