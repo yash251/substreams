@@ -5,9 +5,6 @@ import (
 )
 
 func init() {
-	publishCmd.PersistentFlags().String("spkg-registry", "https://spkg.io", "Substreams package registry")
-	publishCmd.PersistentFlags().Bool("local-development", false, "Set local development")
-
 	rootCmd.AddCommand(publishCmd)
 }
 

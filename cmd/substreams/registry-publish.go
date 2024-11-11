@@ -7,7 +7,6 @@ import (
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
-	"github.com/streamingfast/cli/sflags"
 	"github.com/streamingfast/substreams/manifest"
 	"github.com/tidwall/gjson"
 	"go.uber.org/zap"
@@ -19,9 +18,6 @@ import (
 )
 
 func init() {
-	registryPublish.PersistentFlags().String("spkg-registry", "https://spkg.io", "Substreams package registry")
-	registryPublish.PersistentFlags().String("setup-mode", "production", "Setup mode (production, staging, local-development). Default: production")
-	
 	registryCmd.AddCommand(registryPublish)
 }
 
@@ -43,18 +39,8 @@ var registryPublish = &cobra.Command{
 //  - If the user does provide a github release url, download the spkg and pack it
 
 func runRegistryPublish(cmd *cobra.Command, args []string) error {
-	var apiEndpoint string
-	setupValue := sflags.MustGetString(cmd, "setup-mode")
-	switch setupValue {
-	case "production" :
-		apiEndpoint = "https://substreams.dev"
-	case "staging" :
-		apiEndpoint = "https://staging.substreams.dev"
-	case "local-development" :
-		apiEndpoint = "http://localhost:9000"
-	default:
-		return fmt.Errorf("setup-mode does not exist")
-	}
+	apiEndpoint := "https://substreams.dev"
+	apiEndpoint = os.Getenv("SUBSTREAMS_DEV_ENDPOINT")
 
 	var apiKey string
 	registryTokenBytes, err := os.ReadFile(registryTokenFilename)
@@ -118,8 +104,10 @@ func runRegistryPublish(cmd *cobra.Command, args []string) error {
 		manifestPath = args[0]
 	}
 
+	spkgRegistry := "https://spkg.io"
+	spkgRegistry = os.Getenv("SPKG_REGISTRY_BASE")
 	readerOptions := []manifest.Option{
-		manifest.WithRegistryURL(sflags.MustGetString(cmd, "spkg-registry")),
+		manifest.WithRegistryURL(spkgRegistry),
 	}
 
 	manifestReader, err := manifest.NewReader(manifestPath, readerOptions...)
