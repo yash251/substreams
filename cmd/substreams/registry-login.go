@@ -1,9 +1,10 @@
 package main
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
+	"github.com/charmbracelet/huh"
+	"github.com/charmbracelet/lipgloss"
 	"os"
 	"path/filepath"
 
@@ -20,37 +21,64 @@ var registryLoginCmd = &cobra.Command{
 var registryTokenFilename = filepath.Join(os.Getenv("HOME"), ".config", "substreams", "registry-token")
 
 func init() {
-	registryLoginCmd.Flags().String("registry", "https://substreams.dev", "Substreams registry URL")
-
 	registryCmd.AddCommand(registryLoginCmd)
 }
 
 func runRegistryLoginE(cmd *cobra.Command, args []string) error {
-	registryURL, err := cmd.Flags().GetString("registry")
-	if err != nil {
-		return fmt.Errorf("could not get registry URL: %w", err)
+	registryURL := "https://substreams.dev"
+	if newValue := os.Getenv("SUBSTREAMS_REGISTRY_ENDPOINT"); newValue != "" {
+		registryURL = newValue
 	}
 
-	loginRegistryPage := fmt.Sprintf("%s/me", registryURL)
-
-	fmt.Printf("Paste the token found on %s below\n", loginRegistryPage)
-
-	scanner := bufio.NewScanner(os.Stdin)
-	var token string
-	for scanner.Scan() {
-		token = scanner.Text()
-		break
-	}
-
+	linkStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("12"))
+	fmt.Printf("Login to the Substreams registry.")
+	fmt.Println()
+	fmt.Println()
+	fmt.Println("Navigate to: ")
+	fmt.Println()
+	fmt.Println("    " + linkStyle.Render(fmt.Sprintf("%s/me", registryURL)))
 	fmt.Println("")
+
+	var token string
+	form := huh.NewForm(
+		huh.NewGroup(
+			huh.NewInput().
+				EchoMode(huh.EchoModePassword).
+				Title("Paste the token here:").
+				Inline(true).
+				Value(&token).
+				Validate(func(s string) error {
+					if s == "" {
+						return errors.New("token cannot be empty")
+					}
+					return nil
+				}),
+		),
+	)
+
+	if err := form.Run(); err != nil {
+		return fmt.Errorf("error running form: %w", err)
+	}
 
 	isFileExists := checkFileExists(registryTokenFilename)
 	if isFileExists {
-		fmt.Println("Token already saved to registry-token")
-		fmt.Printf("Do you want to overwrite it? [y/N] ")
-		scanner.Scan()
-		if scanner.Text() == "y" {
-			err = writeRegistryToken(token)
+		var confirmOverwrite bool
+		form = huh.NewForm(
+			huh.NewGroup(
+				huh.NewConfirm().
+					Title("Token already saved to registry-token").
+					Value(&confirmOverwrite).
+					Affirmative("Yes").
+					Negative("No"),
+			),
+		)
+
+		if err := form.Run(); err != nil {
+			return fmt.Errorf("error running form: %w", err)
+		}
+
+		if confirmOverwrite {
+			err := writeRegistryToken(token)
 			if err != nil {
 				return fmt.Errorf("could not write token to registry: %w", err)
 			}
@@ -59,15 +87,15 @@ func runRegistryLoginE(cmd *cobra.Command, args []string) error {
 		}
 
 	} else {
-		err = writeRegistryToken(token)
+		err := writeRegistryToken(token)
 		if err != nil {
 			return fmt.Errorf("could not write token to registry: %w", err)
 		}
 
 	}
 
-	fmt.Printf("Publish packages with SUBSTREAMS_REGISTRY_TOKEN=%s\n", token)
-	fmt.Printf("Token %s saved to registry-token\n", token)
+	fmt.Printf("All set! Token written to ~/.config/substreams/registry-token")
+
 	return nil
 }
 

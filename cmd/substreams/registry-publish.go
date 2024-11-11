@@ -60,9 +60,10 @@ func runRegistryPublish(cmd *cobra.Command, args []string) error {
 			apiKey = substreamsRegistryToken
 		} else {
 			linkStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("12"))
-			//Let's redirect the user to substreams.dev to get a registry token and let them paste in the terminal
-			fmt.Println("`SUBSTREAMS_REGISTRY_TOKEN` env variable is missing...")
-			fmt.Println("You can get a token using the following link: ")
+			fmt.Println("No registry token found...")
+			fmt.Println()
+			fmt.Println()
+			fmt.Println("Navigate to: ")
 			fmt.Println()
 			fmt.Println("    " + linkStyle.Render(fmt.Sprintf("%s/me", apiEndpoint)))
 			fmt.Println("")
@@ -72,7 +73,7 @@ func runRegistryPublish(cmd *cobra.Command, args []string) error {
 				huh.NewGroup(
 					huh.NewInput().
 						EchoMode(huh.EchoModePassword).
-						Title("After retrieving your registry token, paste it here:").
+						Title("Paste the token here:").
 						Inline(true).
 						Value(&token).
 						Validate(func(s string) error {
