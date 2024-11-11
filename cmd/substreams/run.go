@@ -68,11 +68,15 @@ func runRun(cmd *cobra.Command, args []string) error {
 	}
 
 	readerOptions := []manifest.Option{
-		manifest.WithOverrideOutputModule(outputModule),
 		manifest.WithOverrideNetwork(network),
 		manifest.WithParams(params),
 		manifest.WithRegistryURL(getSubstreamsRegistryEndpoint()),
 	}
+
+	if outputModule != "" {
+		readerOptions = append(readerOptions, manifest.WithOverrideOutputModule(outputModule))
+	}
+
 	if sflags.MustGetBool(cmd, "skip-package-validation") {
 		readerOptions = append(readerOptions, manifest.SkipPackageValidationReader())
 	}
@@ -128,6 +132,14 @@ func runRun(cmd *cobra.Command, args []string) error {
 	startBlock, readFromModule, err := readStartBlockFlag(cmd, "start-block")
 	if err != nil {
 		return fmt.Errorf("stop block: %w", err)
+	}
+
+	if outputModule == "" {
+		mods, ok := pkgBundle.Graph.TopologicalSort()
+		if ok {
+			outputModule = mods[0].Name
+			fmt.Printf("Selected output module: %s\n", outputModule)
+		}
 	}
 
 	if readFromModule {
