@@ -20,7 +20,7 @@ const UNSET = math.MaxUint64
 var moduleNameRegexp *regexp.Regexp
 
 func init() {
-	moduleNameRegexp = regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9_]{0,63})$`)
+	moduleNameRegexp = regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9_-]{0,63})$`)
 }
 
 const (
