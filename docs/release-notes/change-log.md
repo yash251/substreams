@@ -12,7 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## Unreleased
 
 * Commands `run`, `gui` and `info` now accept the new standard package definition (ex: `ethereum-common@latest`) to reference an spkg file from https://substreams.dev
-* Changed `substreams run`: the two positional parameters now align with `gui`: `[package [module_name]]`. Before, it was using fuzzy heuristics to see if a single param was a module name or a package name. You need to be more explicit now, like `gui`.
+* Changed `substreams run`: the two positional parameters now align with `gui`: `[package [module_name]]`. The syntax `substreams run <module_name>` is not accepted anymore.
 * Added `substreams publish` to `publish` a package on the substreams registry (check on `https://substreams.dev`).
 * Added `substreams registry` to `login` and `publish` on the substreams registry (check on `https://substreams.dev`).
 * Added `substreams tools extract-wasm` to extract a wasm file from a substreams package.
