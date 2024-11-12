@@ -73,7 +73,7 @@ func checkFileExists(filePath string) bool {
 }
 
 func runConfirmForm(title string) (bool, error) {
-	var confirmOverwrite bool
+	confirmOverwrite := true
 
 	form := huh.NewForm(
 		huh.NewGroup(
