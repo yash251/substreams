@@ -173,7 +173,7 @@ func runRegistryPublish(cmd *cobra.Command, args []string) error {
 
 	fmt.Println("Package published successfully!")
 	fmt.Println("")
-	fmt.Println("View on the web at: ", registryURL)
+	fmt.Println("View on the web at: ", slugifyPackageName(registryURL))
 	fmt.Println("")
 	fmt.Println("Start streaming with:")
 	fmt.Println("")
