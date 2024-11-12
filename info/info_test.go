@@ -2,7 +2,6 @@ package info
 
 import (
 	"encoding/json"
-	"fmt"
 	"testing"
 
 	"github.com/streamingfast/substreams/manifest"
@@ -22,16 +21,14 @@ func TestBasicInfo(t *testing.T) {
 
 	r, err := json.MarshalIndent(info, "", "  ")
 	require.NoError(t, err)
-
-	fmt.Println(string(r))
+	require.NotNil(t, r)
 }
 
 func TestExtendedInfo(t *testing.T) {
-	info, err := Extended("https://github.com/streamingfast/substreams-uniswap-v3/releases/download/v0.2.8/substreams.spkg", "graph_out", nil)
+	info, err := Extended("https://github.com/streamingfast/substreams-uniswap-v3/releases/download/v0.2.8/substreams.spkg", "graph_out")
 	require.NoError(t, err)
 
 	r, err := json.MarshalIndent(info, "", "  ")
 	require.NoError(t, err)
-
-	fmt.Println(string(r))
+	require.NotNil(t, r)
 }
