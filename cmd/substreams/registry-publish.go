@@ -8,6 +8,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
@@ -176,7 +177,7 @@ func runRegistryPublish(cmd *cobra.Command, args []string) error {
 	fmt.Println("")
 	fmt.Println("Start streaming with:")
 	fmt.Println("")
-	fmt.Printf("    substreams gui %s@%s\n", packageName, releaseVersion)
+	fmt.Printf("    substreams gui %s@%s\n", slugifyPackageName(packageName), releaseVersion)
 	fmt.Println("")
 
 	return nil
@@ -213,4 +214,9 @@ func copyPasteTokenForm(endpoint string, linkStyle lipgloss.Style) (string, erro
 	}
 
 	return token, nil
+}
+
+func slugifyPackageName(s string) (slug string) {
+	slug = strings.Replace(s, "_", "-", -1)
+	return
 }
