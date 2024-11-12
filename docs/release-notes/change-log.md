@@ -9,9 +9,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## v1.11.0
 
-* Commands `run`, `gui` and `info` now accept the new standard package definition (ex: `ethereum-common@latest`) to reference an spkg file from https://substreams.dev
+* Commands `run`, `gui` and `info` now accept the new standard package definition (ex: `ethereum-common@latest`) to reference an spkg file from `https://substreams.dev`.
 * Changed `substreams run`: the two positional parameters now align with `gui`: `[package [module_name]]`. The syntax `substreams run <module_name>` is not accepted anymore.
 * Added `substreams publish` to `publish` a package on the substreams registry (check on `https://substreams.dev`).
 * Added `substreams registry` to `login` and `publish` on the substreams registry (check on `https://substreams.dev`).
