@@ -219,11 +219,7 @@ func Basic(pkg *pbsubstreams.Package, graph *manifest.ModuleGraph) (*BasicInfo, 
 	return manifestInfo, nil
 }
 
-func Extended(manifestPath string, outputModule string, skipValidation bool) (*ExtendedInfo, error) {
-	var opts []manifest.Option
-	if skipValidation {
-		opts = append(opts, manifest.SkipPackageValidationReader())
-	}
+func Extended(manifestPath string, outputModule string, opts ...manifest.Option) (*ExtendedInfo, error) {
 	reader, err := manifest.NewReader(manifestPath, opts...)
 	if err != nil {
 		return nil, fmt.Errorf("manifest reader: %w", err)

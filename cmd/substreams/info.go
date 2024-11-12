@@ -10,6 +10,7 @@ import (
 	"github.com/streamingfast/cli"
 	"github.com/streamingfast/cli/sflags"
 	"github.com/streamingfast/substreams/info"
+	"github.com/streamingfast/substreams/manifest"
 
 	"github.com/spf13/cobra"
 )
@@ -58,7 +59,13 @@ func runInfo(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("used-modules-only flag requires the output_module arg to be set")
 	}
 
-	pkgInfo, err := info.Extended(manifestPath, outputModule, skipPackageValidation)
+	opts := []manifest.Option{
+		manifest.WithRegistryURL(getSubstreamsRegistryEndpoint()),
+	}
+	if skipPackageValidation {
+		opts = append(opts, manifest.SkipPackageValidationReader())
+	}
+	pkgInfo, err := info.Extended(manifestPath, outputModule, opts...)
 	if err != nil {
 		return err
 	}

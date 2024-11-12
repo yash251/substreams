@@ -398,15 +398,15 @@ func (r *Reader) resolveInputPath() error {
 		return nil
 	}
 
-	if r.IsSpkgVersionStandardPackage(input) {
-		parts := strings.Split(input, "@")
+	pkgName, version, err := r.ParseStandardPackageAndVersion(input)
+	if err == nil {
 		registryURL := r.registryURL
 		if registryURL == "" {
 			// This is an extreme fallback, because this should be
 			// set by the WithRegistryURL option.
 			registryURL = "https://spkg.io"
 		}
-		r.currentInput = fmt.Sprintf("%s/v1/packages/%s/%s", registryURL, parts[0], parts[1])
+		r.currentInput = fmt.Sprintf("%s/v1/packages/%s/%s", registryURL, pkgName, version)
 		return nil
 	}
 
@@ -601,8 +601,28 @@ func (r *Reader) IsRemotePackage(input string) bool {
 	return hasRemotePrefix(input)
 }
 
-func (r *Reader) IsSpkgVersionStandardPackage(input string) bool {
-	return strings.Contains(input, "@")
+func (r *Reader) ParseStandardPackageAndVersion(input string) (packageName, version string, err error) {
+	parts := strings.Split(input, "@")
+	if len(parts) > 2 {
+		return "", "", fmt.Errorf("too many '@' in package name: %s", input)
+	}
+
+	packageName = parts[0]
+	if !moduleNameRegexp.MatchString(packageName) {
+		return "", "", fmt.Errorf("package name %s does not match regexp %s", packageName, moduleNameRegexp.String())
+	}
+
+	if len(parts) == 1 || parts[1] == "" || parts[1] == "latest" {
+		version = "latest"
+		return
+	}
+
+	if !semver.IsValid(parts[1]) {
+		return "", "", fmt.Errorf("version %q is not valid Semver format", parts[1])
+	}
+	version = parts[1]
+
+	return
 }
 
 // IsLocalManifest determines if reader's input to read the manifest is a local manifest file, which is determined
