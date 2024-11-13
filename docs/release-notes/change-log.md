@@ -9,6 +9,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+* Fixed `SUBSTREAMS_REGISTRY_TOKEN` environment variable not taking precedence over the `registry-token` file.
+
 ## v1.11.0
 
 * Commands `run`, `gui` and `info` now accept the new standard package definition (ex: `ethereum-common@latest`) to reference an spkg file from `https://substreams.dev`.
