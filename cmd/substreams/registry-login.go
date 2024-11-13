@@ -58,7 +58,8 @@ func runRegistryLoginE(cmd *cobra.Command, args []string) error {
 
 	}
 
-	fmt.Printf("All set! Token written to ~/.config/substreams/registry-token")
+	fmt.Printf("All set! Token written to ~/.config/substreams/registry-token\n")
+	fmt.Println()
 
 	return nil
 }

@@ -30,40 +30,15 @@ var registryPublish = &cobra.Command{
 	RunE:  runRegistryPublish,
 }
 
-func runRegistryPublish(cmd *cobra.Command, args []string) error {
+func runRegistryPublish(cmd *cobra.Command, args []string) (err error) {
 	apiEndpoint := getSubstreamsRegistryEndpoint()
 
-	var apiKey string
-	registryTokenBytes, err := os.ReadFile(registryTokenFilename)
+	token, err := getRegistryToken(apiEndpoint)
 	if err != nil {
-		if !os.IsNotExist(err) {
-			return fmt.Errorf("failed to read registry token: %w", err)
-		}
+		return fmt.Errorf("getting registry token: %w", err)
 	}
 
-	registryTokenBytes = bytes.TrimSpace(registryTokenBytes)
-
-	substreamsRegistryToken := os.Getenv("SUBSTREAMS_REGISTRY_TOKEN")
-	apiKey = string(registryTokenBytes)
-	if apiKey == "" {
-		if substreamsRegistryToken != "" {
-			apiKey = substreamsRegistryToken
-		} else {
-			fmt.Println("No registry token found...")
-			fmt.Println()
-			fmt.Println()
-			linkStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("12"))
-			token, err := copyPasteTokenForm(apiEndpoint, linkStyle)
-			if err != nil {
-				return fmt.Errorf("creating copy, paste token form %w", err)
-			}
-
-			// Set the API_KEY using the input token
-			apiKey = token
-		}
-	}
-
-	zlog.Debug("loaded api key", zap.String("api_key", apiKey))
+	zlog.Debug("loaded api key", zap.String("token", token))
 
 	var manifestPath string
 	switch len(args) {
@@ -146,7 +121,7 @@ func runRegistryPublish(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-	req.Header.Set("X-Api-Key", apiKey)
+	req.Header.Set("X-Api-Key", token)
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -181,6 +156,33 @@ func runRegistryPublish(cmd *cobra.Command, args []string) error {
 	fmt.Println("")
 
 	return nil
+}
+
+func getRegistryToken(apiEndpoint string) (string, error) {
+	token := os.Getenv("SUBSTREAMS_REGISTRY_TOKEN")
+	if token == "" {
+		registryTokenBytes, err := os.ReadFile(registryTokenFilename)
+		if err != nil {
+			if !os.IsNotExist(err) {
+				return "", fmt.Errorf("failed to read registry token: %w", err)
+			}
+		}
+
+		token = strings.TrimSpace(string(registryTokenBytes))
+
+		if token == "" {
+			fmt.Println("No registry token found...")
+			fmt.Println()
+			linkStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("12"))
+			inputtedToken, err := copyPasteTokenForm(apiEndpoint, linkStyle)
+			if err != nil {
+				return "", fmt.Errorf("creating copy, paste token form %w", err)
+			}
+
+			token = inputtedToken
+		}
+	}
+	return token, nil
 }
 
 func copyPasteTokenForm(endpoint string, linkStyle lipgloss.Style) (string, error) {
