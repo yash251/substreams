@@ -129,10 +129,18 @@ func runRegistryPublish(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		linkStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
+		if resp.StatusCode == http.StatusUnauthorized {
+			fmt.Println("")
+			fmt.Println(errorStyle.Render("Failed to publish package"))
+			fmt.Println(errorStyle.Render("Reason: " + string(b)))
+			fmt.Println("Make sure you are properly authenticated with:" + "\n")
+			fmt.Println(purpleStyle.Render("substreams registry login"))
+			return nil
+		}
+
 		fmt.Println("")
-		fmt.Println(linkStyle.Render("Failed to publish package") + "\n")
-		fmt.Println("Reason: " + string(b))
+		fmt.Println(errorStyle.Render("Failed to publish package"))
+		fmt.Println(errorStyle.Render("Reason: " + string(b)))
 		return nil
 	}
 
