@@ -69,14 +69,8 @@ func runRegistryPublish(cmd *cobra.Command, args []string) (err error) {
 
 	spkg := pkgBundle.Package
 
-	style := lipgloss.NewStyle().Foreground(lipgloss.Color("12"))
-	headerStyle := lipgloss.NewStyle().Bold(true)
-	fmt.Println()
-	fmt.Println(headerStyle.Render("Package Details"))
-	fmt.Printf("%s: %s\n", style.Render("Name"), spkg.PackageMeta[0].Name)
-	fmt.Printf("%s: %s\n", style.Render("Version"), spkg.PackageMeta[0].Version)
-	fmt.Printf("%s: %s\n", style.Render("URL"), spkg.PackageMeta[0].Url)
-	fmt.Println()
+	warnIncompletePackage(spkg)
+	printPackageDetails(spkg)
 
 	confirm, err := runConfirmForm("Would you like to publish this package?")
 	if err != nil {

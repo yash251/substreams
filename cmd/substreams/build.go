@@ -367,6 +367,7 @@ func findManifest() (string, error) {
 func runCommandInDir(ctx context.Context, dir string, cmdArgs []string) error {
 	cmd := exec.CommandContext(ctx, cmdArgs[0], cmdArgs[1:]...)
 	cmd.Env = append(os.Environ(), "CARGO_TERM_COLOR=always")
+	cmd.Env = append(cmd.Env, "CLICOLOR_FORCE=true")
 	cmd.Dir = dir
 
 	stdoutPipe, err := cmd.StdoutPipe()

@@ -60,6 +60,9 @@ func runPack(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("reading manifest %q: %w", manifestPath, err)
 	}
 
+	warnIncompletePackage(pkgBundle.Package)
+	printPackageDetails(pkgBundle.Package)
+
 	if pkgBundle == nil {
 		return fmt.Errorf("no package found")
 	}
