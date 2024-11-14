@@ -346,7 +346,7 @@ func (m *Manifest) readFileFromName(filename string) ([]byte, error) {
 func (r *manifestConverter) convertToPkg(m *Manifest) (pkg *pbsubstreams.Package, err error) {
 	doc := m.Package.Doc
 	if doc != "" {
-		fmt.Println("Deprecated: the 'package.doc' field is deprecated. The README.md file is picked up instead.\n")
+		fmt.Println("Deprecated: the 'package.doc' field is deprecated. The README.md file is picked up instead.")
 	}
 
 	readmeContent, err := m.readFileFromName("README.md")
