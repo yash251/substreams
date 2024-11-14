@@ -133,7 +133,8 @@ func runRegistryPublish(cmd *cobra.Command, args []string) (err error) {
 			fmt.Println("")
 			fmt.Println(errorStyle.Render("Failed to publish package"))
 			fmt.Println(errorStyle.Render("Reason: " + string(b)))
-			fmt.Println("Make sure you are properly authenticated with:" + "\n")
+			fmt.Println("Make sure you are properly authenticated with:")
+			fmt.Println("")
 			fmt.Println(purpleStyle.Render("substreams registry login"))
 			return nil
 		}
