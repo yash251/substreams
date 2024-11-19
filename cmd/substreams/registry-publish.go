@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/streamingfast/cli"
+	"github.com/streamingfast/cli/utils"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -72,7 +74,7 @@ func runRegistryPublish(cmd *cobra.Command, args []string) (err error) {
 	warnIncompletePackage(spkg)
 	printPackageDetails(spkg)
 
-	confirm, err := runConfirmForm("Would you like to publish this package?")
+	confirm, err := utils.RunConfirmForm("Would you like to publish this package?")
 	if err != nil {
 		return fmt.Errorf("running confirm form %w", err)
 	}
@@ -131,17 +133,17 @@ func runRegistryPublish(cmd *cobra.Command, args []string) (err error) {
 	if resp.StatusCode != http.StatusOK {
 		if resp.StatusCode == http.StatusUnauthorized {
 			fmt.Println("")
-			fmt.Println(errorStyle.Render("Failed to publish package"))
-			fmt.Println(errorStyle.Render("Reason: " + string(b)))
+			fmt.Println(cli.ErrorStyle.Render("Failed to publish package"))
+			fmt.Println(cli.ErrorStyle.Render("Reason: " + string(b)))
 			fmt.Println("Make sure you are properly authenticated with:")
 			fmt.Println("")
-			fmt.Println(purpleStyle.Render("substreams registry login"))
+			fmt.Println(cli.PurpleStyle.Render("substreams registry login"))
 			return nil
 		}
 
 		fmt.Println("")
-		fmt.Println(errorStyle.Render("Failed to publish package"))
-		fmt.Println(errorStyle.Render("Reason: " + string(b)))
+		fmt.Println(cli.ErrorStyle.Render("Failed to publish package"))
+		fmt.Println(cli.ErrorStyle.Render("Reason: " + string(b)))
 		return nil
 	}
 

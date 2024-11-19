@@ -3,11 +3,10 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/streamingfast/cli/utils"
 	"os"
 	"path/filepath"
-
-	"github.com/charmbracelet/huh"
-	"github.com/charmbracelet/lipgloss"
 
 	"github.com/spf13/cobra"
 )
@@ -36,7 +35,7 @@ func runRegistryLoginE(cmd *cobra.Command, args []string) error {
 
 	isFileExists := checkFileExists(registryTokenFilename)
 	if isFileExists {
-		confirmOverwrite, err := runConfirmForm("Token already saved to ~/.config/substreams/registry-token, do you want to overwrite it?")
+		confirmOverwrite, err := utils.RunConfirmForm("Token already saved to ~/.config/substreams/registry-token, do you want to overwrite it?")
 		if err != nil {
 			return fmt.Errorf("running confirm form: %w", err)
 		}
@@ -73,22 +72,3 @@ func checkFileExists(filePath string) bool {
 	return !errors.Is(err, os.ErrNotExist)
 }
 
-func runConfirmForm(title string) (bool, error) {
-	confirmOverwrite := true
-
-	form := huh.NewForm(
-		huh.NewGroup(
-			huh.NewConfirm().
-				Title(title).
-				Value(&confirmOverwrite).
-				Affirmative("Yes").
-				Negative("No"),
-		),
-	)
-
-	if err := form.Run(); err != nil {
-		return false, fmt.Errorf("error running form: %w", err)
-	}
-
-	return confirmOverwrite, nil
-}

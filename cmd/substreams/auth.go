@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/streamingfast/cli"
 	"os"
 	"strings"
 
@@ -27,9 +28,9 @@ func runAuthE(cmd *cobra.Command, args []string) error {
 	fmt.Println("Open this link to authenticate on The Graph Market:")
 	fmt.Println()
 	if localDevelopment == "true" {
-		fmt.Println("    " + purpleStyle.Render("http://localhost:3000/auth/substreams-devenv"))
+		fmt.Println("    " + cli.PurpleStyle.Render("http://localhost:3000/auth/substreams-devenv"))
 	} else {
-		fmt.Println("    " + purpleStyle.Render("https://thegraph.market/auth/substreams-devenv"))
+		fmt.Println("    " + cli.PurpleStyle.Render("https://thegraph.market/auth/substreams-devenv"))
 	}
 	fmt.Println("")
 
@@ -67,7 +68,7 @@ func runAuthE(cmd *cobra.Command, args []string) error {
 
 	fmt.Println("Load credentials in current terminal with the following command:")
 	fmt.Println("")
-	fmt.Println(purpleStyle.Render("       . ./.substreams.env"))
+	fmt.Println(cli.PurpleStyle.Render("       . ./.substreams.env"))
 	fmt.Println()
 
 	return nil
