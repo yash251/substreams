@@ -38,40 +38,60 @@ func GetCommonServerOptions(listenAddr string, logger *zap.Logger, healthcheck d
 }
 
 func ListenTier1(
-	addr string,
+	listenAddr string,
 	svc *Tier1Service,
 	infoService ssconnect.EndpointInfoHandler,
 	auth dauth.Authenticator,
 	logger *zap.Logger,
 	healthcheck dgrpcserver.HealthCheck,
-) error {
+) (err error) {
 
-	// note: some of these common options don't work with connectWeb
-	options := GetCommonServerOptions(addr, logger, healthcheck)
+	done := make(chan struct{})
+	var servers []*connectweb.ConnectWebServer
+	for _, addr := range strings.Split(listenAddr, ",") {
+		// note: some of these common options don't work with connectWeb
+		options := GetCommonServerOptions(addr, logger, healthcheck)
 
-	options = append(options, dgrpcserver.WithConnectInterceptor(dauthconnect.NewAuthInterceptor(auth, logger)))
-	options = append(options, dgrpcserver.WithConnectStrictContentType(false))
-	options = append(options, dgrpcserver.WithReflection(ssconnect.StreamName))
+		options = append(options, dgrpcserver.WithConnectInterceptor(dauthconnect.NewAuthInterceptor(auth, logger)))
+		options = append(options, dgrpcserver.WithConnectStrictContentType(false))
+		options = append(options, dgrpcserver.WithReflection(ssconnect.StreamName))
 
-	streamHandlerGetter := func(opts ...connect_go.HandlerOption) (string, http.Handler) {
-		return ssconnect.NewStreamHandler(svc, opts...)
-	}
-	handlerGetters := []connectweb.HandlerGetter{streamHandlerGetter}
-
-	if infoService != nil {
-		infoHandlerGetter := func(opts ...connect_go.HandlerOption) (string, http.Handler) {
-			out, outh := ssconnect.NewEndpointInfoHandler(infoService, opts...)
-			return out, outh
+		streamHandlerGetter := func(opts ...connect_go.HandlerOption) (string, http.Handler) {
+			return ssconnect.NewStreamHandler(svc, opts...)
 		}
-		handlerGetters = append(handlerGetters, infoHandlerGetter)
+		handlerGetters := []connectweb.HandlerGetter{streamHandlerGetter}
+
+		if infoService != nil {
+			infoHandlerGetter := func(opts ...connect_go.HandlerOption) (string, http.Handler) {
+				out, outh := ssconnect.NewEndpointInfoHandler(infoService, opts...)
+				return out, outh
+			}
+			handlerGetters = append(handlerGetters, infoHandlerGetter)
+		}
+
+		options = append(options, dgrpcserver.WithPermissiveCORS())
+		srv := connectweb.New(handlerGetters, options...)
+		servers = append(servers, srv)
+		cleanAddr := strings.ReplaceAll(addr, "*", "")
+		go func() {
+			srv.Launch(cleanAddr)
+			done <- struct{}{}
+		}()
 	}
 
-	options = append(options, dgrpcserver.WithPermissiveCORS())
-	srv := connectweb.New(handlerGetters, options...)
-	addr = strings.ReplaceAll(addr, "*", "")
-	srv.Launch(addr)
-	<-srv.Terminated()
-	return srv.Err()
+	<-done
+	for _, srv := range servers {
+		srv.Shutdown(nil)
+	}
+
+	for _, srv := range servers {
+		<-srv.Terminated()
+		if e := srv.Err(); e != nil {
+			err = e
+		}
+	}
+
+	return
 }
 
 func ListenTier2(
