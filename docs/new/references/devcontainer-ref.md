@@ -1,12 +1,12 @@
-The Substreams Development Container (“devcontainer”) is a tool to help you build your first project. You can either run it remotely or clone the [substreams-starter repository](https://github.com/streamingfast/substreams-starter?tab=readme-ov-file) to run it locally. Inside the devcontainer, the `substreams init` command sets up a code-generated Substreams project, allowing you to easily build a subgraph or an SQL-based solution for data handling.
+The Substreams Dev Container is a tool to help you build your first project. You can either run it remotely or clone the [substreams-starter repository](https://github.com/streamingfast/substreams-starter?tab=readme-ov-file) to run it locally. Inside the Dev Container, the `substreams init` command sets up a code-generated Substreams project, allowing you to easily build a subgraph or an SQL-based solution for data handling.
 
-##Prerequisites
+## Prerequisites
 
 - Ensure Docker and VS Code are up-to-date.
 
-## Navigating the Devcontainer
+## Navigating the Dev Container
 
-Upon entering the devcontainer, you can either insert your `substreams.yaml` file and run `substreams build` to generate Protobuf files or choose one of the auto-generated paths:
+Upon entering the Dev Container, you can either insert your `substreams.yaml` file and run `substreams build` to generate Protobuf files or choose one of the auto-generated paths:
 
 - **Minimal**: Extracts raw data from the block.
 - **Non-Minimal**: Extracts filtered data using network-specific cache and Protobufs from the Foundational Modules.
