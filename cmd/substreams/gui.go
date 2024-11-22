@@ -137,9 +137,6 @@ func runGui(cmd *cobra.Command, args []string) (err error) {
 	network := sflags.MustGetString(cmd, "network")
 	if network == "" {
 		network = packageBundle.Package.Network
-		if network == "" {
-			return fmt.Errorf("network not set, please provide a network")
-		}
 	}
 
 	defaultParams := make([]string, 0)
