@@ -3,11 +3,11 @@ In this guide, you'll learn how to initialize a Solana-based Substreams project.
 ## Prerequisites
 
 - Docker and VS Code installed and up-to-date.
-- Visit the [Getting Started Guide](https://github.com/streamingfast/substreams-starter) to initialize your development environment.
+- Visit the [Getting Started Guide](https://github.com/streamingfast/substreams-starter) to initialize your Dev Container.
 
 ## Step 1: Initialize Your Solana Substreams Project
 
-1. Open your development environment and run the following command to initialize your project:
+1. Open your Dev Container and run the following command to initialize your project:
     
     ```bash
     substreams init
@@ -44,9 +44,9 @@ After initialization, you can:
 
 You may find these additional resources helpful for developing your first Solana application.
 
-### Development Container Reference
+### Dev Container Reference
 
-The [Development Container Reference](../references/devcontainer-ref.md) helps you navigate the complete container and its common errors. 
+The [Dev Container Reference](../references/devcontainer-ref.md) helps you navigate the complete container and its common errors. 
 
 ### Gui Reference
 
