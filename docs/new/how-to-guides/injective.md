@@ -1,11 +1,56 @@
-Check out the [Getting Started Guide](./intro-your-first-application.md) for more information on how to initialize your project. There are two options within `substreams init` to initialize your Injective Substreams:
+In this guide, you'll learn how to initialize a Injective-based Substreams project. You’ll learn how to set up a simple project to extract raw data or filter events from a smart contract.
 
-- `injective-minimal`: creates a simple Substreams that extracts raw data from the block (generates Rust code).
-- `injective-events`: creates a Substreams that extracts Injective events filtered by _type_ and/or _attributes_.
+## Prerequisites
 
-## Injective Foundational Modules
+- Docker and VS Code installed and up-to-date.
+- Visit the [Getting Started Guide](https://github.com/streamingfast/substreams-starter) to initialize your Dev Container.
 
-The `injective-events` codegen path relies on one of the [Injective Foundational Modules](https://github.com/streamingfast/substreams-foundational-modules/tree/develop/injective-common).  A Foundational Module extracts the most relevant data from blockchain, so that you don't have to code it yourself.
+## Step 1: Initialize Your Injective Substreams Project
 
-Specifically, the `injective-events` path uses the [filtered_events](https://github.com/streamingfast/substreams-foundational-modules/blob/develop/injective-common/substreams.yaml#L58) module from the Injective Foundational Modules to retrieve all the events filtered by event type and/or attributes.
+1. Open your Dev Container and run the following command to initialize your project:
+    
+    ```bash
+    substreams init
+    ```
+    
+2. You will be given the option to choose between two Injective project options. Select the one that best fits your requirements:
+    - **Injective-minimal**: Creates a simple Substreams that extracts raw data from the block and generates Rust code.
+    - **Injective-events**: Creates a Substreams that extracts Injective events using the cached [Injective Foundational Module](https://substreams.dev/packages/injective-common/v0.2.4), filtered by one or more smart contract addresses.
 
+
+## Step 2: Visualize the Data
+
+1. Create your account [here](https://thegraph.market/) to generate an authentification token (JWT) and pass it as input to: 
+
+    ```bash
+    substreams auth
+    ```
+
+2. Run the following command to visualize and itterate on your filtered data model:
+
+    ```bash
+    substreams gui
+    ````
+
+## Step 3: Customize your Project 
+
+After initialization, you can:
+
+- Modify your Substreams manifest to include additional filters or configurations.
+- Implement custom processing logic in Rust based on the filtered data retrieved by the foundational module.
+
+## Additional Resources
+
+You may find these additional resources helpful for developing your first EVM application.
+
+### Dev Container Reference
+
+The [Dev Container Reference](../references/devcontainer-ref.md) helps you navigate the complete container and its common errors. 
+
+### GUI Reference
+
+The [GUI reference](../references/gui.md) lets you explore all the tools available in the Substreams GUI.
+
+### Manifests Reference
+
+The [Manifests Reference](../references/manifests.md) helps you with editing the `substreams.yaml`.
