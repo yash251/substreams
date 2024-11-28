@@ -120,8 +120,6 @@ var HardcodedEndpoints = map[string]string{
 	"starknet-mainnet":        "mainnet.starknet.streamingfast.io:443",
 	"starknet":                "mainnet.starknet.streamingfast.io:443",
 	"starknet-testnet":        "testnet.starknet.streamingfast.io:443",
-	"vara-mainnet":            "mainnet.vara.streamingfast.io:443",
-	"vara-testnet":            "testnet.vara.streamingfast.io:443",
 	"mantra-mainnet":          "mainnet.mantra.streamingfast.io:443",
 	"mantra-testnet":          "testnet.mantra.streamingfast.io:443",
 	"avalanche-mainnet":       "avalanche-mainnet.streamingfast.io:443",
