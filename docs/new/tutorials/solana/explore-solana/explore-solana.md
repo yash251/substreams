@@ -8,7 +8,7 @@ Before you start coding, there are several dependencies you must install on your
 The `https://github.com/streamingfast/substreams-explorers` GitHub repository contains all the Substreams Explorers currently available. You can simply clone the repository:
 
 ```
-$ git clone https://github.com/streamingfast/substreams-explorers
+git clone https://github.com/streamingfast/substreams-explorers
 ```
 
 ### The Substreams CLI
