@@ -3,6 +3,7 @@ package wasm
 import (
 	"fmt"
 	"math/big"
+	"os"
 	"time"
 
 	"github.com/dustin/go-humanize"
@@ -12,6 +13,9 @@ import (
 	pbsubstreams "github.com/streamingfast/substreams/pb/sf/substreams/v1"
 	"github.com/streamingfast/substreams/storage/store"
 )
+
+var TraceReads = os.Getenv("SUBSTREAMS_TRACE_READS") != "false"
+var TraceWrites = os.Getenv("SUBSTREAMS_TRACE_WRITES") != "false"
 
 type Call struct {
 	Clock      *pbsubstreams.Clock // Used by WASM extensions
@@ -334,6 +338,9 @@ func (c *Call) validateWithTwoValueTypes(stateFunc string, updatePolicy pbsubstr
 }
 
 func (c *Call) traceStateWrites(stateFunc, key string) {
+	if !TraceWrites {
+		return
+	}
 	store := c.outputStore
 	var line string
 	if store == nil {
@@ -345,6 +352,9 @@ func (c *Call) traceStateWrites(stateFunc, key string) {
 }
 
 func (c *Call) traceStateReads(stateFunc string, storeIndex int, found bool, key string) {
+	if !TraceReads {
+		return
+	}
 	store := c.inputStores[storeIndex]
 	line := fmt.Sprintf("%s::%s key: %q, found: %v, store details: %s", store.Name(), stateFunc, key, found, store.String())
 	c.ExecutionStack = append(c.ExecutionStack, line)
