@@ -23,5 +23,4 @@ type ModuleExecutor interface {
 	RunsOnBlock(blockNum uint64) bool
 
 	lastExecutionLogs() (logs []string, truncated bool)
-	lastExecutionStack() []string
 }

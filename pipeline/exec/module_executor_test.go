@@ -91,13 +91,6 @@ func (t *MockModuleExecutor) lastExecutionLogs() (logs []string, truncated bool)
 	return nil, false
 }
 
-func (t *MockModuleExecutor) lastExecutionStack() []string {
-	if t.StackFunc != nil {
-		return t.StackFunc()
-	}
-	return nil
-}
-
 func TestModuleExecutorRunner_Run_HappyPath(t *testing.T) {
 	ctx := context.Background()
 

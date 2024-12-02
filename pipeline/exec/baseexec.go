@@ -29,9 +29,8 @@ type BaseExecutor struct {
 	cachedInstance       wasm.Instance
 
 	// Results
-	logs           []string
-	logsTruncated  bool
-	executionStack []string
+	logs          []string
+	logsTruncated bool
 }
 
 func NewBaseExecutor(ctx context.Context, moduleName string, initialBlock uint64, wasmModule wasm.Module, cacheEnabled bool, wasmArguments []wasm.Argument, blockIndex *index.BlockIndex, entrypoint string, tracer ttrace.Tracer) *BaseExecutor {
@@ -104,7 +103,6 @@ func canSkipExecution(wasmArgumentValues map[string][]byte, hasSingleParams bool
 func (e *BaseExecutor) wasmCall(outputGetter execout.ExecutionOutputGetter) (call *wasm.Call, err error) {
 	e.logs = nil
 	e.logsTruncated = false
-	e.executionStack = nil
 
 	argValues, hasSingleParams, err := getWasmArgumentValues(e.wasmArguments, outputGetter)
 	if err != nil {
@@ -126,7 +124,7 @@ func (e *BaseExecutor) wasmCall(outputGetter execout.ExecutionOutputGetter) (cal
 	if panicErr := call.Err(); panicErr != nil {
 		errExecutor := &ErrorExecutor{
 			message:    panicErr.Error(),
-			stackTrace: call.ExecutionStack,
+			stackTrace: call.Logs,
 		}
 		return nil, fmt.Errorf("block %d: module %q: general wasm execution panicked: %w: %s", clock.Number, e.moduleName, ErrWasmDeterministicExec, errExecutor.Error())
 	}
@@ -148,7 +146,6 @@ func (e *BaseExecutor) wasmCall(outputGetter execout.ExecutionOutputGetter) (cal
 	}
 	e.logs = call.Logs
 	e.logsTruncated = call.ReachedLogsMaxByteCount()
-	e.executionStack = call.ExecutionStack
 	return
 }
 
@@ -169,7 +166,4 @@ func (e *BaseExecutor) Close(ctx context.Context) error {
 
 func (e *BaseExecutor) lastExecutionLogs() (logs []string, truncated bool) {
 	return e.logs, e.logsTruncated
-}
-func (e *BaseExecutor) lastExecutionStack() []string {
-	return e.executionStack
 }
