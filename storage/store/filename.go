@@ -70,7 +70,6 @@ func parseFileName(moduleName, filename string) (*FileInfo, bool) {
 		return nil, false
 	}
 
-	fmt.Println(filename, res)
 	return &FileInfo{
 		ModuleName:  moduleName,
 		Filename:    filename,
