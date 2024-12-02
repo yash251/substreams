@@ -1,7 +1,6 @@
 package block
 
 import (
-	"sort"
 	"strings"
 )
 
@@ -44,28 +43,6 @@ func (r Ranges) Contains(input *Range) bool {
 		}
 	}
 	return false
-}
-
-func (r Ranges) SortAndDedupe() (out Ranges) {
-	if r == nil {
-		return nil
-	}
-
-	m := make(map[string]*Range)
-
-	for _, rr := range r {
-		m[rr.String()] = rr
-	}
-
-	out = make(Ranges, len(m))
-	i := 0
-	for _, v := range m {
-		out[i] = v
-		i++
-	}
-
-	sort.Sort(out)
-	return
 }
 
 func (r Ranges) Merged() (out Ranges) {
