@@ -45,13 +45,15 @@ func parseIndexFileName(filename string) (*FileInfo, error) {
 }
 
 func fileNameToRange(filename string, regex *regexp.Regexp) (*block.Range, error) {
-	res := regex.FindAllStringSubmatch(filename, 1)
+	regex.FindAllSubmatchIndex([]byte(filename), 1)
+
+	res := regex.FindAllSubmatchIndex([]byte(filename), 1)
 	if len(res) != 1 {
 		return nil, fmt.Errorf("invalid output cache filename, %q", filename)
 	}
 
-	start := uint64(mustAtoi(res[0][1]))
-	end := uint64(mustAtoi(res[0][2]))
+	start := uint64(mustAtoi(filename[res[0][2]:res[0][3]]))
+	end := uint64(mustAtoi(filename[res[0][4]:res[0][5]]))
 
 	return &block.Range{
 		StartBlock:        start,
