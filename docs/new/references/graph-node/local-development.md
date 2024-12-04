@@ -1,6 +1,6 @@
 ## Local Development of Subgraphs with Graph Node
 
-The Graph Node is the software that indexers run to index subgraphs. When developing a subgraph (or a Substreams-powered subgrpah), it is very convenient to test the subgraph deployment locally. This can be achieved by running the Graph Node software and all its dependencies in a local Docker environment.
+The Graph Node is the software that indexers run to index subgraphs. When developing a subgraph (or Substreams-powered subgrpah), it is very convenient to test the subgraph deployment locally. This can be achieved by running the Graph Node software and all its dependencies in a local Docker environment.
 
 Clone the [Substreams Development Environment GitHub respository](https://github.com/streamingfast/substreams-dev-environment), which contains the necessary shell scripts to run a local Graph Node in your computer.
 
@@ -24,7 +24,7 @@ For example, the following command spins up a Graph Node for the `injective-main
 ./start.sh injective-mainnet https://mainnet.injective.streamingfast.io:443
 ```
 
-The script also expects the `SUBSTREAMS_API_TOKEN` environment variable to be configured with your Substreams API authentication token.
+The script also expects the [`SUBSTREAMS_API_TOKEN`](https://thegraph.market/) environment variable to be configured with your Substreams API authentication token.
 
 ### Interact With the Graph Node
 

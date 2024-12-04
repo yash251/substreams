@@ -4,15 +4,31 @@ description: StreamingFast Substreams manifests reference
 
 # Manifests Reference
 
+This reference documentation **provides a guide for all fields and values** used in a Substreams manifest.
+
 {% hint style="success" %}
 **Tip**: When writing and checking your `substreams.yaml` file, it may help to check your manifest against our [JSON schema](https://json-schema.org/) to ensure there are no problems. JSON schemas can be used in [Jetbrains](https://www.jetbrains.com/help/idea/json.html#ws\_json\_schema\_add\_custom) and [VSCode](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml). Our manifest schema can be seen [here](../../schemas/manifest-schema.json).
 {% endhint %}
 
 ## Manifests overview
 
-The manifest is the high-level outline for a Substreams module. The manifest file is used for defining properties specific to the current Substreams module and identifying the dependencies between the `inputs` and `outputs` of modules.
+In simple terms, a Substreams manifest (`substreams.yaml`) is a configuration file (a YAML file) for your Substreams. The manifest file is used for defining properties specific to the current Substreams module and identifying the dependencies between the `inputs` and `outputs` of modules. For example, the following manifest receives a raw Ethereum block as input (`sf.ethereum.type.v2.Block`) and outputs a custom object (`eth.example.MyBlock`).
 
-This reference documentation **provides a guide for all fields and values** used in a Substreams manifest.
+```yaml
+modules:
+  - name: map_block
+    kind: map
+    initialBlock: 12287507
+    inputs:
+      - source: sf.ethereum.type.v2.Block
+    output:
+      type: proto:eth.example.MyBlock
+```
+
+Among other things, the manifest allows you to define:
+- How many modules your Substreams uses, along with their corresponding inputs and outputs.
+- The schema(s) (i.e. the data model) your Substreams uses.
+- How you will consume the data emitted by your Substreams (SQL, Webhooks...).
 
 ### `specVersion`
 
