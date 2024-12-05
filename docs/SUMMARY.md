@@ -3,8 +3,8 @@
 ## Substreams
 
 * [Introduction](README.md)
-* [Getting Started](new/getting-started.md)
-* [Substreams Architecture](new/develop/architecture.md)
+* [Getting Started](new/explanation/getting-started.md)
+* [Substreams Architecture](new/explanation/develop/architecture.md)
 
 ## Tutorials
 
