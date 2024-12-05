@@ -4,6 +4,7 @@
 
 * [Introduction](README.md)
 * [Getting Started](new/getting-started.md)
+* [Substreams Architecture](new/develop/architecture.md)
 
 ## Tutorials
 
@@ -14,25 +15,6 @@
   * [on Cosmos](new/tutorials/cosmos-compatible)
     * [Injective](new/turorials/cosmos-compatible/injective.md)
     * [Mantra](new/tutorials/cosmos-compatible/mantra.md)
-
-## Documentation
-  * [Other Ways of Consuming](new/consume/other-sinks/README.md)
-    * [Files](new/consume/other-sinks/files.md)
-    * [Key-Value Store](new/consume/other-sinks/kv.md)
-    * [MongoDB](new/consume/other-sinks/mongodb.md)
-    * [Prometheus](new/consume/other-sinks/prometheus.md)
-    * [PubSub](new/consume/other-sinks/pubsub.md)
-* [Develop Substreams](new/develop/develop.md)
-  <!--* [Quickstart](new/develop/init-project.md)-->
-  * [Protobuf Schemas](new/develop/creating-protobuf-schemas.md)
-  * [Rust Dependencies](new/develop/rust-crates.md)
-  * [Indexes](new/develop/indexes.md)
-  * [Parameterized Modules](new/develop/parameterized-modules.md)
-  * [Chain-Specific Extensions](new/develop/chain-specific/overview.md)
-    * [EVM Chain-Specific Extensions](new/develop/chain-specific/evm-chain-specific/overview.md)
-      * [Making eth\_calls](new/develop/chain-specific/evm/eth-calls.md)
-  * [Test Locally](new/develop/test-locally.md)
-  * [Architecture](new/develop/architecture.md)
 
 ## How-To Guides
 
@@ -68,9 +50,13 @@
     * [Go](new/how-to-guides/sinks/stream/go.md)    
   * [PubSub](new/how-to-guides/pubsub.md)
 <!--* [Deploying Substreams](new/tutorials/deployable-services/deployable-services.md)-->
-* [Rust](new/how-to-guides/rust/rust.md)
-  * [Option struct](new/how-to-guides/rust/option.md)
-  * [Result struct](new/how-to-guides/rust/result.md)
+* [EVM Extensions](new/develop/chain-specific/evm-chain-specific/overview.md)
+  * [Making eth\_calls](new/develop/chain-specific/evm/eth-calls.md)
+* [Getting Started Using Rust and Protobuf](new/how-to-guides/using-rust-proto/using-rust-proto.md)
+  * [Rust](new/how-to-guides/using-rust-proto/rust/rust.md)
+    * [Option struct](new/how-to-guides/using-rust-proto/rust/option.md)
+    * [Result struct](new/how-to-guides/using-rust-proto/rust/result.md)
+  * [Protobuf Schemas](new/how-to-guides/using-rust-proto/creating-protobuf-schemas.md)
 
 ## Reference Material
 
@@ -87,9 +73,11 @@
   * [Output](new/references/substreams-components/modules/outputs.md)
   * [Module handlers](new/references/substreams-components/modules/setting-up-handlers.md)
   * [Module handler creation](new/references/substreams-components/modules/setting-up-handlers.md)
+  * [Indexes](new/references/substreams-components/modules/indexes.md)
   * [Keys in stores](new/references/substreams-components/modules/keys-in-stores.md)
   * [Dynamic data sources](new/references/substreams-components/modules/dynamic-data-sources.md)
   * [Aggregation Windows](new/references/substreams-components/modules/aggregation-windows.md)
+  * [Parameterized Modules](new/references/substreams-components/modules/parameterized-modules.md)
 * [Manifests Reference](new/references/substreams-components/manifests.md)
 * [Other Ways of Consuming](new/references/community/other-sinks/README.md)
     * [Files](new/references/community/other-sinks/files.md)
@@ -100,12 +88,18 @@
 * [Graph-Node](new/tutorials/graph-node/graph-node.md)
   * [Local Development](new/tutorials/graph-node/local-development.md)
   * [Publish to The Graph Network](new/tutorials/graph-node/publish-decentralized-network.md)
-* [RUN Reference](new/references/running-substreams.md) <!-- Potential to be removed given its covered in CLI Reference?>
-* [GUI Reference](new/references/gui.md) <!-- Potential to be removed given its covered in CLI Reference?>
-* [Glossary](new/references/glossary.md)
+* [RUN Reference](new/references/running-substreams.md) <!-- Potential to be removed given its covered in CLI Reference? -->
+* [GUI Reference](new/references/gui.md) <!-- Potential to be removed given its covered in CLI Reference? -->
+* [Indexer Reference](new/references/indexer-reference/indexer-reference.md)
+  * [Test Substreams Locally](new/references/indexer-reference/test-locally.md)
+<!-- * [Glossary](new/references/glossary.md) -->
 * [Change log](release-notes/change-log.md)
 * [FAQ](new/references/faq.md)
 
 ## Understanding Decentralized Indexing
 
 * [What is The Graph?](https://thegraph.com/docs/en/about/)
+
+
+* [EVM Chain-Specific Extensions](new/develop/chain-specific/evm-chain-specific/overview.md)
+  * [Making eth\_calls](new/develop/chain-specific/evm/eth-calls.md)

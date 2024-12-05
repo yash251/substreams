@@ -29,5 +29,6 @@ To build and optimize your Substreams from zero, use the minimal path within the
 
 ## Learn
 
+- **Substreams Architecture:**:  For a deeper understanding of how Substreams works, explore the [architectural overview](architecture.md) of the data service.
 - **Substreams Reliability Guarantees**: With a simple reconnection policy, Substreams guarantees you'll never miss data [Reliability Guarantees](./references/reliability-guarantees.md).
 - **Supported Networks**: Check-out which endpoints are supported [here](./references/chains-and-endpoints.md).
