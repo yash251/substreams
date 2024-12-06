@@ -132,6 +132,25 @@ When you run a `gui` session, a file called `replay.log` gets written with the c
 
 You can reload the data without hitting the server again using `--replay`. The data is immediately reloaded in the GUI, ready for more inspection.
 
+#### GUI Cheatsheet
+
+## Cheatsheet
+
+There are the shortcuts that you can use to navigate the GUI. You can always get more information by pressing the `?` key.
+
+| Function | Keys  | 
+|---|---|
+| Switch screen (`Request`, `Progress`, `Output`) | `tab` |
+| Restart                                         | `r`  |
+| Quit                                            | `q`  |
+| Navigate Blocks - Forward                       | `p`  |
+| Navigate Blocks - Backwards                     | `o`  |
+| Navigate Blocks - Go To                         | `=` + *block number* + `enter` |
+| Navigate Modules - Forward                      | `i`  |
+| Navigate Modules - Backwards                    | `u`  |
+| Search                                          | `/` + *text* + `enter`  |
+| Commnads information                            | `?`  |
+
 ### `pack` **(DEPRECATED)**
 
 **(DEPRECATED: use `build` instead)**
