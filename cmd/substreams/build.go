@@ -397,5 +397,9 @@ func runCommandInDir(ctx context.Context, dir string, cmdArgs []string) error {
 		return fmt.Errorf("error running `%s`: %w", strings.Join(cmdArgs, " "), err)
 	}
 
+	if cmd.ProcessState.ExitCode() != 0 {
+		return fmt.Errorf("command %q failed with exit code %d", strings.Join(cmdArgs, " "), cmd.ProcessState.ExitCode())
+	}
+
 	return nil
 }
