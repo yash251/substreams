@@ -26,11 +26,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: './go.mod'
-
       - uses: actions/cache@v4
         with:
           path: |
@@ -39,9 +34,6 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-
-      - name: Build Binary
-        run: go build -v -o ./substreams ./cmd/substreams
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -69,6 +61,14 @@ jobs:
           flavor: |
             latest=${{ startsWith(github.ref, 'refs/tags/') }}
 
+      - name: Set version
+        id: version
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            echo "VERSION=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+          else
+            echo "VERSION=edge" >> "$GITHUB_OUTPUT"
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
@@ -77,3 +77,5 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VERSION=${{ steps.version.outputs.VERSION }}
