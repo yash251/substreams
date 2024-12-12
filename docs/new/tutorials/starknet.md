@@ -1,57 +1,44 @@
-In this guide, you'll learn how to initialize a Starknet-based Substreams project. You’ll learn how to set up a simple project to extract raw data or filter events from a smart contract.
-
-## Prerequisites
-
-- Docker and VS Code installed and up-to-date.
-- Visit the [Getting Started Guide](https://github.com/streamingfast/substreams-starter) to initialize your Dev Container.
+In this guide, you'll learn how to initialize a Starknet-based Substreams project within the Dev Container.
 
 ## Step 1: Initialize Your Starknet Substreams Project
 
-1. Open your Dev Container and run the following command to initialize your project:
-    
-    ```bash
-    substreams init
-    ```
-    
-2. You will be given the option to choose between two Starknet project options. Select the one that best fits your requirements:
-    - **starknet-minimal**: Creates a simple Substreams that extracts raw data from the block and generates Rust code.
-    - **starknet-events**: Creates a Substreams that extracts Starknet events using the cached [Starknet Foundational Module](https://substreams.dev/streamingfast/starknet-foundational/v0.1.3), filtered by one or more smart contract addresses.
+1. Open the [Dev Container](https://github.com/streamingfast/substreams-starter) and follow the on-screen steps or `README.md` to initialize your project.
 
+2. Running `substreams init` will give you the option to choose between two Starknet project options. Select the one that best fits your requirements:
+    - **starknet-minimal**: Creates a simple Substreams that extracts raw Starknet block data and generates corresponding Rust code. This path will start you with the full raw block, you can navigate to the `substreams.yaml` (the manifest) to modify the input.
+    - **starknet-events**: Creates a Substreams that extracts and decodes Starknet events and calls using the cached [Starknet Foundational Module](https://substreams.dev/packages/starknet-foundational/v0.1.4), filtered by one or more smart contract addresses. Contract ABIs are retrieved from Starkscan. If an ABI isn’t available, you’ll need to provide it yourself.
 
+{% hint style="info" %} 
+Note: Starknet ABIs are mutable within blocks, therefore the current ABI of your smart-contract may change in a future block. 
+{% endhint %}
+    
 ## Step 2: Visualize the Data
 
-1. Create your account [here](https://thegraph.market/) to generate an authentification token (JWT) and pass it as input to: 
+1. Running `substreams auth` will prompt you to create your account [here](https://thegraph.market/) to generate an authentification token (JWT), pass it back as input.
 
-    ```bash
-    substreams auth
-    ```
+2. Now you can freely use the `substreams gui` to visualize and itterate on your extracted data.
 
-2. Run the following command to visualize and itterate on your filtered data model:
+## Step 2.5: (Optionally) Transform the Data 
 
-    ```bash
-    substreams gui
-    ````
+Within the generated directories, modify your Substreams modules to include additional filters, aggregations, and transformations, then update the manifest accordingly. To learn more about this, visit the [How-to-Guides](../how-to-guides/develop-your-own-substreams/develop-your-own-substreams.md)
 
-## Step 3: Customize your Project 
+## Step 3: Load the Data
 
-After initialization, you can:
-
-- Modify your Substreams manifest to include additional filters or configurations.
-- Implement custom processing logic in Rust based on the filtered data retrieved by the foundational module.
+To make your Substreams queriable (as opposed to [direct streaming](../how-to-guides/sinks/stream/stream.md)), you can automatically generate a Subgraph (known as a [Substreams-powered subgraph](https://thegraph.com/docs/en/sps/introduction/)) or SQL-DB sink by following the on-screen steps or referring to the `README.md`. 
 
 ## Additional Resources
 
-You may find these additional resources helpful for developing your first EVM application.
+You may find these additional resources helpful for developing your first Starknet application.
 
 ### Dev Container Reference
 
-The [Dev Container Reference](../references/devcontainer-ref.md) helps you navigate the complete container and its common errors. 
+The [Dev Container Reference](../references/devcontainer-ref.md) helps you navigate the container and its common errors. 
 
-### GUI Reference
+### CLI Reference
 
-The [GUI reference](../references/gui.md) lets you explore all the tools available in the Substreams GUI.
+The [CLI reference](../references/cli/command-line-interface.md) lets you explore all the tools available in the Substreams CLI.
 
-### Manifests Reference
+### Substreams Components Reference
 
-The [Manifests Reference](../references/manifests.md) helps you with editing the `substreams.yaml`.
+The [Components Reference](../references/substreams-components/) dives deeeper into navigating the `substreams.yaml`.
 

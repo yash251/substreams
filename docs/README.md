@@ -9,7 +9,7 @@ Substreams is a powerful and decentralized indexing technology, which allows you
 
 ## How Does It Work?
 
-Visit the The following video covers how Substreams works in less than 2 minutes:
+Watch the following video and visit the [Getting Started](./new/explanation/getting-started.md) to learn more about how Substreams works.
 
 {% embed url="https://www.youtube.com/watch?v=gVqGCqKVM08" %}
 Get an overview of Substreams

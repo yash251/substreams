@@ -5,14 +5,12 @@ Getting started with Substreams might feel challenging, but you are not alone! T
 {% hint style="success" %}
 **Tip**: This tutorial teaches you how to build a Substreams from scratch.
 
-Remember that you can auto-generate your Substreams module by usig the [code-generation tools](../../../getting-started/evm/emv-first-sql.md).
+Remember that you can auto-generate your Substreams module by using the [code-generation tools](../../../../tutorials/evm.md).
 {% endhint %}
 
-As you already know, Substreams supports streaming from several blockchains, and every blockchain holds a different data model. This is why the data structures used change from one blockchain to the other. For example, an Ethereum block is represented by the [`sf.ethereum.type.v2.Block`](https://github.com/streamingfast/firehose-ethereum/blob/develop/proto/sf/ethereum/type/v2/type.proto) Rust struct, while a Near block is represented by [`sf.near.type.v1.Block`](https://github.com/streamingfast/firehose-near/blob/develop/proto/sf/near/type/v1/type.proto).
+The Ethereum block model for Substreams is represented by the [`sf.ethereum.type.v2.Block`](https://github.com/streamingfast/firehose-ethereum/blob/develop/proto/sf/ethereum/type/v2/type.proto) Rust struct.
 
-## Before You Begin
-
-Before you start coding, there are several dependencies you must install on your computer.
+Before moving forward, make sure to reference the minimal path within the [Dev Container](https://github.com/streamingfast/substreams-starter). 
 
 ### The GitHub Repository
 The `https://github.com/streamingfast/substreams-explorers` GitHub repository contains all the Substreams Explorers currently available. You can simply clone the repository:
@@ -20,17 +18,11 @@ The `https://github.com/streamingfast/substreams-explorers` GitHub repository co
 ```
 $ git clone https://github.com/streamingfast/substreams-explorers
 ```
-
-### The Substreams CLI
-
-The Substreams CLI allows you to run, package, and visualize your Substreams. Make sure you have the CLI installed by following this [simple tutorial](../../../common/installing-the-cli.md).
-
 ### Substreams Basics
 
 You should be familiar with the basic Substreams terminology, which includes:
 - Modules (understanding the difference between a `map` and a `store` module)
 - Protobufs (understanding what they are)
-
 
 ## Ethereum Explorer
 
@@ -82,4 +74,14 @@ Let's take a closer look at the Substreams manifest (`substreams.yml`):
 2. When you run Substreams, you are really executing a Rust application inside a WASM container. Therefore, Substreams needs to know where is the WASM executable. The `binaries` section specifies the location of the WASM executable.
 3. Every module must be defined in the manifest, along with its `kind`, `inputs` and `outputs`.
 In this example, the `map_block_meta` module is a mapper that takes a raw Ethereum block as input ([`sf.ethereum.type.v2.Block`](https://github.com/streamingfast/firehose-ethereum/blob/develop/proto/sf/ethereum/type/v2/type.proto)) and outputs the `BlockMeta` protobuf. Basically, the `map_block_meta` module returns a reduced version of the Ethereum block.
+
+## Additional Resources
+
+You may find these additional resources helpful for developing your first Solana application.
+
+The [CLI reference](../references/cli/command-line-interface.md) lets you explore all the tools available in the Substreams CLI.
+
+### Substreams Components Reference
+
+The [Components Reference](../references/substreams-components/) dives deeeper into navigating the `substreams.yaml`.
 

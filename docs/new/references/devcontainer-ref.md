@@ -1,27 +1,41 @@
-The Substreams Dev Container is a tool to help you build your first project. You can either run it remotely or clone the [substreams-starter repository](https://github.com/streamingfast/substreams-starter?tab=readme-ov-file) to run it locally. Inside the Dev Container, the `substreams init` command sets up a code-generated Substreams project, allowing you to easily build a subgraph or an SQL-based solution for data handling.
+---
+description: Substreams Dev Container Reference
+---
+
+The Substreams Dev Container is a tool to help you build your first project. You can either run it remotely through Github codespaces or locally by cloning the [substreams-starter repository](https://github.com/streamingfast/substreams-starter?tab=readme-ov-file). Inside the Dev Container, the `substreams init` command sets up a code-generated Substreams project, allowing you to easily build a subgraph or an SQL-based solution for data handling.
 
 ## Prerequisites
 
 - Ensure Docker and VS Code are up-to-date.
 
-## Navigating the Dev Container
+## First Navigating the Dev Container
 
-Upon entering the Dev Container, you can either insert your `substreams.yaml` file and run `substreams build` to generate Protobuf files or choose one of the auto-generated paths:
+Upon entering the Dev Container, you can either build or import your own `substreams.yaml` and associate modules within the minimal path, or opt for the automatically generated Substreams paths. Then running `Substreams Build` generates the Protobuf files.
 
-- **Minimal**: Extracts raw data from the block.
-- **Non-Minimal**: Extracts filtered data using network-specific cache and Protobufs from the Foundational Modules.
+- **Minimal**: Starts you with the raw block data, this path is for experienced users. You can navigate to the `substreams.yaml` to modify the input data source.
+- **Non-Minimal**: Extracts filtered data using network-specific cache and Protobufs from the corresponding Foundational Modules that is built and maintained by the StreamingFast team.
 
-## Building Your Project
+To publish your work with the broader community, publish your `.spkg` to [Substreams registry](https://substreams.dev/) using:  
 
-You can configure your Substreams project for querying either through a Subgraph or directly from your SQL database:
+- `substreams registry login`
+- `substreams registry publish`
 
-- **Subgraph**: Run `substreams codegen subgraph`. This generates a project with a basic `schema.graphql` and `mappings.ts` file. You can customize these to define entities based on the data extracted by Substreams. For more information on configuring a Subgraph sink, see the [Subgraph documentation](https://substreams.streamingfast.io/documentation/consume/subgraph).
-- **SQL**: Run `substreams codegen sql` for SQL-based queries. For more information on configuring a SQL sink, refer to the [SQL documentation](https://substreams.streamingfast.io/documentation/consume/sql).
+{% hint style="success" %}
+**Tip**: If you run into any problems within the Dev Container, use the `help` command to access trouble shooting tools. 
+{% endhint %}
+
+## Building a Sink for Your Project
+
+You can configure your Substreams project to query data either through a Subgraph or directly from an SQL database:
+
+- **Subgraph**: Run `substreams codegen subgraph`. This generates a project with a basic `schema.graphql` and `mappings.ts` file. You can customize these to define entities based on the data extracted by Substreams. For more information on configuring a Subgraph sink, see the [Subgraph documentation](https://thegraph.com/docs/en/sps/triggers).
+- **SQL**: Run `substreams codegen sql` for SQL-based queries. For more information on configuring a SQL sink, refer to the [SQL documentation](../how-to-guides/sinks/sql/sql-sink.md).
 
 ## Deployment Options
 
-To deploy a Subgraph, you can either run the `graph-node` locally using the `deploy-local` command or deploy to Subgraph Studio by using the `deploy` command from the `package.json` file.
+To deploy a Subgraph, you can either run the `graph-node` locally using the `deploy-local` command or deploy to Subgraph Studio by using the `deploy` command found in the `package.json` file.
 
 ## Common Errors
 
 - When running locally, make sure to verify that all Docker containers are healthy by running the `dev-status` command. 
+- If you put the wrong start-block while generating your project, navigate to the `substreams.yaml` to change the block number, then re-run `substreams build`. 

@@ -4,23 +4,23 @@
 
 * [Introduction](README.md)
 * [Getting Started](new/explanation/getting-started.md)
-* [Reliability Guarantees](new/explanation/reliability-guarantees.md)
+* [Never Miss Data](new/explanation/reliability-guarantees.md)
 
 ## Tutorials
 
 * [Develop Your Own Substreams](new/tutorials/intro-to-tutorials.md)
-  * [on EVM](new/tutorials/evm.md)xw
-  * [on Solana](new/tutorialssolana.md)
+  * [on EVM](new/tutorials/evm.md)
+  * [on Solana](new/tutorials/solana.md)
   * [on Starknet](new/tutorials/starknet.md)
   * [on Cosmos](new/tutorials/cosmos-compatible)
-    * [Injective](new/turorials/cosmos-compatible/injective.md)
+    * [Injective](new/tutorials/cosmos-compatible/injective.md)
     * [Mantra](new/tutorials/cosmos-compatible/mantra.md)
 
 ## How-To Guides
 
-* [Initialize a Substreams](new/how-to-guides/develop-your-own-substreams/develop-your-own-substreams.md)
-  * [on EVM](new/how-to-guides/develop-your-own-substreams/evm/evm.md)
-    * [Exploring Ethereum](new/how-to-guides/develop-your-own-substreams/evm/exploring-ethereum/exploring-ethereum.md)
+* [Develop a Substreams](new/how-to-guides/develop-your-own-substreams/develop-your-own-substreams.md)
+  * [on EVM](new/how-to-guides/develop-your-own-substreams/evm/exploring-ethereum/exploring-ethereum.md)
+    <!-- * [Exploring Ethereum](new/how-to-guides/develop-your-own-substreams/evm/exploring-ethereum/exploring-ethereum.md) -->
       * [Mapping Blocks](new/how-to-guides/evm/exploring-ethereum/map\_block\_meta\_module.md)
       * [Filter Transactions](new/how-to-guides/develop-your-own-substreams/evm/exploring-ethereum/map\_filter\_transactions\_module.md)
       * [Retrieve Events of a Smart Contract](new/how-to-guides/develop-your-own-substreams/evm/exploring-ethereum/map\_contract\_events\_module.md)
@@ -37,14 +37,14 @@
       * [Foundational Modules](new/how-to-guides/develop-your-own-substreams/cosmos/injective/foundational.md)
       * [Dojo DEX USDT Volume Subgraph Example](new/how-to-guides/develop-your-own-substreams/cosmos/injective/usdt-exchanges.md)
 * [Use a Substreams Sink](new/how-to-guides/sinks/sinks.md)
-  * [Substreams:SQL](new/how-to-guides/sinks/sql)
+  * [Substreams:SQL](new/how-to-guides/sinks/sql/sql-sink.md)
     <!--* [Deployable Services](new/how-to-guides/sinks/sql/deployable-services/)
       * [Remote Service](new/how-to-guides/sinks/sql/deployable-services/remote-service.md)
       * [Local Service](new/how-to-guides/sinks/sql/deployable-services/local-service.md)-->
-    * [SQL Sink](new/how-to-guides/sinks/sql/sql-sink.md)
+    <!--* [SQL Sink](new/how-to-guides/sinks/sql/sql-sink.md)-->
   * [Substreams:Subgraph](new/how-to-guides/sinks/subgraph/subgraph.md)
-    * [Graph Out](new/how-to-guides/sinks/subgraph/graph-out.md)
     * [Triggers](new/how-to-guides/sinks/subgraph/triggers.md)
+    * [Graph Out](new/how-to-guides/sinks/subgraph/graph-out.md)
   * [Substreams:Stream](new/how-to-guides/sinks/stream/stream.md)
     * [JavaScript](new/how-to-guides/sinks/stream/javascript.md)
     * [Go](new/how-to-guides/sinks/stream/go.md)    
@@ -88,8 +88,6 @@
 * [Graph-Node](new/tutorials/graph-node/graph-node.md)
   * [Local Development](new/tutorials/graph-node/local-development.md)
   * [Publish to The Graph Network](new/tutorials/graph-node/publish-decentralized-network.md)
-* [RUN Reference](new/references/running-substreams.md) <!-- Potential to be removed given its covered in CLI Reference? -->
-* [GUI Reference](new/references/gui.md) <!-- Potential to be removed given its covered in CLI Reference? -->
 * [Indexer Reference](new/references/indexer-reference/indexer-reference.md)
   * [Test Substreams Locally](new/references/indexer-reference/test-locally.md)
 <!-- * [Glossary](new/references/glossary.md) -->
