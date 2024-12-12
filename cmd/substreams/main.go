@@ -33,7 +33,7 @@ func computeVersionString(version string, settings []debug.BuildSetting) string 
 	}
 
 	if date != "" {
-		labels = append(labels, fmt.Sprintf("Built %s", date))
+		labels = append(labels, fmt.Sprintf("Commit Date %s", date))
 	}
 
 	if len(labels) == 0 {
