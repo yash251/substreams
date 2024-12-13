@@ -11,6 +11,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## v1.11.2
 
+### Server-side
+
+* Fix too many memory allocations impacting performance when stores are used
+
+### CLI
+
+* Force topological ordering of protobuf descriptors when 'packing' an spkg (affecting current substreams-js clients)
+* Allow `substreams pack` to be able to do a "re-packing" of an existing spkg file. Useful to apply the protobuf descriptor ordering fix.
+
+### Docker image
+
 * Rebuilt of v1.11.1 to generate Docker `latest` tag with revamp Docker image building.
 * Substreams CLI is now built with using Ubuntu 22, previous releases were built using Ubuntu 20.
 * Substreams Docker image is now using `ubuntu:22` as its base, previous releases were built using `ubuntu:20.04`.

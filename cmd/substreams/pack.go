@@ -51,10 +51,6 @@ func runPack(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("manifest reader: %w", err)
 	}
 
-	if !manifestReader.IsLocalManifest() {
-		return fmt.Errorf(`"pack" can only be used to pack local manifest file`)
-	}
-
 	pkgBundle, err := manifestReader.Read()
 	if err != nil {
 		return fmt.Errorf("reading manifest %q: %w", manifestPath, err)
@@ -69,9 +65,18 @@ func runPack(cmd *cobra.Command, args []string) error {
 
 	originalOutputFile, _ := sflags.GetString(cmd, "output-file")
 
+	manifestDir := filepath.Dir(manifestPath)
+	if manifestReader.IsRemotePackage(manifestPath) {
+		manifestDir = "."
+
+		if !manifestReader.IsLocalManifest() {
+			fmt.Printf("Re-packaging existing .spkg file...")
+		}
+	}
+
 	packageMetadata := pkgBundle.Package.PackageMeta[0]
 	resolvedOutputFile := resolveOutputFile(originalOutputFile, map[string]string{
-		"manifestDir":     filepath.Dir(manifestPath),
+		"manifestDir":     manifestDir,
 		"spkgDefaultName": fmt.Sprintf("%s-%s.spkg", strings.Replace(packageMetadata.Name, "_", "-", -1), packageMetadata.Version),
 		"version":         packageMetadata.Version,
 	})
