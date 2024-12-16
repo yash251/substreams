@@ -1,6 +1,3 @@
-
-## Reliability Guarantees
-
 When you consume a Substreams package through the CLI (or through any of the different sinks available), you are establishing a gRPC connection with the Substreams provider (i.e. StreamingFast, Pinax...), which streams the data of every block back to your sink.
 
 ### The Response Format

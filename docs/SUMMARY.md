@@ -1,10 +1,7 @@
 # Table of contents
 
-## Substreams
-
 * [Introduction](README.md)
 * [Getting Started](new/explanation/getting-started.md)
-* [Never Miss Data](new/explanation/reliability-guarantees.md)
 
 ## Tutorials
 
@@ -61,6 +58,7 @@
 ## Reference Material
 
 * [Chains and endpoints](new/references/chains-and-endpoints.md)
+* [Never Miss Data](new/explanation/reliability-guarantees.md)
 * [Development Container Reference](new/references/devcontainer-ref.md)
 * [Install the CLI](new/references/cli/installing-the-cli.md)
   * [Authentication](new/references/cli/authentication.md)
@@ -94,6 +92,6 @@
 * [Change log](release-notes/change-log.md)
 * [FAQ](new/references/faq.md)
 
-## Understanding Decentralized Indexing
+## Decentralized Indexing
 
 * [What is The Graph?](https://thegraph.com/docs/en/about/)

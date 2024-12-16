@@ -202,8 +202,7 @@ const stream = async (pkg, registry, transport) => {
   for await (const statefulResponse of streamBlocks(transport, request)) {
        /*
             Decode the response and handle the message.
-            There different types of response messages that you can receive. You can read more about the response message in the docs:
-            https://substreams.streamingfast.io/documentation/consume/reliability-guarantees#the-response-format
+            There different types of response messages that you can receive. You can read more about the response message in the docs [here](../../../references/reliability-guarantees.md).
         */
         await handleResponseMessage(statefulResponse.response, registry);
 
