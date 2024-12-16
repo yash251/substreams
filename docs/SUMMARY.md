@@ -58,7 +58,7 @@
 ## Reference Material
 
 * [Chains and endpoints](new/references/chains-and-endpoints.md)
-* [Never Miss Data](new/explanation/reliability-guarantees.md)
+* [Never Miss Data](new/references/reliability-guarantees.md)
 * [Development Container Reference](new/references/devcontainer-ref.md)
 * [Install the CLI](new/references/cli/installing-the-cli.md)
   * [Authentication](new/references/cli/authentication.md)
