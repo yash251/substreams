@@ -9,6 +9,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v1.11.3
+
+### Server-side
+
+* Fixed: detection of gzip compression on 'connect' protocol (js/ts clients)
+* Added: tier1.Config `EnforceCompression` to refuse incoming connections that do not support GZIP compression (default: false)
+
 ## v1.11.2
 
 ### Server-side

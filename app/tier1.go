@@ -60,6 +60,7 @@ type Tier1Config struct {
 	StateStoreDefaultTag string
 	BlockType            string
 	StateBundleSize      uint64
+	EnforceCompression   bool // refuse incoming requests that do not accept gzip compression (ConnectRPC or GRPC)
 
 	MaxSubrequests       uint64
 	SubrequestsEndpoint  string
@@ -199,6 +200,7 @@ func (a *Tier1App) Run() error {
 		a.config.BlockType,
 		subrequestsClientConfig,
 		tier2RequestParameters,
+		a.config.EnforceCompression,
 		opts...,
 	)
 	if err != nil {

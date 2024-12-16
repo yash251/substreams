@@ -72,6 +72,7 @@ type Tier1Service struct {
 	resolveCursor       pipeline.CursorResolver
 	getHeadBlock        func() (uint64, error)
 
+	enforceCompression     bool
 	tier2RequestParameters reqctx.Tier2RequestParameters
 }
 
@@ -129,6 +130,7 @@ func NewTier1(
 
 	substreamsClientConfig *client.SubstreamsClientConfig,
 	tier2RequestParameters reqctx.Tier2RequestParameters,
+	enforceCompression bool,
 	opts ...Option,
 ) (*Tier1Service, error) {
 
@@ -174,6 +176,7 @@ func NewTier1(
 		logger:                 logger,
 		tier2RequestParameters: tier2RequestParameters,
 		blockExecutionTimeout:  3 * time.Minute,
+		enforceCompression:     enforceCompression,
 	}
 
 	s.streamFactoryFunc = sf.New
@@ -209,6 +212,14 @@ func (s *Tier1Service) Blocks(
 	ctx, span := reqctx.WithSpan(ctx, "substreams/tier1/request")
 	defer span.EndWithErr(&err)
 
+	var compressed bool
+	if matchGZIPHeader(req) {
+		compressed = true
+	}
+	if s.enforceCompression && !compressed {
+		return connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("Your client does not accept gzip-compressed streams. Check how to enable it on your GRPC or ConnectRPC client"))
+	}
+
 	request := req.Msg
 	if request.Modules == nil {
 		return connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("missing modules in request"))
@@ -243,16 +254,6 @@ func (s *Tier1Service) Blocks(
 	for i := 0; i < len(moduleNames); i++ {
 		moduleNames[i] = request.Modules.Modules[i].Name
 	}
-	var compressed bool
-	for _, vv := range req.Header().Values("grpc-Accept-Encoding") {
-		for _, v := range strings.Split(vv, ",") {
-			if v == "gzip" {
-				compressed = true
-				break
-			}
-		}
-	}
-
 	fields := []zap.Field{
 		zap.Int64("start_block", request.StartBlockNum),
 		zap.Uint64("stop_block", request.StopBlockNum),
@@ -712,4 +713,25 @@ func toConnectError(ctx context.Context, err error) error {
 	// Do we want to print the full cause as coming from Golang? Would we like to maybe trim off "operational"
 	// data?
 	return connect.NewError(connect.CodeInternal, err)
+}
+
+// must be lowercase
+var compressionHeader = map[string]bool{"grpc-accept-encoding": true, "connect-accept-encoding": true}
+
+const compressionValue = "gzip"
+
+func matchGZIPHeader(req *connect.Request[pbsubstreamsrpc.Request]) bool {
+
+	for k, v := range req.Header() {
+		if compressionHeader[strings.ToLower(k)] {
+			for _, vv := range v {
+				for _, vvv := range strings.Split(vv, ",") {
+					if strings.ToLower(vvv) == compressionValue {
+						return true
+					}
+				}
+			}
+		}
+	}
+	return false
 }
