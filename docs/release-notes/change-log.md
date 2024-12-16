@@ -9,6 +9,30 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v1.11.3
+
+### Server-side
+
+* Fixed: detection of gzip compression on 'connect' protocol (js/ts clients)
+* Added: tier1.Config `EnforceCompression` to refuse incoming connections that do not support GZIP compression (default: false)
+
+## v1.11.2
+
+### Server-side
+
+* Fix too many memory allocations impacting performance when stores are used
+
+### CLI
+
+* Force topological ordering of protobuf descriptors when 'packing' an spkg (affecting current substreams-js clients)
+* Allow `substreams pack` to be able to do a "re-packing" of an existing spkg file. Useful to apply the protobuf descriptor ordering fix.
+
+### Docker image
+
+* Rebuilt of v1.11.1 to generate Docker `latest` tag with revamp Docker image building.
+* Substreams CLI is now built with using Ubuntu 22, previous releases were built using Ubuntu 20.
+* Substreams Docker image is now using `ubuntu:22` as its base, previous releases were built using `ubuntu:20.04`.
+
 ## v1.11.1
 
 - Fix the `gui` breaking when the network field is not set in the spkg

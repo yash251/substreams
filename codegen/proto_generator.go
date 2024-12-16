@@ -36,7 +36,14 @@ func NewProtoGenerator(outputPath string, excludedPaths []string, generateMod bo
 }
 
 func (g *ProtoGenerator) GenerateProto(pkg *pbsubstreams.Package) error {
-	spkgTemporaryFilePath := filepath.Join(os.TempDir(), pkg.PackageMeta[0].Name+".tmp.spkg")
+
+	tmpDir, err := os.MkdirTemp("", "substreams_protogen")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(tmpDir)
+
+	spkgTemporaryFilePath := filepath.Join(tmpDir, pkg.PackageMeta[0].Name+".tmp.spkg")
 	cnt, err := proto.Marshal(pkg)
 	if err != nil {
 		return fmt.Errorf("marshalling package: %w", err)

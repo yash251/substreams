@@ -96,7 +96,6 @@ func (c *Call) AppendLog(message string) {
 	c.LogsByteCount += uint64(len(message))
 	if !c.ReachedLogsMaxByteCount() {
 		c.Logs = append(c.Logs, message)
-		c.ExecutionStack = append(c.ExecutionStack, fmt.Sprintf("log: %s", message))
 	}
 }
 
@@ -130,7 +129,6 @@ func (c *Call) DoAppend(ord uint64, key string, value []byte) {
 }
 func (c *Call) DoDeletePrefix(ord uint64, prefix string) {
 	now := time.Now()
-	c.traceStateWrites("delete_prefix", prefix)
 	c.outputStore.DeletePrefix(ord, prefix)
 	c.stats.RecordModuleWasmStoreDeletePrefix(c.ModuleName, c.outputStore.SizeBytes(), time.Since(now))
 }
@@ -257,7 +255,6 @@ func (c *Call) DoGetAt(storeIndex int, ord uint64, key string) (value []byte, fo
 	defer func() { c.stats.RecordModuleWasmStoreRead(c.ModuleName, time.Since(now)) }()
 	c.validateStoreIndex(storeIndex, "get_at")
 	readStore := c.inputStores[storeIndex]
-	c.traceStateReads("get_at", storeIndex, found, key)
 	return readStore.GetAt(ord, key)
 }
 
@@ -266,7 +263,6 @@ func (c *Call) DoHasAt(storeIndex int, ord uint64, key string) (found bool) {
 	defer func() { c.stats.RecordModuleWasmStoreRead(c.ModuleName, time.Since(now)) }()
 	c.validateStoreIndex(storeIndex, "has_at")
 	readStore := c.inputStores[storeIndex]
-	c.traceStateReads("has_at", storeIndex, found, key)
 	return readStore.HasAt(ord, key)
 }
 
@@ -275,7 +271,6 @@ func (c *Call) DoGetFirst(storeIndex int, key string) (value []byte, found bool)
 	defer func() { c.stats.RecordModuleWasmStoreRead(c.ModuleName, time.Since(now)) }()
 	c.validateStoreIndex(storeIndex, "get_first")
 	readStore := c.inputStores[storeIndex]
-	c.traceStateReads("get_first", storeIndex, found, key)
 	return readStore.GetFirst(key)
 }
 
@@ -284,7 +279,6 @@ func (c *Call) DoHasFirst(storeIndex int, key string) (found bool) {
 	defer func() { c.stats.RecordModuleWasmStoreRead(c.ModuleName, time.Since(now)) }()
 	c.validateStoreIndex(storeIndex, "has_first")
 	readStore := c.inputStores[storeIndex]
-	c.traceStateReads("has_first", storeIndex, found, key)
 	return readStore.HasFirst(key)
 }
 
@@ -293,7 +287,6 @@ func (c *Call) DoGetLast(storeIndex int, key string) (value []byte, found bool) 
 	defer func() { c.stats.RecordModuleWasmStoreRead(c.ModuleName, time.Since(now)) }()
 	c.validateStoreIndex(storeIndex, "get_last")
 	readStore := c.inputStores[storeIndex]
-	c.traceStateReads("get_last", storeIndex, found, key)
 	return readStore.GetLast(key)
 }
 
@@ -302,7 +295,6 @@ func (c *Call) DoHasLast(storeIndex int, key string) (found bool) {
 	defer func() { c.stats.RecordModuleWasmStoreRead(c.ModuleName, time.Since(now)) }()
 	c.validateStoreIndex(storeIndex, "has_last")
 	readStore := c.inputStores[storeIndex]
-	c.traceStateReads("has_last", storeIndex, found, key)
 	return readStore.HasLast(key)
 }
 
@@ -316,38 +308,18 @@ func (c *Call) validateSimple(stateFunc string, updatePolicy pbsubstreams.Module
 	if c.updatePolicy != updatePolicy {
 		c.returnInvalidPolicy(stateFunc, fmt.Sprintf(`updatePolicy == %q`, policyMap[updatePolicy]))
 	}
-	c.traceStateWrites(stateFunc, key)
 }
 
 func (c *Call) validateWithValueType(stateFunc string, updatePolicy pbsubstreams.Module_KindStore_UpdatePolicy, valueType string, key string) {
 	if c.updatePolicy != updatePolicy || c.valueType != valueType {
 		c.returnInvalidPolicy(stateFunc, fmt.Sprintf(`updatePolicy == %q and valueType == %q`, policyMap[updatePolicy], valueType))
 	}
-	c.traceStateWrites(stateFunc, key)
 }
 
 func (c *Call) validateWithTwoValueTypes(stateFunc string, updatePolicy pbsubstreams.Module_KindStore_UpdatePolicy, valueType1, valueType2 string, key string) {
 	if c.updatePolicy != updatePolicy || (c.valueType != valueType1 && c.valueType != valueType2) {
 		c.returnInvalidPolicy(stateFunc, fmt.Sprintf(`updatePolicy == %q and valueType == %q`, policyMap[updatePolicy], valueType1))
 	}
-	c.traceStateWrites(stateFunc, key)
-}
-
-func (c *Call) traceStateWrites(stateFunc, key string) {
-	store := c.outputStore
-	var line string
-	if store == nil {
-		line = fmt.Sprintf("%s key: %q", stateFunc, key)
-	} else {
-		line = fmt.Sprintf("%s::%s key: %q, store details: %s", store.Name(), stateFunc, key, store.String())
-	}
-	c.ExecutionStack = append(c.ExecutionStack, line)
-}
-
-func (c *Call) traceStateReads(stateFunc string, storeIndex int, found bool, key string) {
-	store := c.inputStores[storeIndex]
-	line := fmt.Sprintf("%s::%s key: %q, found: %v, store details: %s", store.Name(), stateFunc, key, found, store.String())
-	c.ExecutionStack = append(c.ExecutionStack, line)
 }
 
 func (c *Call) returnInvalidPolicy(stateFunc, policy string) {

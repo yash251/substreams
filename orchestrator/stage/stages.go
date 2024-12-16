@@ -3,6 +3,7 @@ package stage
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 
@@ -183,24 +184,32 @@ func (s *Stages) UpdateStats() {
 	s.lastStatUpdate = time.Now()
 	out := make([]*pbsubstreamsrpc.Stage, len(s.stages))
 
-	for i := range s.stages {
+	for stgIdx := range s.stages {
 
-		mods := make([]string, len(s.stages[i].allExecutedModules))
-		_ = copy(mods, s.stages[i].allExecutedModules)
+		mods := make([]string, len(s.stages[stgIdx].allExecutedModules))
+		_ = copy(mods, s.stages[stgIdx].allExecutedModules)
 
-		var br []*block.Range
+		br := make(map[uint64]*block.Range)
 		for segmentIdx, segment := range s.segmentStates {
-			state := segment[i]
-			segmenter := s.stages[i].storeModuleStates[0].segmenter
+			state := segment[stgIdx]
+			segmenter := s.stages[stgIdx].storeModuleStates[0].segmenter
 			if state == UnitCompleted || state == UnitPartialPresent || state == UnitMerging {
 				if rng := segmenter.Range(segmentIdx + s.segmentOffset); rng != nil {
-					br = append(br, rng)
+					br[rng.StartBlock] = rng
 				}
 			}
 		}
-		blockRanges := block.Ranges(br).SortAndDedupe().Merged()
 
-		out[i] = &pbsubstreamsrpc.Stage{
+		blockRanges := block.Ranges(make([]*block.Range, len(br)))
+		i := 0
+		for _, v := range br {
+			blockRanges[i] = v
+			i++
+		}
+		sort.Sort(blockRanges)
+		blockRanges = blockRanges.Merged()
+
+		out[stgIdx] = &pbsubstreamsrpc.Stage{
 			Modules:         mods,
 			CompletedRanges: toProtoRanges(blockRanges),
 		}

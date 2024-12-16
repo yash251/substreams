@@ -19,6 +19,7 @@ import (
 	"github.com/streamingfast/dstore"
 	"golang.org/x/mod/semver"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/descriptorpb"
 
 	"github.com/jhump/protoreflect/desc"
 	"github.com/streamingfast/cli"
@@ -591,8 +592,44 @@ func (r *Reader) resolvePkg() (*pbsubstreams.Package, *Manifest, error) {
 		return nil, nil, fmt.Errorf("unable to get package: %w", err)
 	}
 
+	pkg.ProtoFiles, err = orderProtobufFilesByDependencies(pkg.ProtoFiles)
+	if err != nil {
+		return nil, nil, fmt.Errorf("unable to order protobuf files: %w", err)
+	}
+
 	r.pkg = pkg
 	return pkg, manif, nil
+}
+
+func orderProtobufFilesByDependencies(in []*descriptorpb.FileDescriptorProto) ([]*descriptorpb.FileDescriptorProto, error) {
+	var out []*descriptorpb.FileDescriptorProto
+	seen := make(map[string]bool)
+	for _, fd := range in {
+		if err := orderProtobufFilesByDependenciesRec(fd, in, seen, &out); err != nil {
+			return nil, err
+		}
+	}
+	return out, nil
+}
+
+func orderProtobufFilesByDependenciesRec(fd *descriptorpb.FileDescriptorProto, in []*descriptorpb.FileDescriptorProto, seen map[string]bool, out *[]*descriptorpb.FileDescriptorProto) error {
+	if seen[fd.GetName()] {
+		return nil
+	}
+	seen[fd.GetName()] = true
+
+	for _, dep := range fd.GetDependency() {
+		for _, d := range in {
+			if d.GetName() == dep {
+				if err := orderProtobufFilesByDependenciesRec(d, in, seen, out); err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	*out = append(*out, fd)
+	return nil
 }
 
 // IsRemotePackage determines if reader's input to read the manifest is a remote file accessible over

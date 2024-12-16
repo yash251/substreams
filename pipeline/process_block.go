@@ -298,7 +298,6 @@ func (p *Pipeline) executeModules(ctx context.Context, execOutput execout.Execut
 	p.extraMapModuleOutputs = nil
 	p.extraStoreModuleOutputs = nil
 	blockNum := execOutput.Clock().Number
-	block := fmt.Sprintf("%d (%s)", blockNum, execOutput.Clock().Id)
 
 	// they may be already built, but we call this function every time to enable future dynamic changes
 	if err := p.BuildModuleExecutors(ctx); err != nil {
@@ -318,7 +317,7 @@ func (p *Pipeline) executeModules(ctx context.Context, execOutput execout.Execut
 				}
 				res := p.execute(ctx, executor, execOutput)
 				if err := p.applyExecutionResult(ctx, executor, res, execOutput); err != nil {
-					return fmt.Errorf("applying executor results %q on block %s: %w", executor.Name(), block, res.err)
+					return fmt.Errorf("applying executor results %q on block %d (%s): %w", executor.Name(), blockNum, execOutput.Clock().Id, res.err)
 				}
 			}
 		} else {
@@ -351,7 +350,7 @@ func (p *Pipeline) executeModules(ctx context.Context, execOutput execout.Execut
 					return fmt.Errorf("running executor %q: %w", executor.Name(), result.err)
 				}
 				if err := p.applyExecutionResult(ctx, executor, result, execOutput); err != nil {
-					return fmt.Errorf("applying executor results %q on block %s: %w", executor.Name(), block, result.err)
+					return fmt.Errorf("applying executor results %q on block %d (%s): %w", executor.Name(), blockNum, execOutput.Clock(), result.err)
 				}
 			}
 		}

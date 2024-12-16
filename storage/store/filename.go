@@ -65,7 +65,7 @@ func NewPartialFileInfo(moduleName string, start uint64, exclusiveEndBlock uint6
 }
 
 func parseFileName(moduleName, filename string) (*FileInfo, bool) {
-	res := stateFileRegex.FindAllStringSubmatch(filename, 1)
+	res := stateFileRegex.FindAllSubmatchIndex([]byte(filename), 1)
 	if len(res) != 1 {
 		return nil, false
 	}
@@ -73,9 +73,9 @@ func parseFileName(moduleName, filename string) (*FileInfo, bool) {
 	return &FileInfo{
 		ModuleName:  moduleName,
 		Filename:    filename,
-		Range:       block.NewRange(uint64(mustAtoi(res[0][2])), uint64(mustAtoi(res[0][1]))),
-		Partial:     res[0][4] == "partial",
-		WithTraceID: res[0][3] != "",
+		Range:       block.NewRange(uint64(mustAtoi(filename[res[0][4]:res[0][5]])), uint64(mustAtoi(filename[res[0][2]:res[0][3]]))),
+		Partial:     filename[res[0][8]:res[0][9]] == "partial",
+		WithTraceID: res[0][6] != -1,
 	}, true
 }
 
