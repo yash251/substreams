@@ -48,7 +48,7 @@
   * [Substreams:Stream](new/how-to-guides/sinks/stream/stream.md)
     * [JavaScript](new/how-to-guides/sinks/stream/javascript.md)
     * [Go](new/how-to-guides/sinks/stream/go.md)    
-  * [PubSub](new/how-to-guides/pubsub.md)
+  * [PubSub](new/how-to-guides/sinks/pubsub.md)
 <!--* [Deploying Substreams](new/tutorials/deployable-services/deployable-services.md)-->
 * [EVM Extensions](new/how-to-guides/eth-calls/overview.md)
   * [Making eth\_calls](new/how-to-guides/eth-calls/eth-calls.md)
