@@ -7,7 +7,7 @@ In this guide, you'll learn how to initialize a Solana-based Substreams project 
 2. Running `substreams init` will give you the option to choose between two Solana project options. Select the one that best fits your requirements:
     - **sol-minimal**: Creates a simple Substreams that extracts raw Solana block data and generates corresponding Rust code. This path will start you with the full raw block, you can navigate to the `substreams.yaml` (the manifest) to modify the input.
     - **sol-transactions**: Creates a Substreams that filters Solana transactions based on one or more Program IDs and/or Account IDs, using the cached [Solana Foundational Module](https://substreams.dev/streamingfast/solana-common/v0.3.0).
-    - **sol-anchor-beta**: Given an Anchor IDL, create a Substreams that decodes instructions and events. If an IDL isn’t available using the `idl` subcommand within the [Anchor ClI](https://www.anchor-lang.com/docs/cli), you’ll need to provide it yourself.
+    - **sol-anchor-beta**: Given an Anchor IDL, create a Substreams that decodes instructions and events. If an IDL isn’t available using the `idl` subcommand within the [Anchor CLI](https://www.anchor-lang.com/docs/cli), you’ll need to provide it yourself.
 
 {% hint style="info" %} 
 Note: The filtered_transactions_without_votes module extracts transactions while excluding voting transactions, reducing data size and costs by 75%. To access voting transactions, use a full Solana block.
