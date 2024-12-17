@@ -1,6 +1,6 @@
 # Getting Started with Substreams
 
-Integrating Substreams can be quick and easy. This guide will help you get started with consuming ready-made Substreams packages or developing your own. Substreams are permissionaless. Grab a key [here](thegraph.market), no personal information required, and start streaming on-chain data.
+Integrating Substreams can be quick and easy. This guide will help you get started with consuming ready-made Substreams packages or developing your own. Substreams are permissionaless. Grab a key [here](https://thegraph.market/), no personal information required, and start streaming on-chain data.
 
 # Build
 
