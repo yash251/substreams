@@ -16,8 +16,8 @@
 ## How-To Guides
 
 * [Develop a Substreams](new/how-to-guides/develop-your-own-substreams/develop-your-own-substreams.md)
-  * [on EVM](new/how-to-guides/develop-your-own-substreams/evm/exploring-ethereum/exploring-ethereum.md)
-    <!-- * [Exploring Ethereum](new/how-to-guides/develop-your-own-substreams/evm/exploring-ethereum/exploring-ethereum.md) -->
+  * [on EVM](new/how-to-guides/develop-your-own-substreams/evm)
+    * [Exploring Ethereum](new/how-to-guides/develop-your-own-substreams/evm/exploring-ethereum/exploring-ethereum.md)
       * [Mapping Blocks](new/how-to-guides/evm/exploring-ethereum/map\_block\_meta\_module.md)
       * [Filter Transactions](new/how-to-guides/develop-your-own-substreams/evm/exploring-ethereum/map\_filter\_transactions\_module.md)
       * [Retrieve Events of a Smart Contract](new/how-to-guides/develop-your-own-substreams/evm/exploring-ethereum/map\_contract\_events\_module.md)

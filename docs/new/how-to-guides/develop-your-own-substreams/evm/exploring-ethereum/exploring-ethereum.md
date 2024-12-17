@@ -5,7 +5,7 @@ Getting started with Substreams might feel challenging, but you are not alone! T
 {% hint style="success" %}
 **Tip**: This tutorial teaches you how to build a Substreams from scratch.
 
-Remember that you can auto-generate your Substreams module by using the [code-generation tools](../../../../tutorials/evm.md).
+Remember that you can auto-generate a filtered Substreams module by using the [code-generation tools](../../../../tutorials/evm.md).
 {% endhint %}
 
 The Ethereum block model for Substreams is represented by the [`sf.ethereum.type.v2.Block`](https://github.com/streamingfast/firehose-ethereum/blob/develop/proto/sf/ethereum/type/v2/type.proto) Rust struct.
@@ -57,7 +57,7 @@ In the following sections, you will go through every module, run the correspondi
 
 ### The Project Structure
 
-<figure><img src="../../../../.gitbook/assets/tutorials/eth-explorer-structure.png" /><figcaption><p>Ethereum Explorer Project Structure</p></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/tutorials/eth-explorer-structure.png" /><figcaption><p>Ethereum Explorer Project Structure</p></figcaption></figure>
 
 1. The `proto` folder contains the Protobuf definitions for the transformations.
 In this example, there are three Protobuf objects, which are the outputs of the Substreams module mentioned in the previous section: BlockMeta (which represents the information of an Ethereum block), Transaction (which is an abstraction for an Ethereum transaction), and Event (an abstraction for an Ethereum event).
@@ -68,7 +68,7 @@ In this example, there are three Protobuf objects, which are the outputs of the 
 
 Let's take a closer look at the Substreams manifest (`substreams.yml`):
 
-<figure><img src="../../../../.gitbook/assets/tutorials/eth-explorer-manifest.png" width="100%" /><figcaption><p>Ethereum Explorer Manifest</p></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/tutorials/eth-explorer-manifest.png" width="100%" /><figcaption><p>Ethereum Explorer Manifest</p></figcaption></figure>
 
 1. The `protobuf` section specifies the location of the Protobuf files used in the Substreams (i.e. where are the files defining the objects that you are going to use as output). In this example, the files are under the `proto` folder.
 2. When you run Substreams, you are really executing a Rust application inside a WASM container. Therefore, Substreams needs to know where is the WASM executable. The `binaries` section specifies the location of the WASM executable.
@@ -79,9 +79,9 @@ In this example, the `map_block_meta` module is a mapper that takes a raw Ethere
 
 You may find these additional resources helpful for developing your first Solana application.
 
-The [CLI reference](../references/cli/command-line-interface.md) lets you explore all the tools available in the Substreams CLI.
+The [CLI reference](../../../../references/cli/command-line-interface.md) lets you explore all the tools available in the Substreams CLI.
 
 ### Substreams Components Reference
 
-The [Components Reference](../references/substreams-components/) dives deeeper into navigating the `substreams.yaml`.
+The [Components Reference](../../../../references/substreams-components/) dives deeeper into navigating the `substreams.yaml`.
 
