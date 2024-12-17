@@ -28,7 +28,7 @@
     * [SPL Token Tracker](new/how-to-guides/develop-your-own-substreams/solana/token-tracker/token-tracker.md)
     * [NFT Trades](new/how-to-guides/develop-your-own-substreams/solana/top-ledger/nft-trades.md)
     * [DEX Trades](new/how-to-guides/develop-your-own-substreams/solana/top-ledger/dex-trades.md)
-  * [on Cosmos](new/how-to-guides/develop-your-own-substreams/cosmos/cosmos.md)
+  * [on Cosmos]
     * [Injective](new/how-to-guides/develop-your-own-substreams/cosmos/injective/injective.md.md)
       * [Simple Substreams Example](new/how-to-guides/develop-your-own-substreams/cosmos/injective/block-stats.md)
       * [Foundational Modules](new/how-to-guides/develop-your-own-substreams/cosmos/injective/foundational.md)
