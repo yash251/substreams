@@ -8,4 +8,4 @@ Choose your ecosystem to get started:
 
 - [Solana](./solana/solana.md)
 - [EVM](./evm/exploring-ethereum/exploring-ethereum.md)
-- [Cosmos](./cosmos/injective/injective.md)
+- [Cosmos](./cosmos/injective/block-stats.md)
