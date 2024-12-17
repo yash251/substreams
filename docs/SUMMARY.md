@@ -29,7 +29,7 @@
     * [NFT Trades](new/how-to-guides/develop-your-own-substreams/solana/top-ledger/nft-trades.md)
     * [DEX Trades](new/how-to-guides/develop-your-own-substreams/solana/top-ledger/dex-trades.md)
   * [on Cosmos](new/how-to-guides/develop-your-own-substreams/cosmos)
-    * [Injective](new/how-to-guides/develop-your-own-substreams/cosmos/injective/injective.md.md)
+    * [Injective](new/how-to-guides/develop-your-own-substreams/cosmos/injective)
       * [Simple Substreams Example](new/how-to-guides/develop-your-own-substreams/cosmos/injective/block-stats.md)
       * [Foundational Modules](new/how-to-guides/develop-your-own-substreams/cosmos/injective/foundational.md)
       * [Dojo DEX USDT Volume Subgraph Example](new/how-to-guides/develop-your-own-substreams/cosmos/injective/usdt-exchanges.md)
