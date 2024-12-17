@@ -24,7 +24,23 @@ Within the generated directories, modify your Substreams modules to include addi
 
 ## Step 3: Load the Data
 
-To make your Substreams queriable (as opposed to [direct streaming](../how-to-guides/sinks/stream/stream.md)), you can automatically generate a Subgraph (known as a [Substreams-powered subgraph](https://thegraph.com/docs/en/sps/introduction/)) or SQL-DB sink. 
+To make your Substreams queriable (as opposed to [direct streaming](../how-to-guides/sinks/stream/stream.md)), you can automatically generate a Subgraph (known as a [Substreams-powered subgraph](https://thegraph.com/docs/en/sps/introduction/)) or SQL-DB sink.
+
+### Subgraph
+
+1. Run `substreams codegen subgraph` to intialize the sink, producing the neccessary files and function definitions. 
+2. Create your [subgraph mappings](../how-to-guides/sinks/subgraph/triggers.md) within the `mappings.ts` and associated entities within the `schema.graphql`.
+3.  Deploy
+
+### SQL
+
+1. Run `substreams codegen sql` and choose from either ClickHouse or Postgres to intialize the sink, producing the neccessary files. 
+2. Run `substreams build` build the [Substreams:SQL](../how-to-guides/sinks/sql/sql-sink.md) sink. 
+3. Run `substreams-sink-sql` to sink the data into your selected SQL DB.
+
+{% hint style="info" %}
+**Note**: Run `help` to better navigate the development environment and check the health of containers. 
+{% endhint %}
 
 ## Additional Resources
 

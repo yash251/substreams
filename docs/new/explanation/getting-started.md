@@ -1,6 +1,6 @@
 # Getting Started with Substreams
 
-Integrating Substreams can be quick and easy. This guide will help you get started with consuming ready-made Substreams packages or developing your own. Substreams are permissionaless. Grab a key [here](thegraph.market), no personal information required, and start streaming on-chain data.
+Integrating Substreams can be quick and easy. This guide will help you get started with consuming ready-made Substreams packages or developing your own. Substreams are permissionaless. Grab a key [here](https://thegraph.market/), no personal information required, and start streaming on-chain data.
 
 # Build
 
@@ -29,6 +29,6 @@ To build and optimize your Substreams from zero, use the minimal path within the
 
 ## Learn
 
-- **Substreams Reliability Guarantees**: With a simple reconnection policy, Substreams guarantees you'll never miss data [Never Miss Data](../references/reliability-guarantees.md).
-- **Substreams Architecture:**:  For a deeper understanding of how Substreams works, explore the [architectural overview](architecture.md) of the data service.
+- **Substreams Reliability Guarantees**: With a simple reconnection policy, Substreams guarantees you'll _[Never Miss Data](../references/reliability-guarantees.md)_.
+- **Substreams Architecture**: For a deeper understanding of how Substreams works, explore the [architectural overview](architecture.md) of the data service.
 - **Supported Networks**: Check-out which endpoints are supported [here](./references/chains-and-endpoints.md).

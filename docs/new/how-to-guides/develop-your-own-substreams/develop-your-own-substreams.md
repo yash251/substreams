@@ -7,5 +7,5 @@ These how-to guides walk through creating a Substreams that uses raw blockchain 
 Choose your ecosystem to get started:
 
 - [Solana](./solana/solana.md)
-- [EVM](./evm/evm.md)
-- [Cosmos](./cosmos/cosmos.md)
+- [EVM](./evm/exploring-ethereum/exploring-ethereum.md)
+- [Cosmos](./cosmos/injective/block-stats.md)

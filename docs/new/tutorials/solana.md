@@ -6,8 +6,13 @@ In this guide, you'll learn how to initialize a Solana-based Substreams project 
 
 2. Running `substreams init` will give you the option to choose between two Solana project options. Select the one that best fits your requirements:
     - **sol-minimal**: Creates a simple Substreams that extracts raw Solana block data and generates corresponding Rust code. This path will start you with the full raw block, you can navigate to the `substreams.yaml` (the manifest) to modify the input.
+<<<<<<< HEAD
     - **sol-transactions**: Creates a Substreams that filters Solana transactions based on one or more Program IDs and/or Account IDs, using the cached [Solana Common Modules](https://substreams.dev/streamingfast/solana-common/v0.3.0).
     - **sol-anchor-beta**: Given an Anchor IDL, create a Substreams that decodes instructions and events. If an IDL isn’t available using the `idl` subcommand within the [Anchor ClI](https://www.anchor-lang.com/docs/cli), you’ll need to provide it yourself.
+=======
+    - **sol-transactions**: Creates a Substreams that filters Solana transactions based on one or more Program IDs and/or Account IDs, using the cached [Solana Foundational Module](https://substreams.dev/streamingfast/solana-common/v0.3.0).
+    - **sol-anchor-beta**: Given an Anchor IDL, create a Substreams that decodes instructions and events. If an IDL isn’t available using the `idl` subcommand within the [Anchor CLI](https://www.anchor-lang.com/docs/cli), you’ll need to provide it yourself.
+>>>>>>> develop
 
 The modules within Solana Common exclude voting transactions, to benefit from a 75% reduction in data processing size and costs, delay your stream by over 1000 blocks from head. This can be done using the [`sleep`](https://doc.rust-lang.org/std/thread/fn.sleep.html) function in rust.
 
