@@ -24,8 +24,8 @@ redirects:
   developers-guide/cookbook/dynamic-data-sources: ./new/develop/modules/dynamic-data-sources.md
   developers-guide/cookbook/factory-params: ./new/develop/parameterized-modules.md
   developers-guide/cookbook/keys-in-stores: ./new/develop/modules/keys-in-stores.md
-  developers-guide/sink-targets/substreams-powered-subgraph: ./new/consume/subgraph/subgraph.md
-  developers-guide/sink-targets/substreams-sink-sql: ./new/consume/sql/sql.md
+  developers-guide/sink-targets/substreams-powered-subgraph: ./new/how-to-guides/sinks/subgraph/subgraph.md
+  developers-guide/sink-targets/substreams-sink-sql: ./new/how-to-guides/sinks/sql/sql-sink.md
   developers-guide/sink-targets/substreams-sink-files: ./new/consume/other-sinks/files.md
   developers-guide/sink-targets/substreams-sink-kv: ./new/consume/other-sinks/kv.md
   developers-guide/sink-targets/substreams-sink-mongodb: ./new/consume/other-sinks/mongodb.md
@@ -50,26 +50,26 @@ redirects:
   tutorials/exploring-ethereum/map_filter_transactions_module: ./new/tutorials/evm/exploring-ethereum/map_filter_transactions_module.md
   tutorials/exploring-ethereum/map_contract_events_module: ./new/tutorials/evm/exploring-ethereum/map_contract_events_module.md
   tutorials/rust/overview: ./new/tutorials/rust/overview.md
-  tutorials/rust: ./new/tutorials/rust/overview.md
-  tutorials/rust/option: ./new/tutorials/rust/option.md
-  tutorials/rust/result: ./new/tutorials/rust/result.md
-  tutorials/eth-calls: ./new/develop/chain-specific/evm/eth-calls.md
+  tutorials/rust: ./new/how-to-guides/using-rust-proto/rust/rust.md
+  tutorials/rust/option: ./new/how-to-guides/using-rust-proto/rust/option.md
+  tutorials/rust/result: ./new/how-to-guides/using-rust-proto/rust/result.md
+  tutorials/eth-calls: ./new/how-to-guides/using-rust-proto/eth-calls/eth-calls.md
   documentation/consume/other-ways-of-consuming: ./new/consume/other-sinks/README.md
   documentation/consume/other-ways-of-consuming/kv: ./new/consume/other-sinks/kv.md
   documentation/consume/other-ways-of-consuming/mongodb: ./new/consume/other-sinks/mongodb.md
   documentation/consume/other-ways-of-consuming/files: ./new/consume/other-sinks/files.md
   documentation/consume/other-ways-of-consuming/prometheus: ./new/consume/other-sinks/prometheus.md
   documentation/consume/other-ways-of-consuming/pubsub: ./new/consume/other-sinks/pubsub.md
-  intro-solana: ./new/how-to-guides/your-first-application/solana.md
-  intro-injective: ./new/how-to-guides/your-first-application/injective.md
-  documentation/intro-getting-started: ./new/how-to-guides/your-first-application/intro-your-first-application.md
-  documentation/intro-getting-started/intro-evm: ./new/how-to-guides/your-first-application/evm.md
-  documentation/intro-getting-started/intro-evm/evm-first-sps: ./new/how-to-guides/evm.md
-  documentation/intro-getting-started/intro-evm/emv-first-sql: ./new/how-to-guides/evm.md
-  documentation/intro-getting-started/intro-solana: ./new/how-to-guides/solana.md
-  documentation/intro-getting-started/intro-injective: ./new/how-to-guides/injective.md
-  documentation/intro-getting-started/intro-injective/injective-first-sql: ./new/how-to-guides/injective.md
-  documentation/intro-getting-started/intro-injective/injective-first-sps: ./new/how-to-guides/injective.md
-  documentation/how-to-guides/intro-your-first-application/solana: ./new/how-to-guides/solana.md
-  documentation/how-to-guides/intro-your-first-application/evm: ./new/how-to-guides/evm.md
-  documentation/how-to-guides/intro-your-first-application/injective: ./new/how-to-guides/injective.md
+  intro-solana: ./new/tutorials/solana.md
+  intro-injective: ./new/tutorials/injective.md
+  documentation/intro-getting-started: ./new/tutorials/intro-to-tutorials.md
+  documentation/intro-getting-started/intro-evm: ./new/tutorials/evm.md
+  documentation/intro-getting-started/intro-evm/evm-first-sps: ./new/tutorials/evm.md
+  documentation/intro-getting-started/intro-evm/evm-first-sql: ./new/tutorials/evm.md
+  documentation/intro-getting-started/intro-solana: ./new/tutorials/solana.md
+  documentation/intro-getting-started/intro-injective: ./new/tutorials/cosmos-compatible/injective.md
+  documentation/intro-getting-started/intro-injective/injective-first-sql: ./new/tutorials/cosmos-compatible/injective.md
+  documentation/intro-getting-started/intro-injective/injective-first-sps: ./new/tutorials/cosmos-compatible/injective.md
+  documentation/how-to-guides/intro-your-first-application/solana: ./new/tutorials/solana.md
+  documentation/how-to-guides/intro-your-first-application/evm: ./new/tutorials/evm.md
+  documentation/how-to-guides/intro-your-first-application/injective: ./new/tutorials/cosmos-compatible/injective.md
