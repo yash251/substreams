@@ -2,12 +2,6 @@
 
 This module takes a raw Ethereum block and returns a reduced version of a block, with just three pieces of information: hash, parent hash, and block number.
 
-{% hint style="success" %}
-**Tip**: This tutorial teaches you how to build a Substreams from scratch.
-
-Remember that you can auto-generate a filtered Substreams module by using the [code-generation tools](../../../../tutorials/evm.md).
-{% endhint %}
-
 Let's run the Substreams first, and then go through the code.
 
 ### Running the Substreams

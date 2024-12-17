@@ -7,7 +7,7 @@ In this guide, you'll learn how to initialize a Injective-based Substreams proje
 
 ## Step 1: Initialize Your Injective Substreams Project
 
-1. Open the [Dev Container](https://github.com/streamingfast/substreams-starter) and follow the on-screen steps or `README.md` to initialize your project.
+1. Open the [Dev Container](https://github.com/streamingfast/substreams-starter) and follow the on-screen steps to initialize your project.
     
 2. Running `substreams init` will give you the option to choose between two Injective project options. Select the one that best fits your requirements:
     - **Injective-minimal**: Creates a simple Substreams that extracts raw Injective block data and generates corresponding Rust code. This path will start you with the full raw block, you can navigate to the `substreams.yaml` (the manifest) to modify the input.
@@ -19,7 +19,7 @@ Tip: Have the start block of your transaction or specific events ready.
 
 ## Step 2: Visualize the Data
 
-1. Running `substreams auth` will prompt you to create your account [here](https://thegraph.market/) to generate an authentification token (JWT), pass it back as input.
+1. Run `substreams auth` to create your [account](https://thegraph.market/) and generate an authentification token (JWT), then pass this token back as input.
 
 2. Now you can freely use the `substreams gui` to visualize and itterate on your extracted data.
 
@@ -29,7 +29,7 @@ Within the generated directories, modify your Substreams modules to include addi
 
 ## Step 3: Load the Data
 
-To make your Substreams queriable (as opposed to [direct streaming](../how-to-guides/sinks/stream/stream.md)), you can automatically generate a Subgraph (known as a [Substreams-powered subgraph](https://thegraph.com/docs/en/sps/introduction/)) or SQL-DB sink by following the on-screen steps or referring to the `README.md`. 
+To make your Substreams queriable (as opposed to [direct streaming](../how-to-guides/sinks/stream/stream.md)), you can automatically generate a Subgraph (known as a [Substreams-powered subgraph](https://thegraph.com/docs/en/sps/introduction/)) or SQL-DB sink. 
 
 ## Additional Resources
 
