@@ -1,1 +1,1 @@
-This section contains Substreams tutorials specific to EVM-compatible chains (e.g. Ethereum, Polygon or BNB).
+This section contains Substreams how-to-guides specific to EVM-compatible chains (e.g. Ethereum, Polygon or BNB).

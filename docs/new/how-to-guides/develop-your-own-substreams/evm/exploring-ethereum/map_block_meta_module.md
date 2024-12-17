@@ -5,7 +5,7 @@ This module takes a raw Ethereum block and returns a reduced version of a block,
 {% hint style="success" %}
 **Tip**: This tutorial teaches you how to build a Substreams from scratch.
 
-Remember that you can auto-generate your Substreams module by usig the [code-generation tools](../../../getting-started/evm/emv-first-sql.md).
+Remember that you can auto-generate a filtered Substreams module by using the [code-generation tools](../../../../tutorials/evm.md).
 {% endhint %}
 
 Let's run the Substreams first, and then go through the code.

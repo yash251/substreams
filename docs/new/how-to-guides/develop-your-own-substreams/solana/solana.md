@@ -1,3 +1,3 @@
-In the following sections, you will find several Solana tutorials showcasing how you can easily extract data using Substreams.
+In the following sections, you will find several Solana how-to guides showcasing how you can index data using Substreams.
 
 <figure><img src="../../../.gitbook/assets/tutorials/solana-learn.png" width="100%" /></figure>
