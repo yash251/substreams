@@ -5,7 +5,7 @@
 
 ## Tutorials
 
-* [Develop Your Own Substreams](new/tutorials/intro-to-tutorials.md)
+* [Develop Your First Substreams](new/tutorials/intro-to-tutorials.md)
   * [on EVM](new/tutorials/evm.md)
   * [on Solana](new/tutorials/solana.md)
   * [on Starknet](new/tutorials/starknet.md)
