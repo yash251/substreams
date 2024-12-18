@@ -88,11 +88,11 @@ When you consume a Substreams package, a long-live gRPC connection is establishe
 
 {% tabs %}
 {% tab title="NodeJS" %}
-The `index.js` file contains the `main()` function, which runs an infite loop and takes care of managing the disconnections.
+The `index.js` file contains the `main()` function, which runs an infinite loop and takes care of managing the disconnections.
 
 ```js
 const TOKEN = process.env.SUBSTREAMS_API_TOKEN // Substreams token. By default it takes the SUBSTREAMS_API_TOKEN environment variable of your system
-const ENDPOINT = "https://mainnet.eth.streamingfast.io" // Substreams endpont. In this case, Ethereum mainnet
+const ENDPOINT = "https://mainnet.eth.streamingfast.io" // Substreams endpoint. In this case, Ethereum mainnet
 const SPKG = "https://spkg.io/streamingfast/ethereum-explorer-v0.1.2.spkg" // Substreams package. In this case, taken from the substreams.dev registry
 const MODULE = "map_block_meta"
 const START_BLOCK = '100000'
@@ -117,8 +117,8 @@ const main = async () => {
         },
     });
     
-    // The infite loop handles disconnections. Every time an disconnection error is thrown, the loop will automatically reconnect
-    // and start consuming from the latest commited cursor.
+    // The infinite loop handles disconnections. Every time an disconnection error is thrown, the loop will automatically reconnect
+    // and start consuming from the latest committed cursor.
     while (true) {
         try {
             await stream(pkg, registry, transport);
@@ -137,11 +137,11 @@ const main = async () => {
 {% endtab %}
 
 {% tab title="Web" %}
-The `main.js` file contains the `main()` function, which runs an infite loop and takes care of managing the disconnections.
+The `main.js` file contains the `main()` function, which runs an infinite loop and takes care of managing the disconnections.
 
 ```js
 const TOKEN = "<SUBTREAMS-TOKEN>" // Substreams token. Put here your Substreams API token.
-const ENDPOINT = "https://mainnet.eth.streamingfast.io" // Substreams endpont. In this case, Ethereum mainnet
+const ENDPOINT = "https://mainnet.eth.streamingfast.io" // Substreams endpoint. In this case, Ethereum mainnet
 const SPKG = "https://spkg.io/streamingfast/ethereum-explorer-v0.1.2.spkg" // Substreams package. In this case, taken from the substreams.dev registry
 const MODULE = "map_block_meta"
 const START_BLOCK = '100000'
@@ -166,8 +166,8 @@ const main = async () => {
       },
   });
   
-  // The infite loop handles disconnections. Every time an disconnection error is thrown, the loop will automatically reconnect
-  // and start consuming from the latest commited cursor.
+  // The infinite loop handles disconnections. Every time an disconnection error is thrown, the loop will automatically reconnect
+  // and start consuming from the latest committed cursor.
   while (true) {
       try {
           await stream(pkg, registry, transport);

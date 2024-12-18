@@ -4,7 +4,7 @@ The Solana Token Tracker Substreams allows you to extract transfers from Solana 
 
 The Solana Token Tracker Substreams requires medium to advanced Substreams knowledge. If this is the first time you are using Substreams, make sure you:
 
-- Read the [Develop Substreams](../../../develop/develop.md) section, which will teach you the basics of the developing Substreams modules.
+- Read the [Develop Substreams](../../../../tutorials/intro-to-tutorials.md) section, which will teach you the basics of the developing Substreams modules.
 - Complete the [Explore Solana](../explore-solana/explore-solana.md) tutorial, which will assist you in understanding the main pieces of the Solana Substreams.
 
 If you already have the required knowledge, clone the [Solana Token Tracker GitHub repository](https://github.com/streamingfast/solana-token-tracker). You will go through the code in the following steps.
@@ -27,7 +27,7 @@ params:
   map_solana_token_events: "token_contract=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v&token_decimals=6"
 ```
 
-The module receives two inputs (defined in the `intputs` section of the YAML):
+The module receives two inputs (defined in the `inputs` section of the YAML):
 - A string containing a couple of parameters: this parameter is defined in the `params` section of the YAML, and defines the token that you want to extract data from: `token_contract=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v&token_decimals=6`
 `token_contract=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v` is the address of the USDC contract in Solana mainnet and `token_decimals=6` is the number of decimals used the USDC token.
 - A raw Solana block.
@@ -105,7 +105,7 @@ pub fn map_solana_token_events(params: String, block: Block) -> Result<Output, E
 4. _Unwrap_ the transaction if it is available.
 5. _Unwrap_ the transaction message.
 6. _Unwrap_ the transaction metadata.
-7. Iterave over the instructions contained within the transaction.
+7. Iterate over the instructions contained within the transaction.
 8. For every instruction, call the `process_compiled_instruction(...)` function to process the instruction further.
 
 - The `process_compiled_instruction(...)` function is defined in the `util.rs` file.
@@ -193,7 +193,7 @@ Essentially, you are matching every top-level instruction with its corresponding
 5. You only keep Token Program inner instructions.
 6. You process every Token Program inner instruction found further by calling the `process_token_instruction(...)`.
 
-Once you have identified all the Token Program instructions, the `proces_token_instruction(...)` function extracts transfer or mint data from these instructions. To easily extract data from a Token Program instruction, the Substreams relies on the `substreams-solana-program-instructions` Rust crate, which provides useful helper functions.
+Once you have identified all the Token Program instructions, the `process_token_instruction(...)` function extracts transfer or mint data from these instructions. To easily extract data from a Token Program instruction, the Substreams relies on the `substreams-solana-program-instructions` Rust crate, which provides useful helper functions.
 
 ```rust
 fn process_token_instruction(

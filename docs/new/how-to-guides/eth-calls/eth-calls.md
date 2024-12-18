@@ -34,7 +34,7 @@ Complete the information required by the previous command, such as name of the p
 In the `Contract address to track` step, write `0xdac17f958d2ee523a2206206994597c13d831ec7`, the address of the USDT smart contract.
 
 ```bash
-Project name (lowercase, numbers, undescores): usdttracker
+Project name (lowercase, numbers, underscores): usdttracker
 Protocol: Ethereum
 Ethereum chain: Mainnet
 Contract address to track (leave empty to use "Bored Ape Yacht Club"): 0xdac17f958d2ee523a2206206994597c13d831ec7

@@ -85,9 +85,9 @@ fn map_filter_instructions(params: String, blk: Block) -> Result<Instructions, s
 1. The `parse_filters_from_params` function parses the parameters passed to the module.
 In this example, the parameter passed is defined in the `substreams.yaml` file as `program_id=Stake11111111111111111111111111111111111111`.
 2. Iterate over the transactions of the blocks.
-3. Extract the [Message](https://github.com/streamingfast/firehose-solana/blob/develop/proto/sf/solana/type/v1/type.proto#L32) object, which contains relevant information, such as the instructions of the trasaction.
+3. Extract the [Message](https://github.com/streamingfast/firehose-solana/blob/develop/proto/sf/solana/type/v1/type.proto#L32) object, which contains relevant information, such as the instructions of the transaction.
 4. Get accounts of the transaction (the `resolved_accounts()` method contains also accounts stored in the [Address Lookup Tables](https://docs.solana.com/developing/lookup-tables)).
-5. Iterave over the instructions.
+5. Iterate over the instructions.
 6. Use the `apply_filter` function to only keep instruction where `program_id=Stake11111111111111111111111111111111111111`.
 7. Create an `Instruction` object, which will be the output of the Substreams.
 This object is declared as a Protobuf in the `proto` folder of the project.

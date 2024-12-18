@@ -1,8 +1,8 @@
 ## Local Development of Subgraphs with Graph Node
 
-The Graph Node is the software that indexers run to index subgraphs. When developing a subgraph (or Substreams-powered subgrpah), it is very convenient to test the subgraph deployment locally. This can be achieved by running the Graph Node software and all its dependencies in a local Docker environment.
+The Graph Node is the software that indexers run to index subgraphs. When developing a subgraph (or Substreams-powered subgraph), it is very convenient to test the subgraph deployment locally. This can be achieved by running the Graph Node software and all its dependencies in a local Docker environment.
 
-Clone the [Substreams Development Environment GitHub respository](https://github.com/streamingfast/substreams-dev-environment), which contains the necessary shell scripts to run a local Graph Node in your computer.
+Clone the [Substreams Development Environment GitHub repository](https://github.com/streamingfast/substreams-dev-environment), which contains the necessary shell scripts to run a local Graph Node in your computer.
 
 ### Requirements
 
@@ -12,7 +12,7 @@ This tutorial requires you to:
 
 ### Set up the Environment
 
-In the [Substreams Development Environment GitHub respository](https://github.com/streamingfast/substreams-dev-environment), move to the `graph-node` folder. The entrypoint to set up the Graph Node local environment is the `start.sh` script, which spins up a Graph Node instance configured for a specific network (e.g. `injective-mainnet`), along with a local IPFS node and a local Postgres database. When using this script, you must pass two parameters: `NETWORK` and `SUBSTREAMS_ENDPOINT`.
+In the [Substreams Development Environment GitHub repository](https://github.com/streamingfast/substreams-dev-environment), move to the `graph-node` folder. The entrypoint to set up the Graph Node local environment is the `start.sh` script, which spins up a Graph Node instance configured for a specific network (e.g. `injective-mainnet`), along with a local IPFS node and a local Postgres database. When using this script, you must pass two parameters: `NETWORK` and `SUBSTREAMS_ENDPOINT`.
 
 ```bash
 ./start.sh <NETWORK> <SUBSTREAMS_ENDPOINT>

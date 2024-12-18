@@ -14,7 +14,7 @@ Now, you can run the Substreams by using the `substreams gui` command. To avoid 
 
 ```bash
 substreams gui ./substreams.yaml \
-    map_filter_instructions -e mainnet.sol.streamingfast.io:443 \
+    map_filter_transactions -e mainnet.sol.streamingfast.io:443 \
     --start-block 153000028 --stop-block +1
 ```
 
@@ -31,7 +31,7 @@ params:
 
 ### Run the Package From the Substreams Registry
 
-The Solana Explorer is also available as a Substreams package in the [Substreams Regitry](https://substreams.dev). You can simply run it:
+The Solana Explorer is also available as a Substreams package in the [Substreams Registry](https://substreams.dev). You can simply run it:
 
 ```bash
 substreams gui https://spkg.io/streamingfast/solana-explorer-v0.2.0.spkg \
@@ -41,7 +41,7 @@ substreams gui https://spkg.io/streamingfast/solana-explorer-v0.2.0.spkg \
 
 ## Inspect the Code
 
-The `map_flter_transaction.rs` file contains the source of the module. The output emitted by the module is defined as a Protobuf in the `/proto/transactions.proto` file of the project.
+The `map_filter_transaction.rs` file contains the source of the module. The output emitted by the module is defined as a Protobuf in the `/proto/transactions.proto` file of the project.
 
 ```protobuf
 

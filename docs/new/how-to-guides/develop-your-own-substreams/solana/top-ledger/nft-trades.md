@@ -10,7 +10,7 @@ TopLedger is an active contributor to the Substreams community and has developed
 
 The NFT Trades Substreams requires medium to advanced Substreams knowledge. If this is the first time you are using Substreams, make sure you:
 
-- Read the [Develop Substreams](../../../develop/develop.md) section, which will teach you the basics of the developing Substreams modules.
+- Read the [Develop Substreams](../../../../tutorials/intro-to-tutorials.md) section, which will teach you the basics of the developing Substreams modules.
 - Complete the [Explore Solana](../explore-solana/explore-solana.md) tutorial, which will assist you in understanding the main pieces of the Solana Substreams.
 
 Clone the [TopLedger Solana Programs](https://github.com/Topledger/solana-programs) project and navigate to the `nft-trades` folder, which contains the code of the Substreams.
@@ -29,7 +29,7 @@ modules:
       type: proto:sf.solana.nft.trades.v1.Output
 ```
 
-The `Output` object provided as the Substreams output is defined in the `proto/outout.proto` file:
+The `Output` object provided as the Substreams output is defined in the `proto/output.proto` file:
 
 ```protobuf
 message Output {

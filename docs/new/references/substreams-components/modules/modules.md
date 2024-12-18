@@ -4,7 +4,7 @@ description: Learn the basics about modules
 
 ## Modules
 
-In Substreams, manifests and modules are concepts tighly related because they are fundamental to understand how Substreams works.
+In Substreams, manifests and modules are concepts tightly related because they are fundamental to understand how Substreams works.
 
 In simple terms, a Substreams module is a Rust function that receives an input and returns an output. For example, the following Rust function receives an Ethereum block and returns a custom object containing fields such as block number, hash or parent hash.
 

@@ -9,7 +9,7 @@ Substreams offers two different ways of consuming data as SQL:
 - Using the SQL sink, which currently supports PostgresSQL and Clickhouse (recommended)
 
 ### - Substreams:SQL Deployable Service (beta)
-Use the Substreams CLI to easily send the data of your Substreams to a database. It also has support for **dbt transformations**, so it's great for data analyts!
+Use the Substreams CLI to easily send the data of your Substreams to a database. It also has support for **dbt transformations**, so it's great for data analysts!
 
 You can deploy a new service by using the `substreams alpha service` command.
 
@@ -29,4 +29,4 @@ Previous to the implementation of the Deployable Services, the Postgres Sink was
 
 In order to the send the data to a SQL database, your Substreams must have a `db_out` module that emits [`DatabaseChanges`](https://docs.rs/substreams-database-change/latest/substreams_database_change/pb/database/struct.DatabaseChanges.html) objects.
 
-The `DatabaseChanges` object is something that the Postgres sink can understand, thus acting as a conversion layet between the data model of your Substreams and the table structure of the database.
+The `DatabaseChanges` object is something that the Postgres sink can understand, thus acting as a conversion layer between the data model of your Substreams and the table structure of the database.

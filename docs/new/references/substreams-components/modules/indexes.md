@@ -38,7 +38,7 @@ A possible flow to use an index module to index all the events in a block:
 Given this string of addresses, Substreams checks if the event address is contained on a given block before actually decoding the data of the block.
 You can use logical operators (`and` and `or`) to select what events to search.
 
-This previous flow is just an example of a preferred way to use index modules, but it is totally up to you to decide the structure of your Substreams. For example, instead of having a separate module, `all_events`, which extracts all the events of the block, you can receieve the raw `Block` object diretly on the `index_events` module.
+This previous flow is just an example of a preferred way to use index modules, but it is totally up to you to decide the structure of your Substreams. For example, instead of having a separate module, `all_events`, which extracts all the events of the block, you can receive the raw `Block` object directly on the `index_events` module.
 
 The definition of the `index_events` module looks like any other Substreams module, but it is a special _kind_, `kind: blockIndex` and outputs a special data model, `sf.substreams.index.v1.Keys`. The `Keys` object contains a list of labels that will be used to identify the content of that block.
 

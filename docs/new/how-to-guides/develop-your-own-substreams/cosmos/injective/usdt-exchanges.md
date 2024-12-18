@@ -3,7 +3,7 @@ The [USDT Exchanges Volume Subgraph](https://github.com/streamingfast/injective-
 {% hint style="success" %}
 **Tip**: This tutorial teaches you how to build a Substreams from scratch.
 
-Remember that you can auto-generate your Substreams module by usig the [code-generation tools](../../../getting-started/injective/injective-first-sps.md).
+Remember that you can auto-generate your Substreams module by using the [code-generation tools](../../../getting-started/injective/injective-first-sps.md).
 {% endhint %}
 
 The subgraph uses the [Substreams triggers](../../../consume/subgraph/triggers.md) to import data from the Injective foundational modules.
@@ -136,15 +136,15 @@ export function handleEvents(bytes: Uint8Array): void { // 1.
 3. Load the `USDTExchangeVolume` subgraph entity, which will store the historical volume.
 If it is the first trade, then the entity will not exist, and it must be created.
 4. Iterate over the events and verify that the event type is `wasm` (`type == wasm`). This should be already filtered by the Substreams, but it is also nice to re-check it.
-5. Iterate over the attributes of every event, finding out the neccesary information (contract address, action, ask amount, offer amount...).
+5. Iterate over the attributes of every event, finding out the necessary information (contract address, action, ask amount, offer amount...).
 6. Verify that the contract where the event is executed corresponds to the `INJ-USDT` pair in the Dojo DEX.
 7. Update the entity.
 
 ## Deploy to a Local Graph Node
 
-You can test your Substreams-powered Subgraph by deploying to a local Graph Node set-up. Take a look at the the [Graph Node Local Development tutorial](../../graph-node/local-development.md), which provides information on how to spin up a local environment for Graph Node.
+You can test your Substreams-powered Subgraph by deploying to a local Graph Node set-up. Take a look at the the [Graph Node Local Development tutorial](../../../../references/graph-node/local-development.md), which provides information on how to spin up a local environment for Graph Node.
 
-First, clone the [Substreams Development Environment GitHub respository](https://github.com/streamingfast/substreams-dev-environment) and move to the `graph-node` folder. Execute the `start.sh` command with the Injective information (make sure you have Docker running in your computer).
+First, clone the [Substreams Development Environment GitHub repository](https://github.com/streamingfast/substreams-dev-environment) and move to the `graph-node` folder. Execute the `start.sh` command with the Injective information (make sure you have Docker running in your computer).
 
 ```bash
 ./start.sh injective-mainnet https://mainnet.injective.streamingfast.io:443

@@ -195,7 +195,7 @@ network: ethereum
 
 ### image
 
-The `image` field specifies the icon displayed for the Substreams package, which is used in the [Substreams Regsitry](https://substreams.dev). The path is relative to the folder where the manifest is.
+The `image` field specifies the icon displayed for the Substreams package, which is used in the [Substreams Registry](https://substreams.dev). The path is relative to the folder where the manifest is.
 
 ```yaml
 image: ./ethereum-icon.png

@@ -23,7 +23,7 @@ If you choose to not use it, make sure that you are in a directory that contains
 
 ### **`init`**
 
-The `init` command allows you to initialize a Substreams project for several blockchains. It is a conversational-like command: you will be asked several questions and a project with the specicied features will be created for you.
+The `init` command allows you to initialize a Substreams project for several blockchains. It is a conversational-like command: you will be asked several questions and a project with the specified features will be created for you.
 
 The options included in the `init` command will evolve over time, but every blockchain should, at least, contain one option.
 
@@ -149,7 +149,7 @@ There are the shortcuts that you can use to navigate the GUI. You can always get
 | Navigate Modules - Forward                      | `i`  |
 | Navigate Modules - Backwards                    | `u`  |
 | Search                                          | `/` + *text* + `enter`  |
-| Commnads information                            | `?`  |
+| Commands information                            | `?`  |
 
 ### `pack` **(DEPRECATED)**
 

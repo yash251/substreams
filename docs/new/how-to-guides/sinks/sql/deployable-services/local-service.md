@@ -1,4 +1,4 @@
-In you want to manage your own infrastructure, you can use still the deployable services, but locally. This essetially means using the `substreams alpha service` command pointing to a local Docker installation. The following tutorial teaches you how to use the Substreams:SQL deployable service locally.
+In you want to manage your own infrastructure, you can use still the deployable services, but locally. This essentially means using the `substreams alpha service` command pointing to a local Docker installation. The following tutorial teaches you how to use the Substreams:SQL deployable service locally.
 
 ## Tutorial
 
@@ -23,7 +23,7 @@ substreams init
 
 Fill the requested information (name: `cryptopunks`, protocol: `ethereum`, chain: `mainnet`, contract: `b47e3cd837ddf8e4c57f05d70ab865de6e193bbb`)
 ```
-Project name (lowercase, numbers, undescores): cryptopunks
+Project name (lowercase, numbers, underscores): cryptopunks
 Protocol: Ethereum
 Ethereum chain: Mainnet
 ✔ Contract address to track: b47e3cd837ddf8e4c57f05d70ab865de6e193bbb

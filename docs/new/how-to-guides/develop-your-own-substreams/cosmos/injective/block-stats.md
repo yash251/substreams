@@ -1,9 +1,9 @@
-The [BlockStats Susbtreams](https://github.com/streamingfast/substreams-cosmos-block-stats) is a very basic Substreams, extracting data from the Injective blockchain.
+The [BlockStats Substreams](https://github.com/streamingfast/substreams-cosmos-block-stats) is a very basic Substreams, extracting data from the Injective blockchain.
 
 {% hint style="success" %}
 **Tip**: This tutorial teaches you how to build a Substreams from scratch.
 
-Remember that you can auto-generate your Substreams module by usig the [code-generation tools](../../../getting-started/injective/injective-first-sql.md).
+Remember that you can auto-generate your Substreams module by using the [code-generation tools](../../../getting-started/injective/injective-first-sql.md).
 {% endhint %}
 
 ## Before You Begin
@@ -58,7 +58,7 @@ modules:
       type: proto:cosmos.v1.BlockStats # 6.
 ```
 1. The `network` field specifies which network is the Substreams going to be executed on.
-2. Import the [Cosmos Block Protobuf](https://github.com/streamingfast/firehose-cosmos/blob/develop/cosmos/pb/sf/cosmos/type/v1/block.pb.go#L75), which gives you access to the blockchain data.
+2. Import the [Cosmos Block Protobuf](https://github.com/streamingfast/firehose-cosmos/blob/develop/cosmos/pb/sf/cosmos/type/v2/block.pb.go#L75), which gives you access to the blockchain data.
 3. Import the user-defined Protobuf schemas (i.e. the outputs of your Substreams).
 4. Define a module. `block_to_stats`, which will be mapped to the `block_to_stats` Rust function in the source code.
 5. Define the inputs of the module. In this case, the `Block` Cosmos Protobuf.
@@ -92,7 +92,7 @@ substreams gui substreams.yaml block_to_stats \
  --start-block=64987400 --stop-block=+1000
 ```
 
-Review the [GUI Reference](../../../references/gui.md) to get more information on how to use this utility.
+Review the [GUI Reference](https://docs.substreams.dev/reference-material/installing-the-cli/command-line-interface#gui) to get more information on how to use this utility.
 
 ## Inspect the Code
 

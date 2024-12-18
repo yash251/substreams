@@ -20,7 +20,7 @@ Update the generated [`Cargo.toml`](https://github.com/streamingfast/substreams-
 [package]
 name = "substreams-template"
 version = "0.1.0"
-description = "Substream template demo project"
+description = "Substreams template demo project"
 edition = "2021"
 repository = "https://github.com/streamingfast/substreams-template"
 

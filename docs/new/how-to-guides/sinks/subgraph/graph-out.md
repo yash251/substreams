@@ -1,5 +1,5 @@
 
-If you want to include the extractions logic in Substreams to benefit from the paralellization engine, you can use the **EntityChanges** model. 
+If you want to include the extractions logic in Substreams to benefit from the parallelization engine, you can use the **EntityChanges** model. 
 
 Essentially, this means that you will create a `graph_out` module in Substreams, which will emit an **EntityChanges** structure representing the subgraph entities.
 

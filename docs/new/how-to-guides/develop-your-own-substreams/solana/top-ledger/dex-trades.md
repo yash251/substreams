@@ -10,7 +10,7 @@ TopLedger is an active contributor to the Substreams community and has developed
 
 The DEX Trades Substreams requires medium to advanced Substreams knowledge. If this is the first time you are using Substreams, make sure you:
 
-- Read the [Develop Substreams](../../../develop/develop.md) section, which will teach you the basics of the developing Substreams modules.
+- Read the [Develop Substreams](../../../../tutorials/intro-to-tutorials.md) section, which will teach you the basics of the developing Substreams modules.
 - Complete the [Explore Solana](../explore-solana/explore-solana.md) tutorial, which will assist you in understanding the main pieces of the Solana Substreams.
 
 Then, clone the [TopLedger Solana Programs](https://github.com/Topledger/solana-programs) project and navigate to the `dex-trades` folder, which contains the code of the Substreams.
@@ -29,7 +29,7 @@ modules:
       type: proto:sf.solana.dex.trades.v1.Output
 ```
 
-The module receives a raw Solana block as a parameter (`sf.solana.type.v1.Block`) and emits a custom object containing the trades data (`sf.solana.dex.trades.v1.Output`). The output is a Protobut object defined in the `proto/output.proto` file:
+The module receives a raw Solana block as a parameter (`sf.solana.type.v1.Block`) and emits a custom object containing the trades data (`sf.solana.dex.trades.v1.Output`). The output is a Protobuf object defined in the `proto/output.proto` file:
 
 ```protobuf
 message Output {
@@ -52,7 +52,7 @@ message TradeData {
   required bool is_inner_instruction = 13;
   required uint32 instruction_index = 14;
   required string instruction_type = 15;
-  required uint32 inner_instruxtion_index = 16;
+  required uint32 inner_instruction_index = 16;
   required string outer_program = 17;
   required string inner_program = 18;
   required uint64 txn_fee = 19;
@@ -60,7 +60,7 @@ message TradeData {
 }
 ```
 
-The Substreams extracts trades from different DEXs. Because every DEX handles the data diffrerently, it is necessary to create a custom decoding function for every DEX. Every supported DEX has its correponding function in the `dapps` directory of the project.
+The Substreams extracts trades from different DEXs. Because every DEX handles the data differently, it is necessary to create a custom decoding function for every DEX. Every supported DEX has its corresponding function in the `dapps` directory of the project.
 
 ## Run the Substreams
 
@@ -122,8 +122,8 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
 2. Iterate over the transactions.
 3. Get accounts of the transaction (the `resolved_accounts()` method contains also accounts stored in the [Address Lookup Tables](https://docs.solana.com/developing/lookup-tables)).
 4. Iterate over the instructions within the transaction.
-5. Keep only inner instructions beloging to the current top-level instruction.
-Becuse the inner instructions are at the transaction level, you must filter filter which inner instruction belong to the current instruction by using the `index` property.
+5. Keep only inner instructions belonging to the current top-level instruction.
+Because the inner instructions are at the transaction level, you must filter filter which inner instruction belong to the current instruction by using the `index` property.
 6. Get the program account.
 7. Process trade instruction by calling the `get_trade_instruction(...)` function.
 
@@ -186,7 +186,7 @@ fn get_trade_instruction(
 }
 ```
 1. Match the program account passed as a parameter.
-2. Excuted if the program account is `CLMM9tUoggJu2wagPkkqs9eFG4BWhVBZWkP1qv3Sp7tR` (Crema Finance).
+2. Executed if the program account is `CLMM9tUoggJu2wagPkkqs9eFG4BWhVBZWkP1qv3Sp7tR` (Crema Finance).
 3. Call the decoding function of Crema Finance (`parse_trade_instruction(...)`).
 4. Executed if the program account is `Dooar9JkhdZ7J3LHN3A7YCuoGRUggXhQaG4kijfLGU2j` (Dooar Exchange).
 5. Executed if the program account is `Eo7WjKq67rjJQSZxS6z3YkapzY3eMj6Xy8X5EQVn5UaB` (Meteora).
@@ -254,7 +254,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
 
 Until now, the code logic has taken care of the top-level instructions. However, it is also necessary to verify if any of the inner instructions contain relevant DEX information.
 
-The logic for the inner instruction is analogus to the logic of top-level instructions:
+The logic for the inner instruction is analogous to the logic of top-level instructions:
 - Iterate over the inner instructions.
 - Pass the data to the `get_trade_instruction(...)` function.
 - If the `get_trade_instruction(...)` function returns a `TradeInstruction` object, then a new `TradeData` object is created and added to the array.
@@ -335,4 +335,3 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
             });
 }
 ```
-

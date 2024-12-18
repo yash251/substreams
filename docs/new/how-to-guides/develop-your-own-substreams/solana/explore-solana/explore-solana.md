@@ -27,4 +27,3 @@ Take a look at the _Develop Substreams_ section for more information on how to s
 ## The Solana Explorer
 
 The Solana explorer includes several modules showcasing what Solana data you can extract with Substreams (it's easy and fast!). In the following sections, you will find out about the different functions you can use to easily get started with Solana.
-

@@ -133,7 +133,7 @@ pub fn process_deltas(ops: &mut KvOperations, deltas: store::Deltas<DeltaProto<B
                 ops.push_new(delta.key, val, delta.ordinal);
             }
             Operation::Delete => ops.push_delete(&delta.key, delta.ordinal),
-            x => panic!("unsupported opeation {:?}", x),
+            x => panic!("unsupported operation {:?}", x),
         }
     }
 }

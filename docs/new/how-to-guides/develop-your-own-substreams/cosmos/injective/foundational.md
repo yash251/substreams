@@ -1,4 +1,4 @@
-The [Injective Foundational Substreams](https://github.com/streamingfast/substreams-foundational-modules/injective-common) contains Substreams modules, which retrieve fundammental data on the Injective blockchain.
+The [Injective Foundational Substreams](https://github.com/streamingfast/substreams-foundational-modules/injective-common) contains Substreams modules, which retrieve fundamental data on the Injective blockchain.
 
 You can use the Injective Foundational Modules as the input for your Substreams or subgraph.
 
@@ -59,15 +59,15 @@ modules:
     output:
       type: proto:sf.substreams.cosmos.v1.EventList
     doc: |
-      `filtered_events` reads from `all_events` and applies a filter on the event types, only outputing the events that match the filter. 
+      `filtered_events` reads from `all_events` and applies a filter on the event types, only outputting the events that match the filter. 
       The only operator that you should need to use this filter is the logical or `||`, because each event can only match one type.
 ```
 1. The `all_transactions` module provides access to all the transactions of the Injective blockchain.
 It receives a raw Injective block object as input (`sf.cosmos.type.v2.Block`), and outputs a list of transactions object (`sf.substreams.cosmos.v1.TransactionList`).
 2. The `all_events` module provides access to all the events in the Injective blockchain.
 It receives a raw Injective block as input (`sf.cosmos.type.v2.Block`), and outputs a list of events object (`sf.substreams.cosmos.v1.EventList`).
-3. The `index_events` module uses the `all_events` module to create a cache where events are sorted based on their `type` field. This cache helps in the performance of the module. You can read more about _index modules_ in the [correspoding documentation](../../../develop/indexes).
-4. The `filtered_events` allows you to use the `index_events` module (i.e. using the cache of events), to filter only the event types you are interested in.
+1. The `index_events` module uses the `all_events` module to create a cache where events are sorted based on their `type` field. This cache helps in the performance of the module. You can read more about _index modules_ in the [corresponding documentation](../../../../references/substreams-components/modules/indexes.md).
+2. The `filtered_events` allows you to use the `index_events` module (i.e. using the cache of events), to filter only the event types you are interested in.
 The string parameter passed as input is used to specify which events you want to consume.
 
 ## Use The Foundational Modules

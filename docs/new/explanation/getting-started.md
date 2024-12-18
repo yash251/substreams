@@ -1,6 +1,6 @@
 # Getting Started with Substreams
 
-Integrating Substreams can be quick and easy. This guide will help you get started with consuming ready-made Substreams packages or developing your own. Substreams are permissionaless. Grab a key [here](https://thegraph.market/), no personal information required, and start streaming on-chain data.
+Integrating Substreams can be quick and easy. This guide will help you get started with consuming ready-made Substreams packages or developing your own. Substreams are permissionless. Grab a key [here](https://thegraph.market/), no personal information required, and start streaming on-chain data.
 
 # Build
 
@@ -25,10 +25,10 @@ If you can't find a Substreams package that meets your specific needs, you can d
 - [Injective](../tutorials/cosmos-compatible/injective.md)
 - [Mantra](../tutorials/cosmos-compatible/mantra.md)
 
-To build and optimize your Substreams from zero, use the minimal path within the [Dev Container](../references/devcontainer-ref.md) to setup your environment and follow the [How-To Guides](./how-to-guides/develop-your-own-substreams/develop-your-own-substreams.md).
+To build and optimize your Substreams from zero, use the minimal path within the [Dev Container](../references/devcontainer-ref.md) to setup your environment and follow the [How-To Guides](../how-to-guides/develop-your-own-substreams/develop-your-own-substreams.md).
 
 ## Learn
 
 - **Substreams Reliability Guarantees**: With a simple reconnection policy, Substreams guarantees you'll _[Never Miss Data](../references/reliability-guarantees.md)_.
-- **Substreams Architecture**: For a deeper understanding of how Substreams works, explore the [architectural overview](architecture.md) of the data service.
-- **Supported Networks**: Check-out which endpoints are supported [here](./references/chains-and-endpoints.md).
+- **Substreams Architecture**: For a deeper understanding of how Substreams works, explore the [architectural overview](../references/architecture.md) of the data service.
+- **Supported Networks**: Check-out which endpoints are supported [here](../references/chains-and-endpoints.md).

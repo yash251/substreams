@@ -16,7 +16,7 @@ Before moving forward, make sure to reference the minimal path within the [Dev C
 The `https://github.com/streamingfast/substreams-explorers` GitHub repository contains all the Substreams Explorers currently available. You can simply clone the repository:
 
 ```
-$ git clone https://github.com/streamingfast/substreams-explorers
+git clone https://github.com/streamingfast/substreams-explorers
 ```
 ### Substreams Basics
 
@@ -83,5 +83,4 @@ The [CLI reference](../../../../references/cli/command-line-interface.md) lets y
 
 ### Substreams Components Reference
 
-The [Components Reference](../../../../references/substreams-components/) dives deeeper into navigating the `substreams.yaml`.
-
+The [Components Reference](../../../../references/substreams-components/packages.md) dives deeper into navigating the `substreams.yaml`.

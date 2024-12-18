@@ -130,7 +130,7 @@ let store = StoreUSDPrice {
 
 The current implementation is as follows:
 - Start with value = get_last() (1.65)
-- Iterate ord 4, value = detla.OldValue (1.47)
+- Iterate ord 4, value = delta.OldValue (1.47)
 - Iterate ord 3, value = delta.OldValue (<nil>)
 - Iterate ord 2, value = delta.OldValue (1.54)
 - Iterate ord 1, ordinal == 1, return value (1.54)

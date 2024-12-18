@@ -20,13 +20,13 @@ In this guide, you'll learn how to initialize a MANTRA-based Substreams project.
 
 ## Step 2: Visualize the Data
 
-1. Create your account [here](https://thegraph.market/) to generate an authentification token (JWT) and pass it as input to: 
+1. Create your account [here](https://thegraph.market/) to generate an authentication token (JWT) and pass it as input to: 
 
     ```bash
     substreams auth
     ```
 
-2. Run the following command to visualize and itterate on your filtered data model:
+2. Run the following command to visualize and iterate on your filtered data model:
 
     ```bash
     substreams gui
