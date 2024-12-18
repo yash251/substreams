@@ -9,7 +9,7 @@ In this guide, you'll learn how to initialize a Solana-based Substreams project 
     - **sol-transactions**: Creates a Substreams that filters Solana transactions based on one or more Program IDs and/or Account IDs, using the cached [Solana Foundational Module](https://substreams.dev/streamingfast/solana-common/v0.3.0).
     - **sol-anchor-beta**: Given an Anchor IDL, create a Substreams that decodes instructions and events. If an IDL isn’t available using the `idl` subcommand within the [Anchor CLI](https://www.anchor-lang.com/docs/cli), you’ll need to provide it yourself.
 
-The modules within Solana Common exclude voting transactions, to benefit from a 75% reduction in data processing size and costs, delay your stream by over 1000 blocks from head. This can be done using the [`sleep`](https://doc.rust-lang.org/std/thread/fn.sleep.html) function in rust.
+The modules within Solana Common exclude voting transactions, to benefit from a 75% reduction in data processing size and costs, delay your stream by over 1000 blocks from head. This can be done using the [`sleep`](https://doc.rust-lang.org/std/thread/fn.sleep.html) function in Rust.
 
 {% hint style="info" %} 
  To access voting transactions, use the full Solana block, `sf.solana.type.v1.Block`, as input.
